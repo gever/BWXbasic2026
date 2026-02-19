@@ -1,0 +1,1838 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>bwxBASIC Transpiler</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: #111;
+            color: #33ff33;
+            font-family: 'VT323', monospace;
+            height: 100vh;
+            overflow: auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #monitor {
+            width: 1320px;
+            height: 1000px;
+            background-color: #000;
+            border: 20px solid #333;
+            border-radius: 10px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.9);
+            padding: 20px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            max-width: 95vw;
+            max-height: 95vh;
+        }
+
+        #monitor::before {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+            background-size: 100% 4px;
+            z-index: 20;
+            pointer-events: none;
+        }
+
+        canvas {
+            background-color: #000;
+            image-rendering: pixelated;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            cursor: text;
+        }
+
+        #help-overlay {
+            position: absolute;
+            top: 40px;
+            left: 40px;
+            right: 40px;
+            bottom: 40px;
+            z-index: 50;
+            display: none;
+            flex-direction: column;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9);
+            border: 1px solid #444;
+        }
+
+        .help-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #222;
+            color: #ccc;
+            padding: 10px 20px;
+            font-family: sans-serif;
+            font-size: 14px;
+            border-bottom: 2px solid #000;
+        }
+
+        #help-search {
+            background: #444;
+            border: 1px solid #666;
+            color: white;
+            padding: 5px 10px;
+            font-family: sans-serif;
+            width: 200px;
+        }
+
+        .help-close {
+            background: #c00;
+            color: white;
+            border: none;
+            padding: 5px 15px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .printer-paper {
+            flex-grow: 1;
+            background-color: #f4f4f0;
+            background-image: repeating-linear-gradient(to bottom, #f4f4f0, #f4f4f0 40px, #e8eadd 40px, #e8eadd 80px);
+            color: #333;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            overflow-y: auto;
+            padding: 20px 40px;
+            border-left: 12px dotted #bbb;
+            border-right: 12px dotted #bbb;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .help-section {
+            margin-bottom: 40px;
+            border-top: 2px solid #000;
+            padding-top: 20px;
+        }
+
+        .help-title {
+            font-size: 1.8em;
+            font-weight: 900;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .help-entry {
+            margin-bottom: 20px;
+            break-inside: avoid;
+        }
+
+        .help-cmd {
+            font-weight: bold;
+            font-size: 1.2em;
+            color: #000;
+            background: rgba(0, 0, 0, 0.05);
+            display: inline-block;
+            padding: 0 5px;
+        }
+
+        .help-desc {
+            margin: 5px 0 5px 20px;
+        }
+
+        .help-ex {
+            margin-left: 20px;
+            color: #004488;
+            font-family: monospace;
+            font-weight: bold;
+        }
+
+        .help-ex::before {
+            content: "Ex: ";
+            color: #666;
+            font-weight: normal;
+        }
+
+        .index-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .index-btn {
+            background: #fff;
+            border: 2px solid #333;
+            padding: 10px;
+            cursor: pointer;
+            text-align: center;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            box-shadow: 3px 3px 0px rgba(0, 0, 0, 0.2);
+            transition: transform 0.1s;
+        }
+
+        .index-btn:active {
+            transform: translate(2px, 2px);
+            box-shadow: 1px 1px 0px rgba(0, 0, 0, 0.2);
+        }
+
+        #break-btn {
+            position: absolute;
+            top: 30px;
+            right: 40px;
+            background: #cc0000;
+            color: #fff;
+            border: 2px solid #ff0000;
+            font-family: 'VT323', monospace;
+            font-size: 24px;
+            padding: 5px 15px;
+            cursor: pointer;
+            display: none;
+            z-index: 100;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        #input-trap {
+            position: absolute;
+            opacity: 0;
+            top: -1000px;
+        }
+
+        #js-overlay {
+            position: absolute;
+            top: 40px;
+            left: 40px;
+            right: 40px;
+            bottom: 40px;
+            z-index: 60;
+            display: none;
+            flex-direction: column;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9);
+            border: 1px solid #444;
+            background-color: #222;
+        }
+
+        #js-content {
+            flex-grow: 1;
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            overflow-y: auto;
+            padding: 20px;
+            white-space: pre-wrap;
+            /* Preserve formatting */
+            border-top: 2px solid #000;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="monitor">
+        <button id="break-btn">STOP (ESC)</button>
+        <canvas id="main-canvas" width="640" height="480"></canvas>
+
+        <div id="help-overlay">
+            <div class="help-header">
+                <span>bwxBASIC REFERENCE MANUAL</span>
+                <input type="text" id="help-search" placeholder="FILTER COMMANDS..." autocomplete="off">
+                <button class="help-close"
+                    onclick="document.getElementById('help-overlay').style.display='none'">CLOSE</button>
+            </div>
+            <div class="printer-paper" id="help-content"></div>
+        </div>
+        <div id="js-overlay">
+            <div class="help-header">
+                <span>JAVASCRIPT TRANSPILER OUTPUT</span>
+                <button class="help-close"
+                    onclick="document.getElementById('js-overlay').style.display='none'">CLOSE</button>
+            </div>
+            <pre id="js-content"></pre>
+        </div>
+        <input type="text" id="input-trap" autocomplete="off" autofocus>
+    </div>
+
+    <script>
+        /**
+         * bwxBASIC Transpiler
+         */
+
+        const CONFIG = {
+            // These will be calculated dynamically in SCREEN.init()
+            cols: 40, rows: 24,
+            charW: 0, charH: 0,
+
+            width: 640, height: 480,
+            font: '26px VT323',
+            // Offsets removed for natural rendering
+            fontOffsetY: 0, fontOffsetX: 0,
+
+            color: '#33ff33', bgColor: '#000000',
+
+            // NEW: 320x240 Resolution scaled 2x to 640x480
+            scaleX: 2,
+            scaleY: 2
+        };
+
+        const canvas = document.getElementById('main-canvas');
+        const ctx = canvas.getContext('2d', { alpha: false, desynchronized: true });
+        const inputTrap = document.getElementById('input-trap');
+        const breakBtn = document.getElementById('break-btn');
+        const AsyncFunction = Object.getPrototypeOf(async function () { }).constructor;
+
+        // --- SCREEN MEMORY ---
+        const SCREEN = {
+            cx: 0, cy: 0,
+            isCursorDrawn: false,
+
+            init: () => {
+                ctx.font = CONFIG.font;
+                ctx.textBaseline = 'top';
+
+                const metrics = ctx.measureText("M");
+                CONFIG.charW = Math.ceil(metrics.width);
+                CONFIG.charH = 26;
+
+                CONFIG.cols = Math.floor(CONFIG.width / CONFIG.charW);
+                CONFIG.rows = Math.floor(CONFIG.height / CONFIG.charH);
+
+                ctx.fillStyle = CONFIG.bgColor;
+                ctx.fillRect(0, 0, CONFIG.width, CONFIG.height);
+                SCREEN.drawCursor();
+            },
+
+            clear: () => {
+                SCREEN.removeCursor();
+                ctx.fillStyle = CONFIG.bgColor;
+                ctx.fillRect(0, 0, CONFIG.width, CONFIG.height);
+                SCREEN.cx = 0; SCREEN.cy = 0;
+                SCREEN.drawCursor();
+            },
+
+            scroll: () => {
+                SCREEN.removeCursor();
+                ctx.drawImage(canvas,
+                    0, CONFIG.charH, CONFIG.width, CONFIG.height - CONFIG.charH,
+                    0, 0, CONFIG.width, CONFIG.height - CONFIG.charH
+                );
+                ctx.fillStyle = CONFIG.bgColor;
+                ctx.fillRect(0, CONFIG.height - CONFIG.charH, CONFIG.width, CONFIG.charH);
+                SCREEN.drawCursor();
+            },
+
+            newline: () => {
+                SCREEN.removeCursor();
+                SCREEN.cx = 0; SCREEN.cy++;
+                if (SCREEN.cy >= CONFIG.rows) { SCREEN.cy = CONFIG.rows - 1; SCREEN.scroll(); }
+                else SCREEN.drawCursor();
+            },
+
+            // New helper to move cursor physically without erasing/drawing
+            moveTo: (x, y) => {
+                SCREEN.removeCursor();
+                SCREEN.cx = x; SCREEN.cy = y;
+                // Handle wrapping if x is out of bounds (though usually handled by logic)
+                while (SCREEN.cx >= CONFIG.cols) { SCREEN.cx -= CONFIG.cols; SCREEN.cy++; }
+                if (SCREEN.cy >= CONFIG.rows) { SCREEN.cy = CONFIG.rows - 1; SCREEN.scroll(); }
+                SCREEN.drawCursor();
+            },
+
+            put: (str, color) => {
+                SCREEN.removeCursor();
+                ctx.font = CONFIG.font;
+
+                for (let char of str) {
+                    if (char === '\n') {
+                        SCREEN.newline();
+                    } else {
+                        // Check for wrap *before* drawing if we are overflowed
+                        if (SCREEN.cx >= CONFIG.cols) {
+                            SCREEN.cx = 0; SCREEN.cy++;
+                            if (SCREEN.cy >= CONFIG.rows) {
+                                SCREEN.cy = CONFIG.rows - 1;
+                                SCREEN.scroll();
+                            }
+                        }
+
+                        // Clear cell background
+                        ctx.fillStyle = CONFIG.bgColor;
+                        ctx.fillRect(SCREEN.cx * CONFIG.charW, SCREEN.cy * CONFIG.charH, CONFIG.charW, CONFIG.charH);
+                        // Draw char
+                        ctx.fillStyle = color || CONFIG.color;
+                        ctx.fillText(char, (SCREEN.cx * CONFIG.charW) + CONFIG.fontOffsetX, (SCREEN.cy * CONFIG.charH) + CONFIG.fontOffsetY);
+
+                        SCREEN.cx++;
+                    }
+                }
+                SCREEN.drawCursor();
+            },
+
+            drawCursor: () => {
+                if (!IO.cursorVisible || SCREEN.isCursorDrawn) return;
+                const x = SCREEN.cx * CONFIG.charW;
+                const y = SCREEN.cy * CONFIG.charH;
+                ctx.save();
+                ctx.globalCompositeOperation = 'difference';
+                ctx.fillStyle = CONFIG.color;
+                ctx.fillRect(x, y, CONFIG.charW, CONFIG.charH);
+                ctx.restore();
+                SCREEN.isCursorDrawn = true;
+            },
+
+            removeCursor: () => {
+                if (!SCREEN.isCursorDrawn) return;
+                const x = SCREEN.cx * CONFIG.charW;
+                const y = SCREEN.cy * CONFIG.charH;
+                ctx.save();
+                ctx.globalCompositeOperation = 'difference';
+                ctx.fillStyle = CONFIG.color;
+                ctx.fillRect(x, y, CONFIG.charW, CONFIG.charH);
+                ctx.restore();
+                SCREEN.isCursorDrawn = false;
+            }
+        };
+
+        // --- GRAPHICS ---
+        const GRAPHICS = {
+            lastX: 0, lastY: 0,
+            color: '#FFFFFF', // Current RGB color
+            legacyColors: ['#000000', '#14F53C', '#A040A0', '#FFFFFF', '#000000', '#FF6000', '#3040FF', '#FFFFFF'],
+            palette: [], // Populated on init
+            fontSize: 26, // Default font size for GR_PRINT
+
+            init: () => {
+                const hslToHex = (h, s, l) => {
+                    l /= 100;
+                    const a = s * Math.min(l, 1 - l) / 100;
+                    const f = n => {
+                        const k = (n + h / 30) % 12;
+                        const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+                        return Math.round(255 * color).toString(16).padStart(2, '0');
+                    };
+                    return `#${f(0)}${f(8)}${f(4)}`;
+                };
+
+                // Generate 256-color palette
+                // Rows (y): 0 (Light) -> 7 (Dark)
+                // Cols (x): 0 (Left) -> 31 (Right)
+                // New Requirement:
+                // Col 31: Grayscale (White -> Black)
+                // Col 30 -> 0: Rainbow (Red -> Violet)
+
+                for (let y = 0; y < 8; y++) {
+                    for (let x = 0; x < 32; x++) {
+                        let color;
+
+                        if (x === 31) {
+                            // Column 31: Grayscale (White -> Black)
+                            // Saturation 0, Lit goes 100 -> 0
+                            const grayLit = 100 - (y * (100 / 7));
+                            color = hslToHex(0, 0, grayLit);
+                        } else {
+                            // Columns 30..0: Rainbow
+                            // Lightness gradient: Top (0) is bright, Bottom (7) is dark
+                            // Range: ~90% down to ~20%
+                            const lit = 90 - (y * 10);
+
+                            // 30 = Red, 0 = Violet
+                            // 360 degrees / 31 steps ~= 11.6 degrees per step
+                            const hue = (30 - x) * (300 / 30);
+                            color = hslToHex(hue, 100, lit);
+                        }
+                        GRAPHICS.palette.push(color);
+                    }
+                }
+            },
+
+            mapX: (x) => Math.floor(x * CONFIG.scaleX),
+            mapY: (y) => Math.floor(y * CONFIG.scaleY),
+            setMode: (m) => { if (m > 0) SCREEN.clear(); },
+            clear: () => SCREEN.clear(),
+
+            // Sets color from legacy Apple II palette (0-7)
+            setLegacyColor: (c) => {
+                GRAPHICS.color = GRAPHICS.legacyColors[Math.floor(Math.abs(c)) % 8];
+            },
+
+            // Sets color from new 256-color palette (0-255)
+            setPaletteColor: (c) => {
+                GRAPHICS.color = GRAPHICS.palette[Math.floor(Math.abs(c)) % 256];
+            },
+
+            clearToColor: () => {
+                SCREEN.removeCursor();
+                ctx.fillStyle = GRAPHICS.color;
+                ctx.fillRect(0, 0, CONFIG.width, CONFIG.height);
+            },
+
+            moveTo: (x, y) => {
+                GRAPHICS.lastX = GRAPHICS.mapX(x);
+                GRAPHICS.lastY = GRAPHICS.mapY(y);
+            },
+            plot: (x, y) => {
+                SCREEN.removeCursor();
+                ctx.globalCompositeOperation = 'source-over';
+                ctx.fillStyle = GRAPHICS.color;
+                const cx = GRAPHICS.mapX(x), cy = GRAPHICS.mapY(y);
+                ctx.fillRect(cx, cy, Math.ceil(CONFIG.scaleX), Math.ceil(CONFIG.scaleY));
+                GRAPHICS.lastX = cx; GRAPHICS.lastY = cy;
+            },
+            lineTo: (x, y) => {
+                SCREEN.removeCursor();
+                ctx.globalCompositeOperation = 'source-over';
+                ctx.strokeStyle = GRAPHICS.color; ctx.lineWidth = 2; ctx.beginPath();
+                const tx = GRAPHICS.mapX(x), ty = GRAPHICS.mapY(y);
+                ctx.moveTo(GRAPHICS.lastX + (CONFIG.scaleX / 2), GRAPHICS.lastY + (CONFIG.scaleY / 2));
+                ctx.lineTo(tx + (CONFIG.scaleX / 2), ty + (CONFIG.scaleY / 2));
+                ctx.stroke();
+                GRAPHICS.lastX = tx; GRAPHICS.lastY = ty;
+            },
+            rect: (w, h, fill) => {
+                SCREEN.removeCursor();
+                ctx.globalCompositeOperation = 'source-over';
+                const gw = w * CONFIG.scaleX;
+                const gh = h * CONFIG.scaleY;
+                if (fill) {
+                    ctx.fillStyle = GRAPHICS.color;
+                    ctx.fillRect(GRAPHICS.lastX, GRAPHICS.lastY, gw, gh);
+                } else {
+                    ctx.strokeStyle = GRAPHICS.color;
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(GRAPHICS.lastX, GRAPHICS.lastY, gw, gh);
+                }
+            },
+            ellipse: (w, h, fill) => {
+                SCREEN.removeCursor();
+                ctx.globalCompositeOperation = 'source-over';
+                const gw = Math.abs(w * CONFIG.scaleX);
+                const gh = Math.abs(h * CONFIG.scaleY);
+                const cx = GRAPHICS.lastX + (gw / 2);
+                const cy = GRAPHICS.lastY + (gh / 2);
+
+                ctx.beginPath();
+                ctx.ellipse(cx, cy, gw / 2, gh / 2, 0, 0, 2 * Math.PI);
+
+                if (fill) {
+                    ctx.fillStyle = GRAPHICS.color;
+                    ctx.fill();
+                } else {
+                    ctx.strokeStyle = GRAPHICS.color;
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                }
+            },
+            triangle: (x2, y2, x3, y3, fill) => {
+                SCREEN.removeCursor();
+                ctx.globalCompositeOperation = 'source-over';
+                const tx1 = GRAPHICS.lastX;
+                const ty1 = GRAPHICS.lastY;
+                const tx2 = GRAPHICS.mapX(x2);
+                const ty2 = GRAPHICS.mapY(y2);
+                const tx3 = GRAPHICS.mapX(x3);
+                const ty3 = GRAPHICS.mapY(y3);
+
+                ctx.beginPath();
+                ctx.moveTo(tx1, ty1);
+                ctx.lineTo(tx2, ty2);
+                ctx.lineTo(tx3, ty3);
+                ctx.closePath();
+
+                if (fill) {
+                    ctx.fillStyle = GRAPHICS.color;
+                    ctx.fill();
+                } else {
+                    ctx.strokeStyle = GRAPHICS.color;
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                }
+            },
+            print: (str) => {
+                SCREEN.removeCursor();
+                ctx.globalCompositeOperation = 'source-over';
+                ctx.fillStyle = GRAPHICS.color;
+                // Use current graphics font size
+                ctx.font = `${GRAPHICS.fontSize}px VT323`;
+                ctx.textBaseline = 'top';
+                ctx.fillText(str, GRAPHICS.lastX, GRAPHICS.lastY);
+                GRAPHICS.lastX += ctx.measureText(str).width;
+            }
+        };
+
+        // --- MEMORY & STATE ---
+        const SYS = {
+            vars: {}, arrays: {}, program: [], compiled: [],
+            transpiledSource: "", // NEW: Storage for JSPEEK
+            pc: 0, labels: {}, stack: [], forStack: {},
+            lastExecLine: 0, // NEW: Track last executed line for WHERE
+            running: false, break: false, inputCallback: null,
+            getArray: (n, i) => { if (!SYS.arrays[n]) throw `UNDEFINED ARRAY ${n}`; return SYS.arrays[n][i]; },
+            setArray: (n, i, v) => { if (!SYS.arrays[n]) throw `UNDEFINED ARRAY ${n}`; SYS.arrays[n][i] = v; },
+
+            // --- PRNG ---
+            seed: 12345,
+            rnd: (max) => {
+                SYS.seed = (SYS.seed * 9301 + 49297) % 233280;
+                return (SYS.seed / 233280.0) * max;
+            },
+            setSeed: (val) => {
+                SYS.seed = Math.floor(Math.abs(val)) % 233280;
+            }
+        };
+
+        // --- DEMOS ---
+        const DEMOS = {
+            "ANIM.BAS": "demo/anim.bas",
+            "PERFORMANCE.BAS": "demo/performance.bas",
+            "GRAPHICS.BAS": "demo/graphics.bas",
+            "MIXED.BAS": "demo/mixed.bas",
+            "PALETTE.BAS": "demo/palette.bas",
+            "GRAPHICS_API.BAS": "demo/graphics_api.bas",
+            "REGRESSION.BAS": "demo/regression.bas"
+        };
+
+        // --- HELP DATA ---
+        const HELP_DATA = {
+            "SYSTEM & FILES": [
+                { c: "RUN", d: "Executes the program currently in memory. Clears variables. &lt;ESC&gt; to halt execution.", e: "RUN" },
+                { c: "LIST", d: "Displays the source code of the current program.", e: "LIST" },
+                { c: "EDIT", d: "Edit an existing line.", e: "EDIT 50" },
+                { c: "NEW", d: "Clears the current program from memory and resets variables.", e: "NEW" },
+                { c: "SAVE", d: "Saves current program to browser local storage.", e: "SAVE \"MYGAME\"" },
+                { c: "LOAD", d: "Loads a program from local storage or demo library.", e: "LOAD \"DEMO/GRAPHICS.BAS\"" },
+                { c: "DIR", d: "Lists all saved files and available demos.", e: "DIR" },
+                { c: "DOWNLOAD", d: "Downloads the program as a .BAS text file to your computer.", e: "DOWNLOAD \"GAME\"" },
+                { c: "WHERE", d: "Shows the line number where the last program stopped.", e: "WHERE" },
+                { c: "JSECHO", d: "Toggles echoing of output to the browser console for debugging.", e: "JSECHO" },
+                { c: "HELP", d: "Opens this reference manual.", e: "HELP" },
+                { c: "REM", d: "Remark/Comment. Line is ignored by interpreter.", e: "10 REM SETUP VARIABLES" },
+                { c: "VARS", d: "Lists all currently defined variables.", e: "VARS" }
+            ],
+            "SCREEN & GRAPHICS": [
+                { c: "HOME or CLS", d: "Clears the text screen and moves cursor to top-left.", e: "10 HOME" },
+                { c: "GR_CLEAR", d: "Clears screen to current GR_COLOR.", e: "10 GR_CLEAR" },
+                { c: "GR_COLOR", d: "Sets color (0-63).", e: "20 GR_COLOR=3" },
+                { c: "GR_MOVETO", d: "Moves graphics cursor to X,Y.", e: "30 GR_MOVETO 100,100" },
+                { c: "GR_LINETO", d: "Draws line to X,Y.", e: "40 GR_LINETO 200,200" },
+                { c: "GR_RECT", d: "Draws outline rectangle W,H at cursor.", e: "50 GR_RECT 50,50" },
+                { c: "GR_FRECT", d: "Draws filled rectangle W,H at cursor.", e: "60 GR_FRECT 50,50" },
+                { c: "GR_ELLIPSE", d: "Draws outline ellipse W,H at cursor.", e: "70 GR_ELLIPSE 50,30" },
+                { c: "GR_FELLIPSE", d: "Draws filled ellipse W,H at cursor.", e: "80 GR_FELLIPSE 50,30" },
+                { c: "GR_TRI", d: "Draws triangle (x2,y2,x3,y3) from cursor.", e: "90 GR_TRI 200,200,100,200" },
+                { c: "GR_FTRI", d: "Draws filled triangle.", e: "95 GR_FTRI 200,200,100,200" },
+                { c: "GR_PRINT", d: "Prints text at graphics cursor.", e: "10 GR_PRINT \"SCORE: \"; S" },
+                { c: "GR_FONT", d: "Sets font size for GR_PRINT.", e: "20 GR_FONT 10" },
+                { c: "TEXT", d: "Legacy command (Clears screen in Mixed Mode).", e: "100 TEXT" },
+                { c: "HGR", d: "Legacy command (Clears screen in Mixed Mode).", e: "10 HGR" },
+                { c: "HGR2", d: "Legacy command (Clears screen in Mixed Mode).", e: "10 HGR2" },
+                { c: "HCOLOR", d: "Legacy: Sets drawing color (0-7).", e: "20 HCOLOR = 3" },
+                { c: "HPLOT", d: "Legacy: Plots a point or draws lines.", e: "30 HPLOT 0,0 TO 100,100" },
+                { c: "HTAB", d: "Moves cursor to horizontal column X (1-40).", e: "10 HTAB 20" },
+                { c: "VTAB", d: "Moves cursor to vertical row Y (1-24).", e: "20 VTAB 12" },
+                { c: "SETPOS", d: "Moves cursor to X, Y coordinates (Custom).", e: "30 SETPOS 15, 10" }
+            ],
+            "I/O & CONTROL": [
+                { c: "PRINT", d: "Outputs text or variables. Use ; to suppress newline.", e: "10 PRINT \"SCORE: \"; S" },
+                { c: "INPUT", d: "Pauses to get value from user.", e: "20 INPUT \"NAME? \"; N$" },
+                { c: "INKEY(M)", d: "Reads char. M=1 wait, M=0 async.", e: "A$ = INKEY(1)" },
+                { c: "GOTO", d: "Unconditional jump to line number.", e: "50 GOTO 10" },
+                { c: "GOSUB", d: "Jump to subroutine. Returns on RETURN.", e: "10 GOSUB 1000" },
+                { c: "RETURN", d: "Return from subroutine.", e: "1000 RETURN" },
+                { c: "IF...THEN", d: "Conditional execution.", e: "10 IF A > 10 THEN GOTO 50" },
+                { c: "FOR...NEXT", d: "Loop structure.", e: "10 FOR I=1 TO 10 STEP 2 ... 50 NEXT I" },
+                { c: "END", d: "Stops program execution.", e: "99 END" },
+                { c: "DIM", d: "Defines array size.", e: "10 DIM A(100)" },
+                { c: "LET", d: "Assigns value to variable (optional keyword).", e: "10 LET A = 5" }
+            ],
+            "MATH FUNCTIONS": [
+                { c: "SIN(X)", d: "Sine of X (radians).", e: "Y = SIN(3.14)" },
+                { c: "COS(X)", d: "Cosine of X (radians).", e: "Y = COS(0)" },
+                { c: "TAN(X)", d: "Tangent of X.", e: "Y = TAN(1)" },
+                { c: "ATN(X)", d: "Arctangent of X.", e: "Y = ATN(1)" },
+                { c: "SQR(X)", d: "Square root.", e: "Y = SQR(16)" },
+                { c: "ABS(X)", d: "Absolute value.", e: "Y = ABS(-5)" },
+                { c: "INT(X)", d: "Integer part (Floor).", e: "Y = INT(3.9)" },
+                { c: "EXP(X)", d: "e raised to power X.", e: "Y = EXP(1)" },
+                { c: "LOG(X)", d: "Natural logarithm.", e: "Y = LOG(10)" },
+                { c: "EXP(X)", d: "e raised to power X.", e: "Y = EXP(1)" },
+                { c: "LOG(X)", d: "Natural logarithm.", e: "Y = LOG(10)" },
+                { c: "RND(N)", d: "Random number 0 to N. Use N=1 for 0.0-1.0.", e: "R = RND(10)" },
+                { c: "RAND(X)", d: "Random number 0 to X.", e: "R = RAND(100)" },
+                { c: "SEED(N)", d: "Seed the random number generator.", e: "SEED(12345)" }
+            ],
+            "STRING FUNCTIONS": [
+                { c: "LEN(S$)", d: "Length of string.", e: "L = LEN(\"ABC\")" },
+                { c: "LEFT$(S$,N)", d: "First N chars.", e: "A$ = LEFT$(\"HELLO\", 2)" },
+                { c: "RIGHT$(S$,N)", d: "Last N chars.", e: "A$ = RIGHT$(\"WORLD\", 3)" },
+                { c: "MID$(S$,I,N)", d: "N chars starting at I.", e: "A$ = MID$(\"ABC\", 2, 1)" },
+                { c: "STR$(N)", d: "Convert number to string.", e: "A$ = STR$(123)" },
+                { c: "VAL(S$)", d: "Convert string to number.", e: "N = VAL(\"12.5\")" },
+                { c: "INSTR(N,S$,Sub$)", d: "Search for string.", e: "P = INSTR(\"ABC\",\"B\")" }
+            ]
+        };
+
+        // --- FILE SYSTEM ---
+        const FS = {
+            PREFIX: 'bwxBASIC_PROG_',
+            currentFilename: "bwxBASIC_program.bas", // Default filename
+
+            save: (fn) => {
+                try {
+                    localStorage.setItem(FS.PREFIX + fn.toUpperCase(), JSON.stringify(SYS.program));
+                    FS.currentFilename = fn; // Update current filename
+                    IO.print("SAVED " + fn);
+                } catch (e) { IO.print("?ERROR SAVING"); }
+            },
+
+            load: async (fn) => {
+                const f = fn.toUpperCase();
+                // Check if it's a known demo
+                let path = DEMOS[f];
+
+                // If not in DEMOS map, check if user provided a specific path (e.g. "demo/foo.bas")
+                if (!path && (f.startsWith("/") || f.includes("/"))) {
+                    path = fn;
+                }
+
+                if (path) {
+                    try {
+                        const response = await fetch(path);
+                        if (!response.ok) throw new Error("404");
+                        const text = await response.text();
+
+                        // Parse BASIC text file entry
+                        const lines = text.split(/\r\n|\n|\r/);
+                        const prog = [];
+                        for (let line of lines) {
+                            line = line.trim();
+                            if (!line) continue;
+                            const m = line.match(/^(\d+)\s+(.*)/);
+                            if (m) {
+                                prog.push({ line: parseInt(m[1]), src: m[2] });
+                            }
+                        }
+
+                        SYS.program = prog;
+                        SYS.vars = {}; SYS.arrays = {};
+                        FS.currentFilename = fn; // Update current filename
+                        SCREEN.clear();
+                        IO.print("LOADED");
+                        return;
+                    } catch (e) {
+                        // Fall out to check local storage
+                    }
+                }
+
+                // Fallback to Local Storage
+                const d = localStorage.getItem(FS.PREFIX + f);
+                if (d) {
+                    SYS.program = JSON.parse(d);
+                    SYS.vars = {};
+                    SYS.arrays = {};
+                    FS.currentFilename = fn; // Update current filename
+                    SCREEN.clear();
+                    IO.print("LOADED");
+                }
+                else IO.print("?FILE NOT FOUND");
+            },
+
+            dir: () => {
+                IO.print("CATALOG");
+                IO.print(" DEMO/"); for (let k in DEMOS) IO.print("  " + k);
+                IO.print(" -----"); for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k.startsWith(FS.PREFIX)) IO.print("  " + k.replace(FS.PREFIX, '')); }
+            },
+
+            download: (fn) => {
+                SYS.program.sort((a, b) => a.line - b.line);
+                const t = SYS.program.map(l => `${l.line} ${l.src}`).join("\n");
+                const b = new Blob([t], { type: 'text/plain' });
+                const u = URL.createObjectURL(b);
+                const a = document.createElement('a');
+                a.href = u;
+
+                // Use provided filename OR current filename
+                let name = fn || FS.currentFilename;
+
+                // Strip paths if present (e.g. demo/anim.bas -> anim.bas)
+                const parts = name.split(/[/\\]/);
+                name = parts[parts.length - 1];
+
+                // Ensure .BAS extension
+                if (!name.toUpperCase().endsWith(".BAS")) {
+                    name += ".BAS";
+                }
+
+                a.download = name;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            }
+        };
+
+        // --- COMPILER ---
+        const LIB = {
+            'SIN': 'Math.sin', 'COS': 'Math.cos', 'TAN': 'Math.tan', 'ATN': 'Math.atan', 'EXP': 'Math.exp', 'LOG': 'Math.log', 'SQR': 'Math.sqrt', 'ABS': 'Math.abs',
+            'INT': 'Math.floor', 'RND': 'SYS.rnd', 'RAND': 'SYS.rnd',
+            'LEN': '(s)=>(s+"").length', 'LEFT$': '(s,n)=>(s+"").substr(0,n)', 'RIGHT$': '(s,n)=>(s+"").substr((s+"").length-n)', 'MID$': '(s,st,ln)=>(s+"").substr(st-1,ln)',
+            'STR$': '(n)=>n.toString()', 'VAL': '(s)=>parseFloat(s)',
+            'INSTR': '(...a)=>{let i=1,s,sub;if(a.length===3){i=a[0];s=a[1];sub=a[2]}else{s=a[0];sub=a[1]} if(s===undefined||sub===undefined)return 0; return (s+"").indexOf(sub,i-1)+1;}'
+        };
+        const Tokenizer = {
+            regex: /([0-9]*\.?[0-9]+)|(".*?")|([a-zA-Z][a-zA-Z0-9_]*\$?)|(<=|>=|<>|<|>|=)|([\+\-\*\/\^])|(\()|(\))|(:)|(,)|(;)|(')/g,
+            tokenize: (str) => { const t = []; let m; while ((m = Tokenizer.regex.exec(str)) !== null) t.push(m[0]); return t; },
+            // NEW: scan returns tokens AND whitespace for reconstruction
+            scan: (str) => {
+                const results = [];
+                let lastIndex = 0;
+                let m;
+                // create new regex with global flag to reset state
+                const r = new RegExp(Tokenizer.regex);
+                while ((m = r.exec(str)) !== null) {
+                    if (m.index > lastIndex) {
+                        results.push({ type: 'SPACE', val: str.substring(lastIndex, m.index) });
+                    }
+                    results.push({ type: 'TOKEN', val: m[0] });
+                    lastIndex = r.lastIndex;
+                }
+                if (lastIndex < str.length) {
+                    results.push({ type: 'SPACE', val: str.substring(lastIndex) });
+                }
+                return results;
+            }
+        };
+
+        const SYNTAX = {
+            colors: {
+                KEYWORD: '#FFD700', // Gold
+                FUNCTION: '#87CEEB', // SkyBlue
+                COMMAND: '#FF6347', // Tomato
+                STRING: '#98FB98', // PaleGreen
+                NUMBER: '#DA70D6', // Orchid
+                COMMENT: '#808080', // Gray
+                DEFAULT: '#33FF33'  // Base Green
+            },
+            classify: (token) => {
+                if (!token) return SYNTAX.colors.DEFAULT;
+                if (token.startsWith('"')) return SYNTAX.colors.STRING;
+                if (!isNaN(token)) return SYNTAX.colors.NUMBER;
+
+                const tu = token.toUpperCase();
+                if (tu === 'REM' || token === "'") return SYNTAX.colors.COMMENT;
+
+                // Commands
+                if (['PRINT', 'INPUT', 'RUN', 'LIST', 'NEW', 'GR_CLEAR', 'GR_COLOR', 'GR_MOVETO', 'GR_LINETO', 'GR_RECT', 'GR_FRECT', 'GR_ELLIPSE', 'GR_FELLIPSE', 'GR_TRI', 'GR_FTRI', 'GR_PRINT', 'GR_FONT', 'HGR', 'HGR2', 'TEXT', 'HCOLOR', 'HPLOT', 'HTAB', 'VTAB', 'SETPOS', 'HOME', 'DIM', 'LET', 'GOTO', 'GOSUB', 'RETURN', 'IF', 'THEN', 'ELSE', 'FOR', 'NEXT', 'STEP', 'TO', 'END', 'STOP', 'DELAY', 'SAVE', 'LOAD', 'DIR', 'CATALOG', 'DOWNLOAD', 'JSECHO', 'HELP', 'JSPEEK', 'Where', 'VARS'].includes(tu)) return SYNTAX.colors.COMMAND;
+
+                // Keywords (mix of command and structural) - usually same color, but let's separate if desired.
+                // Actually, FOR/NEXT/IF/THEN are flow control. Let's make them KeyWords (Gold)
+                if (['FOR', 'NEXT', 'IF', 'THEN', 'ELSE', 'GOTO', 'GOSUB', 'RETURN', 'STEP', 'TO', 'END', 'STOP'].includes(tu)) return SYNTAX.colors.KEYWORD;
+
+                // Functions
+                if (['SIN', 'COS', 'TAN', 'ATN', 'EXP', 'LOG', 'SQR', 'ABS', 'INT', 'RND', 'RAND', 'LEN', 'LEFT$', 'RIGHT$', 'MID$', 'STR$', 'VAL', 'INKEY', 'INKEY$', 'TIME', 'INSTR'].includes(tu)) return SYNTAX.colors.FUNCTION;
+
+                return SYNTAX.colors.DEFAULT;
+            }
+        };
+        const Compiler = {
+            genExpression: (tokens, ctx) => {
+                const peek = () => tokens[ctx.idx], next = () => tokens[ctx.idx++];
+                const parseExp = () => { let l = parseTerm(); while (ctx.idx < tokens.length && (peek() === '+' || peek() === '-')) l = `(${l} ${next()} ${parseTerm()})`; if (ctx.idx < tokens.length && ['=', '<', '>', '<=', '>=', '<>'].includes(peek())) { let op = next(), jop = op === '=' ? '===' : op === '<>' ? '!==' : op; l = `(${l} ${jop} ${parseExp()}?1:0)`; } return l; };
+                const parseTerm = () => { let l = parsePower(); while (ctx.idx < tokens.length && (peek() === '*' || peek() === '/')) l = `(${l} ${next()} ${parsePower()})`; return l; };
+                const parsePower = () => {
+                    let l = parseFactor();
+                    while (ctx.idx < tokens.length && peek() === '^') {
+                        next(); // consume ^
+                        // TODO: Fix operator precedence for power operator vs unary minus (currently -2^2=4, should be -4)
+                        l = `Math.pow(${l}, ${parseFactor()})`;
+                    }
+                    return l;
+                };
+                const parseFactor = () => {
+                    const t = next();
+                    if (!t) return "0";
+                    if (!isNaN(t) || t.startsWith('"')) return t;
+                    if (t === '(') { const e = parseExp(); next(); return `(${e})`; }
+                    if (t === '-') return `-${parseFactor()}`;
+                    if (t === '+') return parseFactor();
+
+                    if (/^[a-zA-Z]/.test(t)) {
+                        // Normalize token for Keyword/Function checks
+                        const tu = t.toUpperCase();
+
+                        // Handle INKEY$ and INKEY
+                        if (tu === 'INKEY$' || tu === 'INKEY') {
+                            ctx.setAsync();
+                            next(); // consume '('
+                            const mode = parseExp();
+                            next(); // consume ')'
+                            return `(await IO.inkey(${mode}))`;
+                        }
+
+                        if (tu === 'TIME') {
+                            return "performance.now()";
+                        }
+
+                        // Handle Math Functions (SIN, LEN, etc)
+                        if (LIB[tu]) {
+                            next(); const a = [];
+                            if (peek() !== ')') do { a.push(parseExp()); if (peek() === ',') next(); else break; } while (true);
+                            next(); return `(${LIB[tu]})(${a.join(',')})`;
+                        }
+
+                        // Handle Array Access (Use raw 't' to preserve case)
+                        if (peek() === '(') { next(); const i = parseExp(); next(); return `SYS.getArray('${t}',${i})`; }
+
+                        // Handle Variables (Use raw 't' to preserve case)
+                        return `(SYS.vars['${t}']!==undefined?SYS.vars['${t}']:0)`;
+                    }
+                    return "0";
+                };
+                return parseExp();
+            },
+            compile: (lineObj) => {
+                // CHANGE: Do NOT uppercase the source string here.
+                const tokens = Tokenizer.tokenize(lineObj.src);
+
+                let async = false;
+                const ctx = { idx: 0, jsLoops: [], setAsync: () => async = true };
+
+                // Helper to check next token case-insensitively without consuming it
+                const peekUpper = () => (tokens[ctx.idx] || "").toUpperCase();
+
+                const peek = () => tokens[ctx.idx], next = () => tokens[ctx.idx++], remain = () => tokens.slice(ctx.idx);
+                let body = "";
+
+                while (ctx.idx < tokens.length) {
+                    const cmdRaw = next();
+                    if (cmdRaw === ':') continue; if (cmdRaw.toUpperCase() === 'REM' || cmdRaw === "'") break;
+
+                    // Normalize command to uppercase for switching
+                    const cmd = cmdRaw.toUpperCase();
+                    let chunk = "";
+
+                    if (cmd === 'PRINT') {
+                        let nl = true;
+                        const p = [];
+
+                        // PRINT statements are complicated by ';' and ',' separators...
+                        while (ctx.idx < tokens.length) {
+                            // Stop if we hit a command separator
+                            if ([':', "'", 'THEN', 'ELSE'].includes(peekUpper())) break;
+
+                            // 1. Handle leading or consecutive separators
+                            //    (e.g., PRINT ,, X  or  PRINT X,,)
+                            if (peek() === ';' || peek() === ',') {
+                                // If comma, push a space string literal into the output list
+                                if (peek() === ',') p.push('" "');
+                                nl = false;
+                                next();
+                                continue;
+                            }
+
+                            // 2. Parse the Expression
+                            p.push(`IO.format(${Compiler.genExpression(tokens, ctx)})`);
+                            nl = true;
+
+                            // 3. Handle trailing separator immediately after expression
+                            //    (e.g., PRINT X, )
+                            if (peek() === ';' || peek() === ',') {
+                                // If comma, push a space string literal
+                                if (peek() === ',') p.push('" "');
+                                nl = false;
+                                next();
+                            }
+                        }
+
+                        // Join all parts (expressions + spaces) and print
+                        chunk = `IO.print(${p.length ? p.join(' + "" + ') : '""'}, ${nl});`;
+                        if (nl) {
+                            async = true;
+                            chunk += ` await new Promise(r => setTimeout(r, 0));`;
+                        }
+                        chunk += ` if(SYS.break){SYS.running=false;return;}`;
+                    }
+                    else if (cmd === 'GOTO') {
+                        const tgt = Compiler.genExpression(tokens, ctx);
+                        // Fix: Added { ... SYS.running=false; } to the else block
+                        chunk = `var _t=${tgt};if(SYS.labels[_t]!==undefined)SYS.pc=SYS.labels[_t]-1; else { IO.print("?UNDEF LINE "+_t); SYS.running=false; }`;
+                    }
+                    else if (cmd === 'GOSUB') {
+                        const tgt = Compiler.genExpression(tokens, ctx);
+                        // Fix: Added { ... SYS.running=false; } to the else block
+                        chunk = `var _t=${tgt};if(SYS.labels[_t]!==undefined){SYS.stack.push(SYS.pc);SYS.pc=SYS.labels[_t]-1;} else { IO.print("?UNDEF LINE "+_t); SYS.running=false; }`;
+                    }
+                    else if (cmd === 'RETURN') {
+                        // Fix: Added { ... SYS.running=false; } to the else block
+                        chunk = `if(SYS.stack.length>0)SYS.pc=SYS.stack.pop(); else { IO.print("?RETURN WITHOUT GOSUB"); SYS.running=false; }`;
+                    }
+                    else if (cmd === 'IF') {
+                        const cond = Compiler.genExpression(tokens, ctx);
+                        // Case-insensitive 'THEN'
+                        if (next().toUpperCase() !== 'THEN') throw "SYNTAX";
+
+                        // Scan for ELSE, respecting nesting
+                        let elseIdx = -1;
+                        let depth = 0;
+                        for (let i = ctx.idx; i < tokens.length; i++) {
+                            const t = tokens[i].toUpperCase();
+                            if (t === 'IF') {
+                                depth++;
+                            } else if (t === 'ELSE') {
+                                if (depth === 0) {
+                                    elseIdx = i;
+                                    break;
+                                }
+                            } else if (t === 'ELSE' && depth > 0) {
+                                depth--; // This ELSE belongs to a nested IF
+                            }
+                        }
+
+                        let matchThen, matchElse;
+
+                        if (elseIdx !== -1) {
+                            // Split tokens into THEN and ELSE parts
+                            matchThen = tokens.slice(ctx.idx, elseIdx);
+                            matchElse = tokens.slice(elseIdx + 1);
+                            // Consume all tokens
+                            ctx.idx = tokens.length;
+                        } else {
+                            matchThen = tokens.slice(ctx.idx);
+                            matchElse = null;
+                            ctx.idx = tokens.length;
+                        }
+
+                        const compileBranch = (branchTokens) => {
+                            if (!branchTokens || branchTokens.length === 0) return "";
+                            // Check for single line number (GOTO shorthand)
+                            if (branchTokens.length === 1 && !isNaN(branchTokens[0])) {
+                                return `if(SYS.labels[${Number(branchTokens[0])}]!==undefined)SYS.pc=SYS.labels[${Number(branchTokens[0])}]-1; else { IO.print("?UNDEF LINE ${branchTokens[0]}"); SYS.running=false; }`;
+                            }
+                            // Compile as sub-program
+                            const src = branchTokens.join(" "); // Reconstruct source
+                            // We need to use recursion but safely.
+                            // The issue is 'tokens' in Compiler.compile is local.
+                            // We can use a recursive helper or just call Compiler.compile again with a fake object.
+                            const sid = "SUB_" + Math.random().toString(36).substr(2, 9);
+                            SYS[sid] = Compiler.compile({ line: lineObj.line, src: src });
+                            return `return SYS['${sid}'](SYS,IO,GRAPHICS,FS);`;
+                        };
+
+                        const tb = compileBranch(matchThen);
+                        const eb = matchElse ? compileBranch(matchElse) : "";
+
+                        chunk = `if(${cond}){${tb}} ${eb ? `else {${eb}}` : ""}`;
+                    }
+                    else if (cmd === 'FOR') {
+                        const v = next(); // Variable name (keep case)
+                        next(); // '='
+                        const s = Compiler.genExpression(tokens, ctx);
+                        next(); // 'TO' (ignored, but we blindly consume it)
+                        const e = Compiler.genExpression(tokens, ctx);
+                        let st = "1"; if (peekUpper() === 'STEP') { next(); st = Compiler.genExpression(tokens, ctx); }
+
+                        let isSingle = false;
+                        // Case-insensitive lookahead for NEXT
+                        for (let k = ctx.idx; k < tokens.length; k++) { if (tokens[k].toUpperCase() === 'NEXT' && tokens[k + 1] === v) { isSingle = true; break; } }
+
+                        if (isSingle) {
+                            chunk = `{ const _st=${st}; for(SYS.vars['${v}']=${s}; (_st>=0?SYS.vars['${v}']<=${e}:SYS.vars['${v}']>=${e}); SYS.vars['${v}']+=_st) {`;
+                            ctx.jsLoops.push(v);
+                        } else {
+                            chunk = `SYS.vars['${v}']=${s};SYS.forStack['${v}']={target:${e},step:${st},pc:SYS.pc};`;
+                        }
+                    }
+                    else if (cmd === 'NEXT') {
+                        const v = next(); // Variable name (keep case)
+                        if (ctx.jsLoops.length > 0 && ctx.jsLoops[ctx.jsLoops.length - 1] === v) {
+                            chunk = `}}`; ctx.jsLoops.pop();
+                        } else {
+                            chunk = `var l=SYS.forStack['${v}'];if(l){SYS.vars['${v}']+=l.step;if((l.step>=0&&SYS.vars['${v}']<=l.target)||(l.step<0&&SYS.vars['${v}']>=l.target))SYS.pc=l.pc;else delete SYS.forStack['${v}'];}`;
+                        }
+                    }
+                    else if (cmd === 'DIM') { const v = next(); next(); const sz = Compiler.genExpression(tokens, ctx); next(); chunk = `SYS.arrays['${v}']=new Array(${sz}+1).fill(0);`; }
+                    else if (cmd === 'INPUT') { async = true; let p = "?"; if (peek().startsWith('"')) { p = next().replace(/"/g, ''); if (peek() === ';') next(); } const v = next(), str = v.endsWith('$'); chunk = `IO.print("${p}",false);var val=await IO.input();SYS.vars['${v}']=${str ? 'val' : 'parseFloat(val)'};`; }
+
+                    else if (cmd === 'GR_PRINT') {
+                        const p = [];
+                        // Support standard print arguments (expressions, semicolons, commas)
+                        while (ctx.idx < tokens.length) {
+                            if ([':', "'", 'THEN', 'ELSE'].includes(peekUpper())) break;
+
+                            if (peek() === ';' || peek() === ',') {
+                                // Treat comma as space for GR_PRINT for simplicity, or just ignore logic for tabs
+                                if (peek() === ',') p.push('" "');
+                                next();
+                                continue;
+                            }
+
+                            p.push(`IO.format(${Compiler.genExpression(tokens, ctx)})`);
+
+                            if (peek() === ';' || peek() === ',') {
+                                if (peek() === ',') p.push('" "');
+                                next();
+                            }
+                        }
+                        chunk = `GRAPHICS.print(${p.length ? p.join(' + "" + ') : '""'});`;
+                    }
+
+                    else if (cmd === 'HGR' || cmd === 'HGR2' || cmd === 'TEXT') chunk = `GRAPHICS.setMode(1);`;
+                    else if (cmd === 'HCOLOR') {
+                        if (peek() === '=') next();
+                        chunk = `GRAPHICS.setLegacyColor(${Compiler.genExpression(tokens, ctx)});`;
+                    }
+                    else if (cmd === 'HPLOT') {
+                        let sc = "", sl = false;
+                        if (peekUpper() === 'TO') { next(); sl = true; }
+                        else {
+                            const x = Compiler.genExpression(tokens, ctx);
+                            if (peek() === ',') next();
+                            sc = `GRAPHICS.plot(${x},${Compiler.genExpression(tokens, ctx)});`;
+                        }
+                        let lc = "";
+                        while (peekUpper() === 'TO') {
+                            next(); const x = Compiler.genExpression(tokens, ctx);
+                            if (peek() === ',') next();
+                            lc += `GRAPHICS.lineTo(${x},${Compiler.genExpression(tokens, ctx)});`;
+                        }
+                        chunk = (sl ? "" : sc) + lc;
+                    }
+
+                    // --- NEW STATEFUL GRAPHICS API ---
+                    else if (cmd === 'GR_CLEAR' || cmd === 'GR_CLS') chunk = `GRAPHICS.clearToColor();`;
+                    else if (cmd === 'GR_COLOR') {
+                        if (peek() === '=') next();
+                        chunk = `GRAPHICS.setPaletteColor(${Compiler.genExpression(tokens, ctx)});`;
+                    }
+                    else if (cmd === 'GR_MOVETO') {
+                        const x = Compiler.genExpression(tokens, ctx);
+                        if (peek() === ',') next();
+                        chunk = `GRAPHICS.moveTo(${x},${Compiler.genExpression(tokens, ctx)});`;
+                    }
+                    else if (cmd === 'GR_LINETO') {
+                        const x = Compiler.genExpression(tokens, ctx);
+                        if (peek() === ',') next();
+                        chunk = `GRAPHICS.lineTo(${x},${Compiler.genExpression(tokens, ctx)});`;
+                    }
+                    else if (cmd === 'GR_RECT' || cmd === 'GR_FRECT') {
+                        const filled = cmd === 'GR_FRECT';
+                        const w = Compiler.genExpression(tokens, ctx);
+                        if (peek() === ',') next();
+                        chunk = `GRAPHICS.rect(${w},${Compiler.genExpression(tokens, ctx)},${filled});`;
+                    }
+                    else if (cmd === 'GR_ELLIPSE' || cmd === 'GR_FELLIPSE') {
+                        const filled = cmd === 'GR_FELLIPSE';
+                        const w = Compiler.genExpression(tokens, ctx);
+                        if (peek() === ',') next();
+                        chunk = `GRAPHICS.ellipse(${w},${Compiler.genExpression(tokens, ctx)},${filled});`;
+                    }
+                    else if (cmd === 'GR_TRI' || cmd === 'GR_FTRI') {
+                        const filled = cmd === 'GR_FTRI';
+                        const x2 = Compiler.genExpression(tokens, ctx);
+                        if (peek() === ',') next();
+                        const y2 = Compiler.genExpression(tokens, ctx);
+                        if (peek() === ',') next();
+                        const x3 = Compiler.genExpression(tokens, ctx);
+                        if (peek() === ',') next();
+                        chunk = `GRAPHICS.triangle(${x2},${y2},${x3},${Compiler.genExpression(tokens, ctx)},${filled});`;
+                    }
+                    else if (cmd === 'GR_FONT') {
+                        chunk = `GRAPHICS.fontSize = ${Compiler.genExpression(tokens, ctx)};`;
+                    }
+
+
+                    else if (cmd === 'SEED') {
+                        if (peek() === '(') {
+                            next();
+                            const val = Compiler.genExpression(tokens, ctx);
+                            if (peek() === ')') next();
+                            chunk = `SYS.setSeed(${val});`;
+                        } else {
+                            chunk = `IO.print("?SYNTAX ERROR"); SYS.running=false;`;
+                        }
+                    }
+
+                    else if (cmd === 'LET' || (cmd && peek() === '=') || (cmd && peek() === '(')) {
+                        let v = cmdRaw; // Use raw for variable name
+                        if (cmd === 'LET') v = next();
+                        if (peek() === '(') {
+                            next(); const i = Compiler.genExpression(tokens, ctx); next(); next();
+                            chunk = `SYS.setArray('${v}',${i},${Compiler.genExpression(tokens, ctx)});`;
+                        } else {
+                            next();
+                            chunk = `SYS.vars['${v}']=${Compiler.genExpression(tokens, ctx)};`;
+                        }
+                    }
+
+                    else if (cmd === 'HTAB') chunk = `IO.htab(${Compiler.genExpression(tokens, ctx)});`;
+                    else if (cmd === 'VTAB') chunk = `IO.vtab(${Compiler.genExpression(tokens, ctx)});`;
+                    else if (cmd === 'SETPOS') { const x = Compiler.genExpression(tokens, ctx); next(); const y = Compiler.genExpression(tokens, ctx); chunk = `IO.setPos(${x},${y});`; }
+                    else if (cmd === 'HOME' || cmd === 'CLS') chunk = "IO.home();";
+
+                    else if (cmd === 'END') chunk = "SYS.running=false;";
+                    else if (cmd === 'DELAY') { async = true; chunk = `await new Promise(r=>setTimeout(r,${Compiler.genExpression(tokens, ctx)}));`; }
+                    else if (cmd === 'SAVE') chunk = `FS.save(${Compiler.genExpression(tokens, ctx)});`;
+                    else if (cmd === 'LOAD') { async = true; chunk = `await FS.load(${Compiler.genExpression(tokens, ctx)});`; }
+                    else if (cmd === 'DIR' || cmd === 'CATALOG') chunk = `FS.dir();`;
+                    else if (cmd === 'DOWNLOAD') chunk = `FS.download(${Compiler.genExpression(tokens, ctx)});`;
+                    else if (cmd === 'JSECHO') chunk = `IO.jsEcho = !IO.jsEcho; IO.print("JSECHO " + (IO.jsEcho ? "ON" : "OFF"));`;
+                    else if (cmd === 'HELP') chunk = `IO.help();`;
+                    else if (['LIST', 'RUN', 'EDIT', 'NEW', 'COPY', 'VARS', 'WHERE', 'JSPEEK'].includes(cmd)) {
+                        chunk = `IO.print("?ILLEGAL COMMAND IN LINE ${lineObj.line}"); SYS.running=false;`;
+                    }
+                    else chunk = `IO.print("?SYNTAX ERROR"); SYS.running=false;`;
+
+                    body += chunk + "\n";
+                }
+
+                try {
+                    const f = new (async ? AsyncFunction : Function)("SYS", "IO", "GRAPHICS", "FS", body);
+                    // NEW: Attach the generated text to the function so JSPEEK can read it
+                    f.generatedBody = body;
+                    return f;
+                } catch (e) {
+                    return () => { IO.print(`?COMPILE ERROR ${lineObj.line}`); SYS.running = false; };
+                }
+            }
+        };
+
+        // --- I/O & HELP ---
+        const IO = {
+            cursorVisible: true,
+            buffer: [], // Key buffer for INKEY$
+            waiter: null, // Callback for blocking INKEY$
+
+            // REPL Editing State
+            history: [],
+            historyIdx: -1,
+            lineBuffer: "",     // Current command string being typed
+            lineCursor: 0,      // Cursor position within lineBuffer
+            viewScroll: 0,      // NEW: Horizontal scroll offset
+            promptStartX: 0,    // Where the prompt ] started
+            promptStartY: 0,
+
+            // --- Runtime Input Handling ---
+            bufferKey: (key) => {
+                if (key.length === 1 || key === 'Enter') {
+                    const k = key === 'Enter' ? '\r' : key;
+                    if (IO.waiter) { const w = IO.waiter; IO.waiter = null; w(k); }
+                    else { IO.buffer.push(k); if (IO.buffer.length > 16) IO.buffer.shift(); }
+                }
+            },
+            inkey: async (mode) => {
+                if (Math.floor(mode) === 0) return IO.buffer.shift() || "";
+                if (IO.buffer.length > 0) return IO.buffer.shift();
+                return new Promise(r => IO.waiter = r);
+            },
+
+            format: (val) => {
+                if (typeof val === 'number') {
+                    // Round to 3 decimals, strip trailing zeros
+                    return parseFloat(val.toFixed(3));
+                }
+                return val;
+            },
+
+            // --- Helper Functions ---
+            help: () => {
+                const ov = document.getElementById('help-overlay'), ct = document.getElementById('help-content'), search = document.getElementById('help-search');
+                ov.style.display = 'flex'; search.focus();
+
+                const render = (filter = "") => {
+                    let html = "<div class='help-title' style='text-align:center'>QUICK INDEX</div><div class='index-grid'>";
+                    const keys = Object.keys(HELP_DATA);
+                    keys.forEach(cat => { html += `<button class='index-btn' onclick="document.getElementById('sec-${cat}').scrollIntoView({behavior:'smooth'})">${cat}</button>`; });
+                    html += "</div><hr/><br/>";
+                    keys.forEach(cat => {
+                        html += `<div id='sec-${cat}' class='help-section'><div class='help-title'>${cat}</div>`;
+                        HELP_DATA[cat].forEach(item => {
+                            if (!filter || item.c.includes(filter.toUpperCase()) || item.d.toUpperCase().includes(filter.toUpperCase())) {
+                                html += `<div class='help-entry'><div class='help-cmd'>${item.c}</div><div class='help-desc'>${item.d}</div><div class='help-ex'>${item.e}</div></div>`;
+                            }
+                        });
+                        html += "</div>";
+                    });
+                    ct.innerHTML = html;
+                };
+                render(); search.onkeyup = (e) => render(e.target.value);
+            },
+
+            jsEcho: false,
+            jsBuffer: "",
+
+            print: (txt, newline = true, color = null) => {
+                const s = txt.toString();
+                if (IO.jsEcho) {
+                    IO.jsBuffer += s;
+                    if (newline) {
+                        console.log(IO.jsBuffer);
+                        IO.jsBuffer = "";
+                    }
+                }
+                SCREEN.put(s, color);
+                if (newline) SCREEN.newline();
+            },
+
+            input: () => {
+                IO.cursorVisible = true; SCREEN.drawCursor();
+                return new Promise(r => { SYS.inputCallback = r; inputTrap.value = ""; inputTrap.focus(); });
+            },
+
+            home: () => SCREEN.clear(),
+            htab: (x) => { SCREEN.removeCursor(); SCREEN.cx = Math.max(0, Math.min(CONFIG.cols - 1, x - 1)); SCREEN.drawCursor(); },
+            vtab: (y) => { SCREEN.removeCursor(); SCREEN.cy = Math.max(0, Math.min(CONFIG.rows - 1, y - 1)); SCREEN.drawCursor(); },
+            setPos: (x, y) => { SCREEN.removeCursor(); SCREEN.cx = Math.max(0, Math.min(CONFIG.cols - 1, x - 1)); SCREEN.cy = Math.max(0, Math.min(CONFIG.rows - 1, y - 1)); SCREEN.drawCursor(); },
+
+            // --- Command Execution ---
+            handleCommand: (raw) => {
+                const cRaw = raw.trim();
+                const c = cRaw.toUpperCase();
+
+                if (cRaw) {
+                    // Save to history (avoid duplicates at end)
+                    if (IO.history[IO.history.length - 1] !== cRaw) IO.history.push(cRaw);
+                    IO.historyIdx = IO.history.length;
+                }
+
+                if (!c) return IO.prompt();
+
+                const m = cRaw.match(/^(\d+)\s*(.*)/);
+                if (m) {
+                    const l = parseInt(m[1]);
+                    SYS.program = SYS.program.filter(x => x.line !== l);
+                    if (m[2]) SYS.program.push({ line: l, src: m[2] });
+                    IO.prompt();
+                } else {
+                    if (c.startsWith('LIST')) {
+                        SYS.program.sort((a, b) => a.line - b.line);
+
+                        let min = 0, max = 65535;
+                        const args = c.substring(4).trim();
+
+                        if (args === ".") {
+                            min = SYS.lastExecLine; max = SYS.lastExecLine;
+                        }
+                        else if (args.length > 0) {
+                            if (args.includes('-')) {
+                                const parts = args.split('-');
+                                if (parts[0].trim() !== "") min = parseInt(parts[0]);
+                                if (parts[1].trim() !== "") max = parseInt(parts[1]);
+                            } else {
+                                min = parseInt(args);
+                                max = parseInt(args);
+                            }
+                        }
+
+                        let indent = 0;
+                        SYS.program.forEach(l => {
+                            // Calculate indentation
+                            const tokens = Tokenizer.tokenize(l.src);
+                            let tempIndent = indent;
+
+                            for (let t of tokens) {
+                                const tu = t.toUpperCase();
+                                if (tu === 'FOR') indent++;
+                                else if (tu === 'NEXT') {
+                                    indent = Math.max(0, indent - 1);
+                                    tempIndent = indent;
+                                }
+                                else if (tu === 'REM' || t === "'") break;
+                            }
+
+                            if (l.line >= min && l.line <= max) {
+                                // Draw Line Number (Standard Color)
+                                IO.print(`${l.line} `, false);
+
+                                // Draw Indentation
+                                const spaces = "  ".repeat(tempIndent);
+                                IO.print(spaces, false);
+
+                                // Draw Scanned Tokens with Color
+                                const scanned = Tokenizer.scan(l.src);
+                                let isComment = false;
+
+                                for (let item of scanned) {
+                                    if (item.type === 'SPACE') {
+                                        IO.print(item.val, false);
+                                    } else {
+                                        let color = isComment ? SYNTAX.colors.COMMENT : SYNTAX.classify(item.val);
+
+                                        // Check if this token starts a comment
+                                        if (!isComment) {
+                                            const tu = item.val.toUpperCase();
+                                            if (tu === 'REM' || item.val === "'") {
+                                                isComment = true;
+                                                color = SYNTAX.colors.COMMENT;
+                                            }
+                                        }
+
+                                        IO.print(item.val, false, color);
+                                    }
+                                }
+                                IO.print(""); // Newline
+                            }
+                        });
+                        IO.prompt();
+                    }
+                    else if (c === 'RUN') ENGINE.run();
+                    else if (c.startsWith('EDIT')) {
+                        const mEdit = c.match(/^EDIT\s+(\d+)/);
+                        if (mEdit) {
+                            const ln = parseInt(mEdit[1]);
+                            const found = SYS.program.find(l => l.line === ln);
+                            if (found) {
+                                IO.prompt(); // Draw the prompt ']'
+
+                                // Pre-fill buffer with the line number and source
+                                IO.lineBuffer = `${found.line} ${found.src}`;
+                                IO.lineCursor = IO.lineBuffer.length;
+
+                                // Draw the text
+                                IO.refreshLine();
+                                return; // Return early so we don't draw a blank prompt
+                            } else {
+                                IO.print("?UNDEFINED LINE ERROR");
+                            }
+                        } else {
+                            IO.print("?SYNTAX ERROR");
+                        }
+                        IO.prompt();
+                    }
+                    else if (c === 'NEW') { SYS.program = []; SYS.vars = {}; SCREEN.clear(); IO.prompt(); }
+                    else if (c === 'COPY') {
+                        // 1. Sort the program lines to ensure correct order
+                        SYS.program.sort((a, b) => a.line - b.line);
+
+                        // 2. Convert program objects back to text format
+                        const text = SYS.program.map(l => `${l.line} ${l.src}`).join("\n");
+
+                        // 3. Write to system clipboard with fallback
+                        const doLegacyCopy = (txt) => {
+                            try {
+                                const textArea = document.createElement("textarea");
+                                textArea.value = txt;
+                                textArea.style.top = "0";
+                                textArea.style.left = "0";
+                                textArea.style.position = "fixed";
+                                document.body.appendChild(textArea);
+                                textArea.focus();
+                                textArea.select();
+                                const successful = document.execCommand('copy');
+                                document.body.removeChild(textArea);
+                                if (successful) IO.print("COPIED TO CLIPBOARD");
+                                else IO.print("?CLIPBOARD FAILED");
+                            } catch (err) {
+                                IO.print("?CLIPBOARD ERROR: " + err);
+                            }
+                            IO.prompt();
+                        };
+
+                        if (navigator.clipboard && navigator.clipboard.writeText) {
+                            navigator.clipboard.writeText(text)
+                                .then(() => {
+                                    IO.print("COPIED TO CLIPBOARD");
+                                    IO.prompt();
+                                })
+                                .catch(err => {
+                                    doLegacyCopy(text);
+                                });
+                        } else {
+                            doLegacyCopy(text);
+                        }
+                        return;
+                    }
+                    else if (c === 'VARS') {
+                        const keys = Object.keys(SYS.vars).sort();
+                        if (keys.length === 0) {
+                            // Optional: IO.print("NO VARIABLES DEFINED");
+                        } else {
+                            for (const k of keys) {
+                                let val = SYS.vars[k];
+                                if (typeof val === 'string') {
+                                    IO.print(`${k} = "${val}"`);
+                                } else {
+                                    IO.print(`${k} = ${val}`);
+                                }
+                            }
+                        }
+                        IO.prompt();
+                    }
+                    else if (c === 'WHERE') {
+                        if (SYS.lastExecLine) {
+                            IO.print("BREAK IN " + SYS.lastExecLine);
+                        } else {
+                            IO.print("?NO RUN DATA");
+                        }
+                        IO.prompt();
+                    }
+                    else if (c === 'JSPEEK') {
+                        ENGINE.generateOnly();
+                        const ov = document.getElementById('js-overlay');
+                        const ct = document.getElementById('js-content');
+                        ct.textContent = SYS.transpiledSource || "// NO PROGRAM LOADED";
+                        ov.style.display = 'flex';
+                        IO.prompt();
+                    }
+                    else {
+                        try {
+                            const func = Compiler.compile({ line: 0, src: cRaw });
+                            SYS.running = true;
+                            const res = func(SYS, IO, GRAPHICS, FS);
+                            if (res && res.then) {
+                                res.then(() => {
+                                    SYS.running = false;
+                                    IO.prompt();
+                                }).catch((e) => {
+                                    SYS.running = false;
+                                    IO.print("?RUNTIME ERROR"); // Catch async errors
+                                    IO.prompt();
+                                });
+                            } else {
+                                SYS.running = false;
+                                IO.prompt();
+                            }
+                        }
+                        catch (e) {
+                            SYS.running = false;
+                            IO.print("?SYNTAX ERROR");
+                            IO.prompt();
+                        }
+                    }
+                }
+            },
+
+            // --- REPL Input Management ---
+            prompt: () => {
+                IO.cursorVisible = true;
+                IO.print("]", false);
+                // Save where the input area starts
+                IO.promptStartX = SCREEN.cx;
+                IO.promptStartY = SCREEN.cy;
+                IO.lineBuffer = "";
+                IO.lineCursor = 0;
+                IO.viewScroll = 0; // Reset scroll
+                IO.historyIdx = IO.history.length;
+                SCREEN.drawCursor();
+            },
+
+            refreshLine: () => {
+                // 1. Calculate available width on the current line
+                //    (from prompt start to end of screen width)
+                const availableWidth = CONFIG.cols - IO.promptStartX;
+
+                // 2. Adjust View Scroll based on Cursor
+                //    Ensure cursor is visible within [viewScroll, viewScroll + availableWidth)
+                //    Leave 1 char padding at right if possible, or just exact fit
+                if (IO.lineCursor < IO.viewScroll) {
+                    IO.viewScroll = IO.lineCursor;
+                } else if (IO.lineCursor >= IO.viewScroll + availableWidth) {
+                    IO.viewScroll = IO.lineCursor - availableWidth + 1;
+                }
+
+                // 3. Determine visible text
+                const visibleText = IO.lineBuffer.substring(IO.viewScroll, IO.viewScroll + availableWidth);
+
+                // 4. Move to prompt start
+                SCREEN.removeCursor();
+                SCREEN.cx = IO.promptStartX;
+                SCREEN.cy = IO.promptStartY;
+
+                // 5. Draw visible text
+                SCREEN.put(visibleText);
+
+                // 6. Clear remaining space on the line if text is shorter than width
+                const usedWidth = visibleText.length;
+                if (usedWidth < availableWidth) {
+                    const clearLen = availableWidth - usedWidth;
+                    // Don't use put() for clearing if it wraps, manually clear or use put with spaces
+                    // put() wraps if it hits edge.
+                    // If we are at edge, put() might wrap.
+                    // Better: Fill with spaces up to availableWidth
+                    SCREEN.put(" ".repeat(clearLen));
+                }
+
+                // 7. Position Cursor visually
+                //    Visual X = promptStartX + (logicalCursor - viewScroll)
+                const visualCursorX = IO.promptStartX + (IO.lineCursor - IO.viewScroll);
+                SCREEN.moveTo(visualCursorX, IO.promptStartY);
+            }
+        };
+
+        // --- ENGINE ---
+        const ENGINE = {
+            // NEW: Helper to generate source for JSPEEK without running
+            generateOnly: () => {
+                SYS.program.sort((a, b) => a.line - b.line);
+                let fullSource = "// APPLESCRIPT -> JAVASCRIPT TRANSPILER OUTPUT\n\n";
+
+                SYS.program.forEach(lineObj => {
+                    fullSource += `// --- LINE ${lineObj.line}: ${lineObj.src} ---\n`;
+                    // Compile to get the body attached
+                    const func = Compiler.compile(lineObj);
+                    if (func.generatedBody) {
+                        fullSource += func.generatedBody + "\n";
+                    }
+                });
+
+                SYS.transpiledSource = fullSource;
+            },
+
+            run: async () => {
+                SYS.program.sort((a, b) => a.line - b.line);
+                SYS.compiled = []; SYS.labels = {};
+
+                SYS.program.forEach((x, i) => {
+                    SYS.labels[x.line] = i;
+                    console.log(`Compiling line ${x.line}: ${x.src}`);
+                    const f = Compiler.compile(x);
+                    SYS.compiled.push(f);
+                });
+
+                // reset state
+                SYS.pc = 0;
+                SYS.running = true;
+                SYS.break = false;
+                SYS.vars = {};
+                SYS.arrays = {};
+                SYS.stack = [];
+                SYS.forStack = {};
+                SYS.lastExecLine = 0;
+
+                breakBtn.style.display = 'block'; IO.cursorVisible = false; SCREEN.removeCursor();
+                const t0 = performance.now(); let ly = t0; let ops = 0;
+                try {
+                    while (SYS.running && SYS.pc < SYS.compiled.length) {
+                        if (SYS.break) {
+                            IO.print(`\nBREAK IN ${SYS.program[SYS.pc]?.line}`);
+                            SYS.running = false;
+                            break;
+                        }
+
+                        // NEW: Track the line about to be executed
+                        if (SYS.program[SYS.pc]) SYS.lastExecLine = SYS.program[SYS.pc].line;
+
+                        const res = SYS.compiled[SYS.pc](SYS, IO, GRAPHICS, FS);
+                        if (res && res.then) {
+                            await res;
+                            ly = performance.now();
+                            if (SYS.break) { IO.print(`\nBREAK IN ${SYS.program[SYS.pc]?.line}`); SYS.running = false; break; }
+                        }
+                        SYS.pc++; ops++;
+                        if ((ops & 127) === 0 && (performance.now() - ly) > 14) { await new Promise(r => setTimeout(r, 0)); ly = performance.now(); }
+                    }
+                } catch (e) {
+                    IO.print("\n?" + e);
+                    SYS.running = false;
+                    IO.prompt();
+                    return;
+                }
+                breakBtn.style.display = 'none';
+                SYS.running = false; IO.prompt();
+            }
+        };
+
+        // --- EVENTS ---
+        // --- Global Key Listener ---
+        document.addEventListener('click', (e) => { if (e.target.id !== 'help-search') inputTrap.focus(); });
+        breakBtn.onclick = (e) => {
+            e.preventDefault();
+            if (SYS.running) {
+                SYS.break = true;
+                if (IO.waiter) { IO.waiter(""); IO.waiter = null; }
+                if (SYS.inputCallback) { SYS.inputCallback(""); SYS.inputCallback = null; }
+            }
+            inputTrap.focus();
+        };
+
+        // --- Paste Support ---
+
+
+        // --- Global Key Listener ---
+        window.onkeydown = (e) => {
+            // 1. Handle Break (ESC)
+            if (e.key === 'Escape' && SYS.running) {
+                SYS.break = true;
+                if (IO.waiter) { IO.waiter(""); IO.waiter = null; }
+                if (SYS.inputCallback) { SYS.inputCallback(""); SYS.inputCallback = null; }
+                return;
+            }
+
+            // 2. Handle Runtime Keys (INKEY$ or INPUT)
+            if (SYS.running) {
+                // CASE A: Program is running normally or waiting for INKEY$
+                if (!SYS.inputCallback) {
+                    IO.bufferKey(e.key);
+                    if (e.key === 'Backspace') e.preventDefault();
+                }
+                // CASE B: Program is waiting for INPUT command
+                else {
+                    e.preventDefault(); // Take control of the input
+
+                    if (e.key === 'Enter') {
+                        SCREEN.newline();
+                        const val = inputTrap.value; // Grab the accumulated text
+                        const cb = SYS.inputCallback;
+                        SYS.inputCallback = null;
+                        cb(val); // Send text back to the interpreter
+                    }
+                    else if (e.key === 'Backspace') {
+                        if (inputTrap.value.length > 0) {
+                            // Remove last char from buffer
+                            inputTrap.value = inputTrap.value.slice(0, -1);
+
+                            // Visual Backspace: Move cursor back and clear cell
+                            SCREEN.removeCursor();
+                            if (SCREEN.cx > 0) SCREEN.cx--;
+                            else if (SCREEN.cy > 0) { SCREEN.cy--; SCREEN.cx = CONFIG.cols - 1; }
+
+                            // Erase the character visually
+                            ctx.fillStyle = CONFIG.bgColor;
+                            ctx.fillRect(SCREEN.cx * CONFIG.charW, SCREEN.cy * CONFIG.charH, CONFIG.charW, CONFIG.charH);
+                            SCREEN.drawCursor();
+                        }
+                    }
+                    else if (e.key.length === 1) {
+                        // Add to buffer and screen
+                        inputTrap.value += e.key;
+                        SCREEN.put(e.key);
+                    }
+                }
+                return;
+            }
+
+            // 3. Handle Prompt Editing (When NOT running)
+            // Use e.key to manage buffer manually
+
+            if (e.ctrlKey || e.metaKey) return; // Allow Copy/Paste shortcuts
+
+            e.preventDefault(); // Stop hidden input from doubling chars
+
+            if (e.key === 'Enter') {
+                SCREEN.newline();
+                IO.handleCommand(IO.lineBuffer);
+            }
+            else if (e.key === 'Backspace') {
+                if (IO.lineCursor > 0) {
+                    IO.lineBuffer = IO.lineBuffer.slice(0, IO.lineCursor - 1) + IO.lineBuffer.slice(IO.lineCursor);
+                    IO.lineCursor--;
+                    IO.refreshLine();
+                }
+            }
+            else if (e.key === 'Delete') {
+                if (IO.lineCursor < IO.lineBuffer.length) {
+                    IO.lineBuffer = IO.lineBuffer.slice(0, IO.lineCursor) + IO.lineBuffer.slice(IO.lineCursor + 1);
+                    IO.refreshLine();
+                }
+            }
+            else if (e.key === 'ArrowLeft') {
+                if (IO.lineCursor > 0) {
+                    IO.lineCursor--;
+                    IO.refreshLine();
+                }
+            }
+            else if (e.key === 'ArrowRight') {
+                if (IO.lineCursor < IO.lineBuffer.length) {
+                    IO.lineCursor++;
+                    IO.refreshLine();
+                }
+            }
+            else if (e.key === 'ArrowUp') {
+                if (IO.history.length > 0 && IO.historyIdx > 0) {
+                    IO.historyIdx--;
+                    IO.lineBuffer = IO.history[IO.historyIdx];
+                    IO.lineCursor = IO.lineBuffer.length;
+                    IO.refreshLine();
+                }
+            }
+            else if (e.key === 'ArrowDown') {
+                if (IO.historyIdx < IO.history.length - 1) {
+                    IO.historyIdx++;
+                    IO.lineBuffer = IO.history[IO.historyIdx];
+                    IO.lineCursor = IO.lineBuffer.length;
+                    IO.refreshLine();
+                } else {
+                    // Clear line if going past history
+                    IO.historyIdx = IO.history.length;
+                    IO.lineBuffer = "";
+                    IO.lineCursor = 0;
+                    IO.refreshLine();
+                }
+            }
+            else if (e.key.length === 1) {
+                // Printable characters
+                const textBefore = IO.lineBuffer.slice(0, IO.lineCursor);
+                // Count quotes before cursor to see if we are inside a string
+                const quoteCount = (textBefore.match(/"/g) || []).length;
+                // If even quotes, we are outside a string -> Force Uppercase
+                const char = (quoteCount % 2 === 0) ? e.key.toUpperCase() : e.key;
+
+                IO.lineBuffer = textBefore + char + IO.lineBuffer.slice(IO.lineCursor);
+                IO.lineCursor++;
+                IO.refreshLine();
+            }
+        };
+
+        inputTrap.oninput = null;
+
+        // --- Paste Support ---
+        inputTrap.addEventListener('paste', (e) => {
+            e.preventDefault();
+            // Get pasted data via clipboard API
+            const text = (e.clipboardData || window.clipboardData).getData('text');
+
+            // Split into lines, filtering out empty ones
+            const lines = text.split(/\r\n|\n|\r/).filter(line => line.trim() !== "");
+
+            // Process each line sequentially
+            const processLine = async (index) => {
+                if (index >= lines.length) return;
+
+                const line = lines[index];
+
+                // Echo the line to the screen
+                IO.print(line);
+
+                // If it looks like a line number + code, handle it as a command
+                // If it is a direct command (RUN, LIST), handle it immediately
+                if (SYS.inputCallback) {
+                    // If we are stuck at an INPUT prompt, feed it the data
+                    const cb = SYS.inputCallback;
+                    SYS.inputCallback = null;
+                    cb(line);
+                } else {
+                    // Standard command processing
+                    IO.handleCommand(line);
+                }
+
+                // Small delay to prevent freezing UI on large pastes
+                setTimeout(() => processLine(index + 1), 10);
+            };
+
+            processLine(0);
+        });
+
+
+        // Init
+        document.fonts.load(CONFIG.font).then(() => {
+            GRAPHICS.init();
+            SCREEN.init();
+            IO.print("bwxBASIC -- v0.6");
+            IO.print("type HELP for manual");
+            IO.prompt();
+        });
+
+    </script>
+</body>
+
+</html>
