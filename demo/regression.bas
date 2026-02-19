@@ -426,8 +426,15 @@
 2105 IF LARGE(50) <> 51 THEN ERRORS = ERRORS + 1 : PRINT "Error: LARGE(50) should be 51, got "; LARGE(50)
 2110 IF LARGE(100) <> 101 THEN ERRORS = ERRORS + 1 : PRINT "Error: LARGE(100) should be 101, got "; LARGE(100)
 
-2115 REM Skip to final summary section
-2120 GOTO 3000
+2115 REM Test 13: DIM A = 1, 2, 3 and DATA statement
+2120 DIM PREARR = 10, 20, 30
+2125 DATA 40, 50, 60
+2130 IF PREARR(0) <> 10 THEN ERRORS = ERRORS + 1 : PRINT "Error: PREARR(0) should be 10, got "; PREARR(0)
+2135 IF PREARR(2) <> 30 THEN ERRORS = ERRORS + 1 : PRINT "Error: PREARR(2) should be 30, got "; PREARR(2)
+2140 IF PREARR(5) <> 60 THEN ERRORS = ERRORS + 1 : PRINT "Error: PREARR(5) should be 60, got "; PREARR(5)
+
+2145 REM Skip to final summary section
+2150 GOTO 3000
 
 1999 GOTO -1 : REM This line should never be executed
 

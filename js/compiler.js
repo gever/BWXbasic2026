@@ -241,16 +241,35 @@ export const Compiler = {
             }
             else if (cmd === 'DIM') {
                 const v = next(); // name
-                next(); // '('
-                const dims = [];
+                if (peek() === '=') {
+                    next(); // consume '='
+                    const vals = [];
+                    while (ctx.idx < tokens.length) {
+                        vals.push(Compiler.genExpression(tokens, ctx));
+                        if (peek() === ',') next(); // consume ','
+                        else break;
+                    }
+                    chunk = `SYS.arrays['${v}']=[${vals.join(',')}]; SYS.lastDimArray='${v}';`;
+                } else {
+                    next(); // '('
+                    const dims = [];
+                    while (ctx.idx < tokens.length) {
+                        dims.push(Compiler.genExpression(tokens, ctx));
+                        if (peek() === ',') next(); // consume ','
+                        else break;
+                    }
+                    next(); // ')'
+                    chunk = `SYS.arrays['${v}']={}; SYS.lastDimArray='${v}';`;
+                }
+            }
+            else if (cmd === 'DATA') {
+                const vals = [];
                 while (ctx.idx < tokens.length) {
-                    dims.push(Compiler.genExpression(tokens, ctx));
-                    if (peek() === ',') next(); // consume ','
+                    vals.push(Compiler.genExpression(tokens, ctx));
+                    if (peek() === ',') next();
                     else break;
                 }
-                next(); // ')'
-
-                chunk = `SYS.arrays['${v}']={};`;
+                chunk = `if(!SYS.lastDimArray) throw "DATA WITHOUT DIM"; else { var a = SYS.arrays[SYS.lastDimArray]; if(Array.isArray(a)) a.push(${vals.join(',')}); else throw "DATA ON NON-LIST ARRAY"; }`;
             }
             else if (cmd === 'INPUT') { async = true; let p = "?"; if (peek().startsWith('"')) { p = next().replace(/"/g, ''); if (peek() === ';') next(); } const v = next(), str = v.endsWith('$'); chunk = `IO.print("${p}",false);var val=await IO.input();SYS.vars['${v}']=${str ? 'val' : 'parseFloat(val)'};`; }
 

@@ -43,6 +43,7 @@ export const ENGINE = {
         SYS.stack = [];
         SYS.forStack = {};
         SYS.lastExecLine = 0;
+        SYS.lastDimArray = null;
 
         const breakBtn = document.getElementById('break-btn');
         breakBtn.style.display = 'block'; IO.cursorVisible = false; SCREEN.removeCursor();
