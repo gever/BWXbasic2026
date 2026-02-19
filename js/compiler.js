@@ -21,7 +21,15 @@ export const Compiler = {
         const parseFactor = () => {
             const t = next();
             if (!t) return "0";
-            if (!isNaN(t) || t.startsWith('"')) return t;
+            if (!isNaN(t) && t.trim() !== '') {
+                // To avoid octal parsing (e.g. 021 -> 17 in JS), we can parseFloat
+                // Or just return the raw string if it has decimals, but for integers drop leading zeros
+                if (t.length > 1 && t.startsWith('0') && !t.includes('.')) {
+                    return parseFloat(t).toString();
+                }
+                return t;
+            }
+            if (t.startsWith('"')) return t;
             if (t === '(') { const e = parseExp(); next(); return `(${e})`; }
             if (t === '-') return `-${parseFactor()}`;
             if (t === '+') return parseFactor();
@@ -50,8 +58,16 @@ export const Compiler = {
                     next(); return `(${LIB[tu]})(${a.join(',')})`;
                 }
 
-                // Handle Array Access (Use raw 't' to preserve case)
-                if (peek() === '(') { next(); const i = parseExp(); next(); return `SYS.getArray('${t}',${i})`; }
+                // Handle Array Access
+                if (peek() === '(') {
+                    next();
+                    const dims = [];
+                    if (peek() !== ')') do { dims.push(parseExp()); if (peek() === ',') next(); else break; } while (true);
+                    next();
+                    // To handle multi-dimensional arrays without a complex descriptor, we can use a string key or flat math.
+                    // let's just make the index a string joined by commas
+                    return `SYS.getArray('${t}', ${dims.length > 1 ? '\`' + dims.map(d => '${' + d + '}').join(',') + '\`' : dims[0]})`;
+                }
 
                 // Handle Variables (Use raw 't' to preserve case)
                 return `(SYS.vars['${t}']!==undefined?SYS.vars['${t}']:0)`;
@@ -174,9 +190,12 @@ export const Compiler = {
 
                 const compileBranch = (branchTokens) => {
                     if (!branchTokens || branchTokens.length === 0) return "";
-                    // Check for single line number (GOTO shorthand)
+                    // Check for single line number (GOTO shorthand, e.g. THEN 100 or THEN -1)
                     if (branchTokens.length === 1 && !isNaN(branchTokens[0])) {
-                        return `if(SYS.labels[${Number(branchTokens[0])}]!==undefined)SYS.pc=SYS.labels[${Number(branchTokens[0])}]-1; else { IO.print("?UNDEF LINE ${branchTokens[0]}"); SYS.running=false; }`;
+                        return `var _t=${Number(branchTokens[0])};if(SYS.labels[_t]!==undefined)SYS.pc=SYS.labels[_t]-1; else { IO.print("?UNDEF LINE "+_t); SYS.running=false; }`;
+                    }
+                    if (branchTokens.length === 2 && branchTokens[0] === '-' && !isNaN(branchTokens[1])) {
+                        return `var _t=-${Number(branchTokens[1])};if(SYS.labels[_t]!==undefined)SYS.pc=SYS.labels[_t]-1; else { IO.print("?UNDEF LINE "+_t); SYS.running=false; }`;
                     }
                     // Compile as sub-program
                     const src = branchTokens.join(" "); // Reconstruct source
@@ -220,7 +239,19 @@ export const Compiler = {
                     chunk = `var l=SYS.forStack['${v}'];if(l){SYS.vars['${v}']+=l.step;if((l.step>=0&&SYS.vars['${v}']<=l.target)||(l.step<0&&SYS.vars['${v}']>=l.target))SYS.pc=l.pc;else delete SYS.forStack['${v}'];}`;
                 }
             }
-            else if (cmd === 'DIM') { const v = next(); next(); const sz = Compiler.genExpression(tokens, ctx); next(); chunk = `SYS.arrays['${v}']=new Array(${sz}+1).fill(0);`; }
+            else if (cmd === 'DIM') {
+                const v = next(); // name
+                next(); // '('
+                const dims = [];
+                while (ctx.idx < tokens.length) {
+                    dims.push(Compiler.genExpression(tokens, ctx));
+                    if (peek() === ',') next(); // consume ','
+                    else break;
+                }
+                next(); // ')'
+
+                chunk = `SYS.arrays['${v}']={};`;
+            }
             else if (cmd === 'INPUT') { async = true; let p = "?"; if (peek().startsWith('"')) { p = next().replace(/"/g, ''); if (peek() === ';') next(); } const v = next(), str = v.endsWith('$'); chunk = `IO.print("${p}",false);var val=await IO.input();SYS.vars['${v}']=${str ? 'val' : 'parseFloat(val)'};`; }
 
             else if (cmd === 'GR_PRINT') {
@@ -326,8 +357,12 @@ export const Compiler = {
                 let v = cmdRaw; // Use raw for variable name
                 if (cmd === 'LET') v = next();
                 if (peek() === '(') {
-                    next(); const i = Compiler.genExpression(tokens, ctx); next(); next();
-                    chunk = `SYS.setArray('${v}',${i},${Compiler.genExpression(tokens, ctx)});`;
+                    next();
+                    const dims = [];
+                    if (peek() !== ')') do { dims.push(Compiler.genExpression(tokens, ctx)); if (peek() === ',') next(); else break; } while (true);
+                    next();
+                    next(); // '='
+                    chunk = `SYS.setArray('${v}', ${dims.length > 1 ? '\`' + dims.map(d => '${' + d + '}').join(',') + '\`' : dims[0]}, ${Compiler.genExpression(tokens, ctx)});`;
                 } else {
                     next();
                     chunk = `SYS.vars['${v}']=${Compiler.genExpression(tokens, ctx)};`;
@@ -339,7 +374,7 @@ export const Compiler = {
             else if (cmd === 'SETPOS') { const x = Compiler.genExpression(tokens, ctx); next(); const y = Compiler.genExpression(tokens, ctx); chunk = `IO.setPos(${x},${y});`; }
             else if (cmd === 'HOME' || cmd === 'CLS') chunk = "IO.home();";
 
-            else if (cmd === 'END') chunk = "SYS.running=false;";
+            else if (cmd === 'END') { async = true; chunk = "await new Promise(r => setTimeout(r, 10)); SYS.running=false;"; }
             else if (cmd === 'DELAY') { async = true; chunk = `await new Promise(r=>setTimeout(r,${Compiler.genExpression(tokens, ctx)}));`; }
             else if (cmd === 'SAVE') chunk = `FS.save(${Compiler.genExpression(tokens, ctx)});`;
             else if (cmd === 'LOAD') { async = true; chunk = `await FS.load(${Compiler.genExpression(tokens, ctx)});`; }

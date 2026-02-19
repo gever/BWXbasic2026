@@ -1,0 +1,11 @@
+{
+  "name": "bwxbasic",
+  "version": "1.0.0",
+  "description": "bwxBASIC Interpreter and Web App",
+  "type": "module",
+  "scripts": {
+    "test": "node tests/run_regression.js"
+  },
+  "author": "bwx",
+  "license": "ISC"
+}

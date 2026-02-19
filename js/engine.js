@@ -62,8 +62,10 @@ export const ENGINE = {
                 if (res && res.then) {
                     await res;
                     ly = performance.now();
-                    if (SYS.break) { IO.print(`\nBREAK IN ${SYS.program[SYS.pc]?.line}`); SYS.running = false; break; }
                 }
+                if (!SYS.running) break;
+                if (SYS.break) { IO.print(`\nBREAK IN ${SYS.program[SYS.pc]?.line}`); SYS.running = false; break; }
+
                 SYS.pc++; ops++;
                 if ((ops & 127) === 0 && (performance.now() - ly) > 14) { await new Promise(r => setTimeout(r, 0)); ly = performance.now(); }
             }
