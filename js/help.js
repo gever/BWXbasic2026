@@ -47,7 +47,8 @@ export const HELP_DATA = {
         { c: "IF...THEN", d: "Conditional execution.", e: "10 IF A > 10 THEN GOTO 50" },
         { c: "FOR...NEXT", d: "Loop structure.", e: "10 FOR I=1 TO 10 STEP 2 ... 50 NEXT I" },
         { c: "END", d: "Stops program execution.", e: "99 END" },
-        { c: "DIM", d: "Defines array size.", e: "10 DIM A(100)" },
+        { c: "DIM", d: "Defines array size or initializes values.", e: "10 DIM A(100) or 20 DIM B = 1, 2, 3" },
+        { c: "DATA", d: "Appends values sequentially to the last initialized DIM array.", e: "30 DATA 4, 5, 6" },
         { c: "LET", d: "Assigns value to variable (optional keyword).", e: "10 LET A = 5" }
     ],
     "MATH FUNCTIONS": [

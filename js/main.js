@@ -23,6 +23,8 @@ breakBtn.onclick = (e) => {
 };
 
 window.onkeydown = (e) => {
+    // Allow default key behavior if typing in the help search box
+    if (e.target && e.target.id === 'help-search') return;
     // 1. Handle Break (ESC)
     if (e.key === 'Escape' && SYS.running) {
         SYS.break = true;

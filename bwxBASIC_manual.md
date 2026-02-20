@@ -10,8 +10,12 @@ bwxBASIC is a modern web-based implementation of BASIC, inspired by Applesoft BA
 *   **Strings**: Text enclosed in double quotes. Variable names must end with `$`.
     *   `N$ = "bwxBASIC"`
 *   **Arrays**: Defined with `DIM`. Zero-indexed.
-    *   `DIM A(10)` (Create array with 11 slots, 0-10)
+    *   `DIM A(10)` (Create array with 11 array slots, 0-10)
     *   `A(0) = 99`
+    *   **Array Initialization**: Arrays can be pre-filled using `=` instead of `()`.
+        *   `DIM B = 1, 2, 3` (Creates array `B` with elements `B(0)=1, B(1)=2, B(2)=3`)
+    *   **Appending (DATA)**: Appends values to the most recently `DIM` declared array.
+        *   `DATA 4, 5, 6` (Appends values `4, 5, 6` extending the previous array to size 6)
 
 ## 2. Input / Output
 

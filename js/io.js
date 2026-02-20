@@ -71,7 +71,14 @@ export const IO = {
             });
             ct.innerHTML = html;
         };
-        render(); search.onkeyup = (e) => render(e.target.value);
+        render();
+        search.onkeyup = (e) => render(e.target.value);
+        search.onkeydown = (e) => {
+            if (e.key === 'Escape') {
+                ov.style.display = 'none';
+                document.getElementById('input-trap').focus();
+            }
+        };
     },
 
     jsEcho: false,
