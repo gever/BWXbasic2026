@@ -25,16 +25,6 @@ export const EDITOR = {
 
             for (let i = 0; i < lines.length; i++) {
                 const line = lines[i];
-                if (line.trim() === "") {
-                    resultHTML += "\n";
-                    continue;
-                }
-
-                // Apply rudimentary indentation whitespace
-                const leadingSpaceMatch = line.match(/^(\s+)/);
-                const leadingSpace = leadingSpaceMatch ? leadingSpaceMatch[1] : "";
-                resultHTML += leadingSpace;
-
                 const scanned = Tokenizer.scan(line);
                 let isComment = false;
 
