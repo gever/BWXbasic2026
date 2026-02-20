@@ -213,12 +213,15 @@ export const Compiler = {
 
                 // The FUN block acts as a barrier: it initializes the local variables using the arguments provided
                 // from the callFunction array. If SYS.callArgs isn't set, then someone sequentially fell into it.
-                // We let sequential execution pass through without variable masking.
+                // We let sequential execution pass through by signaling the engine to skip until RETURN.
                 chunk = `
-                    if (SYS.callArgs !== null) {
-                        var _saved = {};
-                        var _args = SYS.callArgs;
-                        `;
+                    if (SYS.callArgs === null) {
+                        SYS.pc = SYS.funSkipMap[SYS.pc] - 1;
+                        return;
+                    }
+                    var _saved = {};
+                    var _args = SYS.callArgs;
+                    `;
                 params.forEach((p, idx) => {
                     chunk += `
                         _saved['${p}'] = SYS.vars['${p}'] !== undefined ? SYS.vars['${p}'] : SYS.NIL;
@@ -226,9 +229,8 @@ export const Compiler = {
                     `;
                 });
                 chunk += `
-                        SYS.callArgs = null;
-                        SYS.stack.push({ type: 'FUN', saved: _saved });
-                    }
+                    SYS.callArgs = null;
+                    SYS.stack.push({ type: 'FUN', saved: _saved });
                 `;
             }
             else if (cmd === 'CALL') {

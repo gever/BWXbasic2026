@@ -3,6 +3,7 @@ import { SYS } from './system.js';
 import { SCREEN } from './screen.js';
 import { Tokenizer, SYNTAX } from './parser.js';
 import { Compiler } from './compiler.js';
+import { ENGINE } from './engine.js';
 import { FS } from './fs.js';
 import { GRAPHICS } from './graphics.js';
 import { HELP_DATA } from './help.js';
@@ -180,10 +181,21 @@ export const IO = {
                         else if (tu === 'REM' || t === "'") break;
                     }
 
-                    if (l.line >= min && l.line <= max) {
-                        // Draw Line Number (Standard Color)
-                        IO.print(`${l.line} `, false);
+                    if (l.line !== null) {
+                        if (l.line >= min && l.line <= max) {
+                            // Draw Line Number (Standard Color)
+                            IO.print(`${l.line} `, false);
+                        }
+                    } else {
+                        // Un-numbered blocks (like FUN or inline nested closures) are technically line 0 natively inside arrays
+                        if (0 >= min && 0 <= max) {
+                            IO.print(`     `, false);
+                        }
+                    }
 
+                    const shouldDraw = (l.line !== null && l.line >= min && l.line <= max) || (l.line === null && 0 >= min && 0 <= max);
+
+                    if (shouldDraw) {
                         // Draw Indentation
                         const spaces = "  ".repeat(tempIndent);
                         IO.print(spaces, false);
@@ -322,7 +334,7 @@ export const IO = {
                 try {
                     const func = Compiler.compile({ line: 0, src: cRaw });
                     SYS.running = true;
-                    const res = func(SYS, IO, GRAPHICS, FS);
+                    const res = func(SYS, IO, GRAPHICS, FS, ENGINE);
                     if (res && res.then) {
                         res.then(() => {
                             SYS.running = false;

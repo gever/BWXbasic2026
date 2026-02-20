@@ -31,7 +31,8 @@ export const ENGINE = {
     },
 
     run: async () => {
-        SYS.compiled = []; SYS.labels = {};
+        SYS.compiled = []; SYS.labels = {}; SYS.funSkipMap = {};
+        const funIndices = [];
 
         SYS.program.forEach((x, i) => {
             if (x.line !== null) SYS.labels[x.line] = i;
@@ -47,12 +48,18 @@ export const ENGINE = {
             const funMatch = x.src.match(/^\s*FUN\s+([A-Za-z_][A-Za-z0-9_]*)\s*\(/i);
             if (funMatch) {
                 SYS.labels[funMatch[1].toUpperCase()] = i;
+                funIndices.push(i);
             }
 
             console.log(`Compiling line ${x.line}: ${x.src}`);
             const f = Compiler.compile(x);
             SYS.compiled.push(f);
         });
+
+        // Initialize block skips to jump sequential execution over subroutine blocks
+        for (let j = 0; j < funIndices.length; j++) {
+            SYS.funSkipMap[funIndices[j]] = (j + 1 < funIndices.length) ? funIndices[j + 1] : SYS.program.length;
+        }
 
         // reset state
         SYS.pc = 0;
