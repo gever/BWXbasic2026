@@ -141,14 +141,26 @@ export const Compiler = {
                 chunk += ` if(SYS.break){SYS.running=false;return;}`;
             }
             else if (cmd === 'GOTO') {
-                const tgt = Compiler.genExpression(tokens, ctx);
-                // Fix: Added { ... SYS.running=false; } to the else block
-                chunk = `var _t=${tgt};if(SYS.labels[_t]!==undefined)SYS.pc=SYS.labels[_t]-1; else { IO.print("?UNDEF LINE "+_t); SYS.running=false; }`;
+                const startIdx = ctx.idx;
+                const tgtExp = Compiler.genExpression(tokens, ctx);
+                const isSingleToken = (ctx.idx - startIdx === 1) && /^[A-Za-z_]/.test(tokens[startIdx]);
+                if (isSingleToken) {
+                    const label = tokens[startIdx].toUpperCase();
+                    chunk = `if(SYS.labels['${label}']!==undefined)SYS.pc=SYS.labels['${label}']-1; else { var _t=${tgtExp}; if(SYS.labels[_t]!==undefined)SYS.pc=SYS.labels[_t]-1; else { IO.print("?UNDEF LABEL OR VAR "+'${label}'); SYS.running=false; } }`;
+                } else {
+                    chunk = `var _t=${tgtExp};if(SYS.labels[_t]!==undefined)SYS.pc=SYS.labels[_t]-1; else { IO.print("?UNDEF LINE "+_t); SYS.running=false; }`;
+                }
             }
             else if (cmd === 'GOSUB') {
-                const tgt = Compiler.genExpression(tokens, ctx);
-                // Fix: Added { ... SYS.running=false; } to the else block
-                chunk = `var _t=${tgt};if(SYS.labels[_t]!==undefined){SYS.stack.push(SYS.pc);SYS.pc=SYS.labels[_t]-1;} else { IO.print("?UNDEF LINE "+_t); SYS.running=false; }`;
+                const startIdx = ctx.idx;
+                const tgtExp = Compiler.genExpression(tokens, ctx);
+                const isSingleToken = (ctx.idx - startIdx === 1) && /^[A-Za-z_]/.test(tokens[startIdx]);
+                if (isSingleToken) {
+                    const label = tokens[startIdx].toUpperCase();
+                    chunk = `if(SYS.labels['${label}']!==undefined){SYS.stack.push(SYS.pc);SYS.pc=SYS.labels['${label}']-1;} else { var _t=${tgtExp}; if(SYS.labels[_t]!==undefined){SYS.stack.push(SYS.pc);SYS.pc=SYS.labels[_t]-1;} else { IO.print("?UNDEF LABEL OR VAR "+'${label}'); SYS.running=false; } }`;
+                } else {
+                    chunk = `var _t=${tgtExp};if(SYS.labels[_t]!==undefined){SYS.stack.push(SYS.pc);SYS.pc=SYS.labels[_t]-1;} else { IO.print("?UNDEF LINE "+_t); SYS.running=false; }`;
+                }
             }
             else if (cmd === 'RETURN') {
                 // Fix: Added { ... SYS.running=false; } to the else block
@@ -193,6 +205,11 @@ export const Compiler = {
                 const compileBranch = (branchTokens) => {
                     if (!branchTokens || branchTokens.length === 0) return "";
                     // Check for single line number (GOTO shorthand, e.g. THEN 100 or THEN -1)
+                    if (branchTokens.length === 1 && /^[A-Za-z_]/.test(branchTokens[0])) {
+                        const label = branchTokens[0].toUpperCase();
+                        const tgtExp = Compiler.genExpression(branchTokens, { idx: 0, jsLoops: ctx.jsLoops });
+                        return `if(SYS.labels['${label}']!==undefined)SYS.pc=SYS.labels['${label}']-1; else { var _t=${tgtExp}; if(SYS.labels[_t]!==undefined)SYS.pc=SYS.labels[_t]-1; else { IO.print("?UNDEF LABEL OR VAR "+'${label}'); SYS.running=false; } }`;
+                    }
                     if (branchTokens.length === 1 && !isNaN(branchTokens[0])) {
                         return `var _t=${Number(branchTokens[0])};if(SYS.labels[_t]!==undefined)SYS.pc=SYS.labels[_t]-1; else { IO.print("?UNDEF LINE "+_t); SYS.running=false; }`;
                     }

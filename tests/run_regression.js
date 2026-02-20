@@ -98,13 +98,19 @@ const loadTestFile = (filepath) => {
     const text = fs.readFileSync(absPath, 'utf8');
     const lines = text.split(/\r\n|\n|\r/);
     const prog = [];
+    let currentNum = 10;
 
     for (let line of lines) {
         line = line.trim();
         if (!line) continue;
         const m = line.match(/^(\d+)\s+(.*)/);
         if (m) {
-            prog.push({ line: parseInt(m[1]), src: m[2] });
+            const ln = parseInt(m[1]);
+            prog.push({ line: ln, src: m[2] });
+            currentNum = Math.floor(ln / 10) * 10 + 10;
+        } else {
+            prog.push({ line: currentNum, src: line });
+            currentNum += 10;
         }
     }
 

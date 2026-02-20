@@ -13,8 +13,16 @@ export const ENGINE = {
 
         SYS.program.forEach(lineObj => {
             fullSource += `// --- LINE ${lineObj.line}: ${lineObj.src} ---\n`;
+
+            // Temporary object for compilation preview to strip labels
+            const x = { line: lineObj.line, src: lineObj.src };
+            const labelMatch = x.src.match(/^\s*([A-Za-z_][A-Za-z0-9_]*)\s*:(.*)$/);
+            if (labelMatch) {
+                x.src = labelMatch[2].trim() || "REM";
+            }
+
             // Compile to get the body attached
-            const func = Compiler.compile(lineObj);
+            const func = Compiler.compile(x);
             if (func.generatedBody) {
                 fullSource += func.generatedBody + "\n";
             }
@@ -29,6 +37,14 @@ export const ENGINE = {
 
         SYS.program.forEach((x, i) => {
             SYS.labels[x.line] = i;
+
+            // Catch optional alphanumeric labels (e.g., LoopStart: LET X = 1)
+            const labelMatch = x.src.match(/^\s*([A-Za-z_][A-Za-z0-9_]*)\s*:(.*)$/);
+            if (labelMatch) {
+                SYS.labels[labelMatch[1].toUpperCase()] = i;
+                x.src = labelMatch[2].trim() || "REM";
+            }
+
             console.log(`Compiling line ${x.line}: ${x.src}`);
             const f = Compiler.compile(x);
             SYS.compiled.push(f);
