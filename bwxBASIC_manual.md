@@ -16,6 +16,11 @@ bwxBASIC is a modern web-based implementation of BASIC, inspired by Applesoft BA
         *   `DIM B = 1, 2, 3` (Creates array `B` with elements `B(0)=1, B(1)=2, B(2)=3`)
     *   **Appending (DATA)**: Appends values to the most recently `DIM` declared array.
         *   `DATA 4, 5, 6` (Appends values `4, 5, 6` extending the previous array to size 6)
+*   **Associative Arrays (Dictionaries)**: Defined with `DICT`.
+    *   **Initialization**: `DICT TBL = ("foo", 10), ("bar", 20)`
+    *   **Appending (DATA)**: Appends pairs to the last `DICT`. `DATA ("baz", 30)`
+    *   **Deletion & Missing Keys**: Missing keys resolve to the constant `NIL`. Assigning `NIL` (e.g. `TBL("foo") = NIL`) removes the key.
+    *   **Iteration**: Loop through keys using `FORKEYS K, TBL ... NEXT K`.
 
 ## 2. Input / Output
 

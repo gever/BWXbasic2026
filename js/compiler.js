@@ -38,6 +38,8 @@ export const Compiler = {
                 // Normalize token for Keyword/Function checks
                 const tu = t.toUpperCase();
 
+                if (tu === 'NIL') return "SYS.NIL";
+
                 // Handle INKEY$ and INKEY
                 if (tu === 'INKEY$' || tu === 'INKEY') {
                     ctx.setAsync();
@@ -236,7 +238,21 @@ export const Compiler = {
                 if (ctx.jsLoops.length > 0 && ctx.jsLoops[ctx.jsLoops.length - 1] === v) {
                     chunk = `}}`; ctx.jsLoops.pop();
                 } else {
-                    chunk = `var l=SYS.forStack['${v}'];if(l){SYS.vars['${v}']+=l.step;if((l.step>=0&&SYS.vars['${v}']<=l.target)||(l.step<0&&SYS.vars['${v}']>=l.target))SYS.pc=l.pc;else delete SYS.forStack['${v}'];}`;
+                    chunk = `var l=SYS.forStack['${v}'];if(l){ if(l.type==='hash'){ l.idx++; if(l.idx < l.keys.length){ SYS.vars['${v}']=l.keys[l.idx]; SYS.pc=l.pc; } else delete SYS.forStack['${v}']; } else { SYS.vars['${v}']+=l.step;if((l.step>=0&&SYS.vars['${v}']<=l.target)||(l.step<0&&SYS.vars['${v}']>=l.target))SYS.pc=l.pc;else delete SYS.forStack['${v}']; } }`;
+                }
+            }
+            else if (cmd === 'FORKEYS') {
+                const kVar = next(); // K
+                if (peek() === ',') next();
+                const hVar = next(); // X
+                let isSingle = false;
+                for (let k = ctx.idx; k < tokens.length; k++) { if (tokens[k].toUpperCase() === 'NEXT' && tokens[k + 1] === kVar) { isSingle = true; break; } }
+
+                if (isSingle) {
+                    chunk = `{ const _keys = Object.keys(SYS.arrays['${hVar}']||{}).filter(k=>k!=='_isHash'); for(let _i=0; _i<_keys.length; _i++) { SYS.vars['${kVar}']=_keys[_i]; `;
+                    ctx.jsLoops.push(kVar);
+                } else {
+                    chunk = `var _hKeys = Object.keys(SYS.arrays['${hVar}']||{}).filter(k=>k!=='_isHash'); if (_hKeys.length === 0) { var _found = false; for(var _j=SYS.pc; _j<SYS.program.length; _j++) { if(SYS.program[_j].src.toUpperCase().includes('NEXT '+ '${kVar}'.toUpperCase())) { SYS.pc = _j; _found = true; break; } } if(!_found) { IO.print("?FORKEYS WITHOUT NEXT"); SYS.running=false; } } else { SYS.forStack['${kVar}']={ type: 'hash', keys: _hKeys, idx: 0, pc: SYS.pc }; SYS.vars['${kVar}'] = _hKeys[0]; }`;
                 }
             }
             else if (cmd === 'DIM') {
@@ -262,14 +278,46 @@ export const Compiler = {
                     chunk = `SYS.arrays['${v}']={}; SYS.lastDimArray='${v}';`;
                 }
             }
-            else if (cmd === 'DATA') {
-                const vals = [];
+            else if (cmd === 'DICT') {
+                const v = next(); // name
+                if (peek() === '=') next(); // consume '='
+                const pairs = [];
                 while (ctx.idx < tokens.length) {
-                    vals.push(Compiler.genExpression(tokens, ctx));
+                    if (peek() === '(') {
+                        next();
+                        const k = Compiler.genExpression(tokens, ctx);
+                        if (peek() === ',') next();
+                        const val = Compiler.genExpression(tokens, ctx);
+                        if (peek() === ')') next();
+                        pairs.push({ k, val });
+                    }
                     if (peek() === ',') next();
                     else break;
                 }
-                chunk = `if(!SYS.lastDimArray) throw "DATA WITHOUT DIM"; else { var a = SYS.arrays[SYS.lastDimArray]; if(Array.isArray(a)) a.push(${vals.join(',')}); else throw "DATA ON NON-LIST ARRAY"; }`;
+                let init = `SYS.arrays['${v}'] = { _isHash: true }; SYS.lastDimArray='${v}'; `;
+                pairs.forEach(p => {
+                    init += `SYS.arrays['${v}'][${p.k}] = ${p.val}; `;
+                });
+                chunk = init;
+            }
+            else if (cmd === 'DATA') {
+                let init = `if(!SYS.lastDimArray) throw "DATA WITHOUT DIM/DICT"; var a = SYS.arrays[SYS.lastDimArray]; `;
+                while (ctx.idx < tokens.length) {
+                    if (peek() === '(') {
+                        next();
+                        const k = Compiler.genExpression(tokens, ctx);
+                        if (peek() === ',') next();
+                        const val = Compiler.genExpression(tokens, ctx);
+                        if (peek() === ')') next();
+                        init += `if(a._isHash) a[${k}] = ${val}; else throw "DATA TUPLE ON NON-DICT ARRAY"; `;
+                    } else {
+                        const val = Compiler.genExpression(tokens, ctx);
+                        init += `if(Array.isArray(a)) a.push(${val}); else throw "DATA SCALAR ON DICT ARRAY"; `;
+                    }
+                    if (peek() === ',') next();
+                    else break;
+                }
+                chunk = init;
             }
             else if (cmd === 'INPUT') { async = true; let p = "?"; if (peek().startsWith('"')) { p = next().replace(/"/g, ''); if (peek() === ';') next(); } const v = next(), str = v.endsWith('$'); chunk = `IO.print("${p}",false);var val=await IO.input();SYS.vars['${v}']=${str ? 'val' : 'parseFloat(val)'};`; }
 
@@ -384,7 +432,8 @@ export const Compiler = {
                     chunk = `SYS.setArray('${v}', ${dims.length > 1 ? '\`' + dims.map(d => '${' + d + '}').join(',') + '\`' : dims[0]}, ${Compiler.genExpression(tokens, ctx)});`;
                 } else {
                     next();
-                    chunk = `SYS.vars['${v}']=${Compiler.genExpression(tokens, ctx)};`;
+                    const exp = Compiler.genExpression(tokens, ctx);
+                    chunk = `if(${exp} === SYS.NIL && SYS.arrays['${v}']) { SYS.arrays['${v}'] = { _isHash: true }; } else { SYS.vars['${v}']=${exp}; }`;
                 }
             }
 

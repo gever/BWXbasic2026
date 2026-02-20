@@ -48,8 +48,11 @@ export const HELP_DATA = {
         { c: "FOR...NEXT", d: "Loop structure.", e: "10 FOR I=1 TO 10 STEP 2 ... 50 NEXT I" },
         { c: "END", d: "Stops program execution.", e: "99 END" },
         { c: "DIM", d: "Defines array size or initializes values.", e: "10 DIM A(100) or 20 DIM B = 1, 2, 3" },
-        { c: "DATA", d: "Appends values sequentially to the last initialized DIM array.", e: "30 DATA 4, 5, 6" },
-        { c: "LET", d: "Assigns value to variable (optional keyword).", e: "10 LET A = 5" }
+        { c: "DICT", d: "Defines an associative array/hash table.", e: "10 DICT T = (\"A\", 1), (\"B\", 2)" },
+        { c: "DATA", d: "Appends values sequentially to the last initialized DIM or DICT array.", e: "30 DATA 4, 5, 6" },
+        { c: "NIL", d: "Constant for a missing or empty DICT value. Used to delete keys.", e: "40 T(\"A\") = NIL" },
+        { c: "LET", d: "Assigns value to variable (optional keyword).", e: "10 LET A = 5" },
+        { c: "FORKEYS", d: "Loop through keys of a DICT.", e: "10 FORKEYS K, T ... 20 NEXT K" }
     ],
     "MATH FUNCTIONS": [
         { c: "SIN(X)", d: "Sine of X (radians).", e: "Y = SIN(3.14)" },

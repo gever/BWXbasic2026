@@ -433,8 +433,22 @@
 2135 IF PREARR(2) <> 30 THEN ERRORS = ERRORS + 1 : PRINT "Error: PREARR(2) should be 30, got "; PREARR(2)
 2140 IF PREARR(5) <> 60 THEN ERRORS = ERRORS + 1 : PRINT "Error: PREARR(5) should be 60, got "; PREARR(5)
 
-2145 REM Skip to final summary section
-2150 GOTO 3000
+2145 REM Test 14: Hash Tables
+2150 DICT TBL = ("foo", 10), ("bar", 20)
+2155 DATA ("baz", 30)
+2160 IF TBL("foo") <> 10 THEN ERRORS = ERRORS + 1 : PRINT "Error: TBL('foo') should be 10, got "; TBL("foo")
+2165 LET TBL("foo") = NIL
+2170 IF TBL("foo") <> NIL THEN ERRORS = ERRORS + 1 : PRINT "Error: TBL('foo') should be deleted and return NIL."
+2175 LET COUNT = 0
+2180 FORKEYS K, TBL
+2185   IF TBL(K) <> NIL THEN LET COUNT = COUNT + 1
+2190 NEXT K
+2195 IF COUNT <> 2 THEN ERRORS = ERRORS + 1 : PRINT "Error: TBL should have 2 keys remaining, counted: "; COUNT
+2200 LET TBL = NIL
+2205 IF TBL("bar") <> NIL THEN ERRORS = ERRORS + 1 : PRINT "Error: TBL('bar') should be NIL after whole table clear."
+
+2210 REM Skip to final summary section
+2215 GOTO 3000
 
 1999 GOTO -1 : REM This line should never be executed
 
