@@ -8,6 +8,7 @@ export const HELP_DATA = {
         { c: "LOAD", d: "Loads a program from local storage or demo library.", e: "LOAD \"DEMO/GRAPHICS.BAS\"" },
         { c: "DIR", d: "Lists all saved files and available demos.", e: "DIR" },
         { c: "DOWNLOAD", d: "Downloads the program as a .BAS text file to your computer.", e: "DOWNLOAD \"GAME\"" },
+        { c: "UPLOAD", d: "Uploads a .BAS text file from your computer into memory.", e: "UPLOAD" },
         { c: "WHERE", d: "Shows the line number where the last program stopped.", e: "WHERE" },
         { c: "JSECHO", d: "Toggles echoing of output to the browser console for debugging.", e: "JSECHO" },
         { c: "HELP", d: "Opens this reference manual.", e: "HELP" },

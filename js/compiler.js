@@ -544,6 +544,7 @@ export const Compiler = {
             else if (cmd === 'LOAD') { async = true; chunk = `await FS.load(${Compiler.genExpression(tokens, ctx)});`; }
             else if (cmd === 'DIR' || cmd === 'CATALOG') chunk = `FS.dir();`;
             else if (cmd === 'DOWNLOAD') chunk = `FS.download(${Compiler.genExpression(tokens, ctx)});`;
+            else if (cmd === 'UPLOAD') { async = true; chunk = `await FS.upload();`; }
             else if (cmd === 'JSECHO') chunk = `IO.jsEcho = !IO.jsEcho; IO.print("JSECHO " + (IO.jsEcho ? "ON" : "OFF"));`;
             else if (cmd === 'HELP') chunk = `IO.help();`;
             else if (['LIST', 'RUN', 'EDIT', 'NEW', 'COPY', 'VARS', 'WHERE', 'JSPEEK'].includes(cmd)) {

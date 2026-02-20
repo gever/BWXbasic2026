@@ -94,5 +94,41 @@ export const FS = {
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
+    },
+
+    upload: () => {
+        return new Promise((resolve) => {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.bas,.txt,text/plain';
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                if (!file) { resolve(); return; }
+                const reader = new FileReader();
+                reader.onload = (re) => {
+                    const text = re.target.result;
+                    SYS.program = [];
+                    FS.currentFilename = file.name;
+                    text.split(/\r?\n/).forEach(line => {
+                        line = line.replace(/\r/g, "");
+                        if (line.trim().length > 0) {
+                            const m = line.match(/^(\d+)\s+(.*)/);
+                            if (m) {
+                                SYS.program.push({ line: parseInt(m[1]), src: m[2] });
+                            } else {
+                                SYS.program.push({ line: null, src: line });
+                            }
+                        }
+                    });
+                    IO.print(`Uploaded ${file.name}`);
+                    import('./engine.js').then(({ ENGINE }) => {
+                        ENGINE.generateOnly();
+                        resolve();
+                    });
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        });
     }
 };
