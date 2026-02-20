@@ -37,22 +37,25 @@ export const ENGINE = {
         SYS.program.forEach((x, i) => {
             if (x.line !== null) SYS.labels[x.line] = i;
 
+            // Clone x locally to prevent destructive global mapping out of SYS.program
+            const compileChunk = { line: x.line, src: x.src };
+
             // Catch optional alphanumeric labels (e.g., LoopStart: LET X = 1)
-            const labelMatch = x.src.match(/^\s*([A-Za-z_][A-Za-z0-9_]*)\s*:(.*)$/);
+            const labelMatch = compileChunk.src.match(/^\s*([A-Za-z_][A-Za-z0-9_]*)\s*:(.*)$/);
             if (labelMatch) {
                 SYS.labels[labelMatch[1].toUpperCase()] = i;
-                x.src = labelMatch[2].trim() || "REM";
+                compileChunk.src = labelMatch[2].trim() || "REM";
             }
 
             // Catch FUN definitions for forward jumping (e.g., FUN MYMATH(X,Y))
-            const funMatch = x.src.match(/^\s*FUN\s+([A-Za-z_][A-Za-z0-9_]*)\s*\(/i);
+            const funMatch = compileChunk.src.match(/^\s*FUN\s+([A-Za-z_][A-Za-z0-9_]*)\s*\(/i);
             if (funMatch) {
                 SYS.labels[funMatch[1].toUpperCase()] = i;
                 funIndices.push(i);
             }
 
-            console.log(`Compiling line ${x.line}: ${x.src}`);
-            const f = Compiler.compile(x);
+            console.log(`Compiling line ${compileChunk.line}: ${compileChunk.src}`);
+            const f = Compiler.compile(compileChunk);
             SYS.compiled.push(f);
         });
 
