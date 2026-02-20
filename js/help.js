@@ -2,7 +2,7 @@ export const HELP_DATA = {
     "SYSTEM & FILES": [
         { c: "RUN", d: "Executes the program currently in memory. Clears variables. &lt;ESC&gt; to halt execution.", e: "RUN" },
         { c: "LIST", d: "Displays the source code of the current program.", e: "LIST" },
-        { c: "EDIT", d: "Edit an existing line.", e: "EDIT 50" },
+        { c: "EDIT", d: "Opens the full-screen code editor. Or use 'EDIT <line>' for single line.", e: "EDIT" },
         { c: "NEW", d: "Clears the current program from memory and resets variables.", e: "NEW" },
         { c: "SAVE", d: "Saves current program to browser local storage.", e: "SAVE \"MYGAME\"" },
         { c: "LOAD", d: "Loads a program from local storage or demo library.", e: "LOAD \"DEMO/GRAPHICS.BAS\"" },

@@ -93,6 +93,18 @@ Jumping and Subroutines.
 110 RETURN
 ```
 
+### Labels & Optional Line Numbers
+bwxBASIC allows both traditional line numbers and modern alphanumeric labels. Programs execute top-to-bottom sequentially.
+*   **Line Numbers**: Optional. `10 PRINT "HELLO"`
+*   **Labels**: End with a colon. `LoopStart:`
+*   **GOTO / GOSUB Targets**: Can be line numbers, labels, or even variables containing a target. `GOTO LoopStart`
+
+```basic
+LoopStart:
+PRINT "Hello"
+GOTO LoopStart
+```
+
 ## 4. Functions
 
 ### Math
@@ -167,7 +179,13 @@ bwxBASIC uses a 64-color palette organized by hue and brightness. Colors are acc
 
 *   `RUN`: Execute program.
 *   `LIST`: View source code (supports ranges like `LIST 10-50`).
-*   `EDIT Ln`: Edit a specific line number.
+*   `EDIT`: Opens the full-screen integrated code editor.
+    *   **Editor Commands**:
+        *   Type normally as you would in an IDE.
+        *   Standard shortcuts are supported: `Ctrl+C` (Copy), `Ctrl+V` (Paste), `Ctrl+Z` (Undo), `Shift+Ctrl+Z` (Redo).
+        *   Syntax is highlighted in real-time.
+        *   Click **SAVE & CLOSE** to apply changes and seamlessly rebuild the program array.
+*   `EDIT Ln`: Edit a specific line number directly via the REPL prompt string.
 *   `NEW`: Clear program and variables.
 *   `SAVE "NAME"`: Save to local storage.
 *   `LOAD "NAME"`: Load from local storage or demos.
