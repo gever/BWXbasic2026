@@ -234,8 +234,46 @@
             overflow-y: auto;
             padding: 20px;
             white-space: pre-wrap;
-            /* Preserve formatting */
             border-top: 2px solid #000;
+        }
+
+        #editor-overlay {
+            position: absolute;
+            top: 40px;
+            left: 40px;
+            right: 40px;
+            bottom: 40px;
+            z-index: 70;
+            display: none;
+            flex-direction: column;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9);
+            border: 1px solid #444;
+            background-color: #111;
+        }
+
+        #editor-content {
+            flex-grow: 1;
+            background-color: #111;
+            color: #33ff33;
+            font-family: 'VT323', monospace;
+            font-size: 24px;
+            line-height: 1.2;
+            overflow-y: auto;
+            padding: 20px;
+            white-space: pre;
+            border-top: 2px solid #000;
+            outline: none;
+        }
+
+        #editor-save {
+            background: #008800;
+            color: white;
+            border: none;
+            padding: 5px 15px;
+            cursor: pointer;
+            font-weight: bold;
+            font-family: 'VT323', monospace;
+            font-size: 20px;
         }
     </style>
 </head>
@@ -262,6 +300,13 @@
                     onclick="document.getElementById('js-overlay').style.display='none'">CLOSE</button>
             </div>
             <pre id="js-content"></pre>
+        </div>
+        <div id="editor-overlay">
+            <div class="help-header">
+                <span>bwxBASIC INTERNAL CODE EDITOR</span>
+                <button id="editor-save">SAVE & CLOSE</button>
+            </div>
+            <div id="editor-content"></div>
         </div>
         <input type="text" id="input-trap" autocomplete="off" autofocus>
     </div>

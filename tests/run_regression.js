@@ -107,10 +107,8 @@ const loadTestFile = (filepath) => {
         if (m) {
             const ln = parseInt(m[1]);
             prog.push({ line: ln, src: m[2] });
-            currentNum = Math.floor(ln / 10) * 10 + 10;
         } else {
-            prog.push({ line: currentNum, src: line });
-            currentNum += 10;
+            prog.push({ line: null, src: line });
         }
     }
 

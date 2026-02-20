@@ -31,7 +31,6 @@ export const FS = {
 
                 const lines = text.split(/\r\n|\n|\r/);
                 const prog = [];
-                let currentNum = 10;
                 for (let line of lines) {
                     line = line.trim();
                     if (!line) continue;
@@ -39,11 +38,9 @@ export const FS = {
                     if (m) {
                         const ln = parseInt(m[1]);
                         prog.push({ line: ln, src: m[2] });
-                        currentNum = Math.floor(ln / 10) * 10 + 10;
                     } else {
-                        // Un-numbered line, auto-assign
-                        prog.push({ line: currentNum, src: line });
-                        currentNum += 10;
+                        // Un-numbered line
+                        prog.push({ line: null, src: line });
                     }
                 }
 
@@ -75,8 +72,11 @@ export const FS = {
     },
 
     download: (fn) => {
-        SYS.program.sort((a, b) => a.line - b.line);
-        const t = SYS.program.map(l => `${l.line} ${l.src}`).join("\n");
+        let t = "";
+        SYS.program.forEach(l => {
+            if (l.line !== null) t += `${l.line} ${l.src}\n`;
+            else t += `${l.src}\n`;
+        });
         const b = new Blob([t], { type: 'text/plain' });
         const u = URL.createObjectURL(b);
         const a = document.createElement('a');

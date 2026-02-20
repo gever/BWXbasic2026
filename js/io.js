@@ -7,13 +7,11 @@ import { ENGINE } from './engine.js';
 import { FS } from './fs.js';
 import { GRAPHICS } from './graphics.js';
 import { HELP_DATA } from './help.js';
+import { EDITOR } from './editor.js';
 
 let inputTrap = null; // will be passed from main
 
 export const IO = {
-    cursorVisible: true,
-    buffer: [], // Key buffer for INKEY$
-    waiter: null, // Callback for blocking INKEY$
 
     // REPL Editing State
     history: [],
@@ -123,13 +121,33 @@ export const IO = {
         const m = cRaw.match(/^(\d+)\s*(.*)/);
         if (m) {
             const l = parseInt(m[1]);
-            SYS.program = SYS.program.filter(x => x.line !== l);
-            if (m[2]) SYS.program.push({ line: l, src: m[2] });
+            // Remove existing numerical line match (if any)
+            let existingIdx = -1;
+            for (let i = 0; i < SYS.program.length; i++) {
+                if (SYS.program[i].line === l) { existingIdx = i; break; }
+            }
+            if (existingIdx !== -1) SYS.program.splice(existingIdx, 1);
+
+            // Insert new line maintaining positional explicit boundaries
+            if (m[2]) {
+                let targetIdx = SYS.program.length; // Default to append
+                let lastExplicitNumber = 0;
+
+                for (let i = 0; i < SYS.program.length; i++) {
+                    const ln = SYS.program[i].line;
+                    if (ln !== null) {
+                        lastExplicitNumber = ln;
+                    }
+                    if (l < lastExplicitNumber && ln !== null) {
+                        targetIdx = i;
+                        break;
+                    }
+                }
+                SYS.program.splice(targetIdx, 0, { line: l, src: m[2] });
+            }
             IO.prompt();
         } else {
             if (c.startsWith('LIST')) {
-                SYS.program.sort((a, b) => a.line - b.line);
-
                 let min = 0, max = 65535;
                 const args = c.substring(4).trim();
 
@@ -200,37 +218,41 @@ export const IO = {
             }
             else if (c === 'RUN') ENGINE.run();
             else if (c.startsWith('EDIT')) {
-                const mEdit = c.match(/^EDIT\s+(\d+)/);
-                if (mEdit) {
-                    const ln = parseInt(mEdit[1]);
-                    const found = SYS.program.find(l => l.line === ln);
-                    if (found) {
-                        IO.prompt(); // Draw the prompt ']'
+                const arg = c.substring(4).trim();
 
-                        // Pre-fill buffer with the line number and source
-                        IO.lineBuffer = `${found.line} ${found.src}`;
-                        IO.lineCursor = IO.lineBuffer.length;
-
-                        // Draw the text
-                        IO.refreshLine();
-                        return; // Return early so we don't draw a blank prompt
-                    } else {
-                        IO.print("?UNDEFINED LINE ERROR");
-                    }
+                if (arg === "") {
+                    // Start full integrated editor overlay
+                    EDITOR.open();
                 } else {
-                    IO.print("?SYNTAX ERROR");
+                    const mEdit = arg.match(/^(\d+)/);
+                    if (mEdit) {
+                        const ln = parseInt(mEdit[1]);
+                        const found = SYS.program.find(l => l.line === ln);
+                        if (found) {
+                            IO.prompt(); // Draw the prompt ']'
+
+                            // Pre-fill buffer with the line number and source
+                            IO.lineBuffer = `${found.line} ${found.src}`;
+                            IO.lineCursor = IO.lineBuffer.length;
+
+                            // Draw the text
+                            IO.refreshLine();
+                            return; // Return early so we don't draw a blank prompt
+                        } else {
+                            IO.print("?UNDEFINED LINE ERROR");
+                        }
+                    } else {
+                        IO.print("?SYNTAX ERROR");
+                    }
+                    IO.prompt();
                 }
-                IO.prompt();
             }
             else if (c === 'NEW') { SYS.program = []; SYS.vars = {}; SCREEN.clear(); IO.prompt(); }
             else if (c === 'COPY') {
-                // 1. Sort the program lines to ensure correct order
-                SYS.program.sort((a, b) => a.line - b.line);
+                // 1. Convert program objects back to text format in current internal order
+                const text = SYS.program.map(l => l.line !== null ? `${l.line} ${l.src}` : l.src).join("\n");
 
-                // 2. Convert program objects back to text format
-                const text = SYS.program.map(l => `${l.line} ${l.src}`).join("\n");
-
-                // 3. Write to system clipboard with fallback
+                // 2. Write to system clipboard with fallback
                 const doLegacyCopy = (txt) => {
                     try {
                         const textArea = document.createElement("textarea");

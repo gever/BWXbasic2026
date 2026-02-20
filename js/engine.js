@@ -8,7 +8,6 @@ import { SCREEN } from './screen.js';
 export const ENGINE = {
     // NEW: Helper to generate source for JSPEEK without running
     generateOnly: () => {
-        SYS.program.sort((a, b) => a.line - b.line);
         let fullSource = "// APPLESCRIPT -> JAVASCRIPT TRANSPILER OUTPUT\n\n";
 
         SYS.program.forEach(lineObj => {
@@ -32,11 +31,10 @@ export const ENGINE = {
     },
 
     run: async () => {
-        SYS.program.sort((a, b) => a.line - b.line);
         SYS.compiled = []; SYS.labels = {};
 
         SYS.program.forEach((x, i) => {
-            SYS.labels[x.line] = i;
+            if (x.line !== null) SYS.labels[x.line] = i;
 
             // Catch optional alphanumeric labels (e.g., LoopStart: LET X = 1)
             const labelMatch = x.src.match(/^\s*([A-Za-z_][A-Za-z0-9_]*)\s*:(.*)$/);

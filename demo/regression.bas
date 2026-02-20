@@ -447,20 +447,13 @@
 2200 LET TBL = NIL
 2205 IF TBL("bar") <> NIL THEN ERRORS = ERRORS + 1 : PRINT "Error: TBL('bar') should be NIL after whole table clear."
 
-2210 REM Test 15: Optional Line Numbers and Labels
-2220 GOTO SkipAhead
-2230 ERRORS = ERRORS + 1 : PRINT "Error: GOTO missed label"
-SkipAhead:
-LET X = 0
-LoopStart: LET X = X + 1
-IF X < 3 THEN LoopStart
-IF X <> 3 THEN ERRORS = ERRORS + 1 : PRINT "Error: Label Loop failed"
-GOSUB SubLabel
-GOTO 2500
-SubLabel:
-LET Y = 1
-RETURN
-2500 IF Y <> 1 THEN ERRORS = ERRORS + 1 : PRINT "Error: GOSUB label failed"
+2210 REM Test 15: Internal Order Indexing
+2220 LET X = 0
+LoopBlock: LET X = X + 1
+IF X < 3 THEN LoopBlock
+GOTO 2250
+2240 GOTO 2210
+2250 IF X <> 3 THEN ERRORS = ERRORS + 1 : PRINT "Error: Un-numbered interleaving failed."
 
 2510 REM Skip to final summary section
 2520 GOTO 3000

@@ -3,6 +3,7 @@ import { SYS } from './system.js';
 import { SCREEN } from './screen.js';
 import { GRAPHICS } from './graphics.js';
 import { IO } from './io.js';
+import { EDITOR } from './editor.js';
 
 const canvas = document.getElementById('main-canvas');
 const ctx = canvas.getContext('2d', { alpha: false, desynchronized: true });
@@ -10,8 +11,13 @@ const inputTrap = document.getElementById('input-trap');
 const breakBtn = document.getElementById('break-btn');
 
 IO.init(inputTrap);
+EDITOR.init();
 
-document.addEventListener('click', (e) => { if (e.target.id !== 'help-search') inputTrap.focus(); });
+document.addEventListener('click', (e) => {
+    if (e.target.id === 'help-search') return;
+    if (EDITOR.active || e.target.closest('#editor-overlay')) return;
+    inputTrap.focus();
+});
 breakBtn.onclick = (e) => {
     e.preventDefault();
     if (SYS.running) {
@@ -23,7 +29,8 @@ breakBtn.onclick = (e) => {
 };
 
 window.onkeydown = (e) => {
-    // Allow default key behavior if typing in the help search box
+    // Allow default key behavior if typing in the help search box or the editor is active
+    if (EDITOR.active) return;
     if (e.target && e.target.id === 'help-search') return;
     // 1. Handle Break (ESC)
     if (e.key === 'Escape' && SYS.running) {
