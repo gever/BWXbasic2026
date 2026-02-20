@@ -455,8 +455,26 @@ GOTO 2250
 2240 GOTO 2210
 2250 IF X <> 3 THEN ERRORS = ERRORS + 1 : PRINT "Error: Un-numbered interleaving failed."
 
+2260 REM Test 16: User Functions and Scoping
+LET X = 100
+LET Y = 500
+LET FUNC_RES = CALL DO_MATH(10, 20)
+IF FUNC_RES <> 30 THEN ERRORS = ERRORS + 1 : PRINT "Error: CALL DO_MATH(10, 20) returned "; FUNC_RES; " instead of 30"
+IF X <> 100 THEN ERRORS = ERRORS + 1 : PRINT "Error: Outer X was mutated! Got "; X
+IF Y <> 500 THEN ERRORS = ERRORS + 1 : PRINT "Error: Outer Y was mutated! Got "; Y
+CALL MUTATE_GLOBAL()
+IF Z <> 999 THEN ERRORS = ERRORS + 1 : PRINT "Error: Function failed to mutate true global variable Z."
+
 2510 REM Skip to final summary section
 2520 GOTO 3000
+
+FUN DO_MATH(X, Y)
+  LET TOTAL = X + Y
+RETURN TOTAL
+
+FUN MUTATE_GLOBAL()
+  LET Z = 999
+RETURN
 
 1999 GOTO -1 : REM This line should never be executed
 

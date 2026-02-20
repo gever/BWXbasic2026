@@ -3,7 +3,6 @@ import { SYS } from './system.js';
 import { SCREEN } from './screen.js';
 import { Tokenizer, SYNTAX } from './parser.js';
 import { Compiler } from './compiler.js';
-import { ENGINE } from './engine.js';
 import { FS } from './fs.js';
 import { GRAPHICS } from './graphics.js';
 import { HELP_DATA } from './help.js';

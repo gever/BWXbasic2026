@@ -43,6 +43,12 @@ export const ENGINE = {
                 x.src = labelMatch[2].trim() || "REM";
             }
 
+            // Catch FUN definitions for forward jumping (e.g., FUN MYMATH(X,Y))
+            const funMatch = x.src.match(/^\s*FUN\s+([A-Za-z_][A-Za-z0-9_]*)\s*\(/i);
+            if (funMatch) {
+                SYS.labels[funMatch[1].toUpperCase()] = i;
+            }
+
             console.log(`Compiling line ${x.line}: ${x.src}`);
             const f = Compiler.compile(x);
             SYS.compiled.push(f);
@@ -58,6 +64,9 @@ export const ENGINE = {
         SYS.forStack = {};
         SYS.lastExecLine = 0;
         SYS.lastDimArray = null;
+        SYS.callArgs = null;
+        SYS.hasReturned = false;
+        SYS.returnValue = 0;
 
         const breakBtn = document.getElementById('break-btn');
         breakBtn.style.display = 'block'; IO.cursorVisible = false; SCREEN.removeCursor();
@@ -73,7 +82,7 @@ export const ENGINE = {
                 // NEW: Track the line about to be executed
                 if (SYS.program[SYS.pc]) SYS.lastExecLine = SYS.program[SYS.pc].line;
 
-                const res = SYS.compiled[SYS.pc](SYS, IO, GRAPHICS, FS);
+                const res = SYS.compiled[SYS.pc](SYS, IO, GRAPHICS, FS, ENGINE);
                 if (res && res.then) {
                     await res;
                     ly = performance.now();
@@ -92,5 +101,69 @@ export const ENGINE = {
         }
         breakBtn.style.display = 'none';
         SYS.running = false; IO.prompt();
+    },
+
+    // NEW: Recursive inner-execution loop for CALL statements
+    callFunction: async (funcName, args) => {
+        const u = funcName.toUpperCase();
+        if (SYS.labels[u] === undefined) {
+            IO.print(`?UNDEF FUNCTION ${u}`);
+            SYS.running = false;
+            return 0;
+        }
+
+        // 1. Save execution state of outer environment
+        const outerPc = SYS.pc;
+        const outerHasReturned = SYS.hasReturned;
+        const outerCallArgs = SYS.callArgs;
+
+        // 2. Setup inner state
+        SYS.pc = SYS.labels[u];
+        SYS.callArgs = args;
+        SYS.hasReturned = false;
+        SYS.returnValue = 0;
+
+        let ly = performance.now();
+        let ops = 0;
+
+        // 3. Begin Local Execution Loop
+        try {
+            while (SYS.running && !SYS.hasReturned && SYS.pc < SYS.compiled.length) {
+                if (SYS.break) {
+                    SYS.running = false;
+                    break;
+                }
+
+                if (SYS.program[SYS.pc]) SYS.lastExecLine = SYS.program[SYS.pc].line;
+
+                const res = SYS.compiled[SYS.pc](SYS, IO, GRAPHICS, FS, ENGINE);
+                if (res && res.then) {
+                    await res;
+                    ly = performance.now();
+                }
+
+                if (!SYS.running) break;
+                if (SYS.break) { SYS.running = false; break; }
+                if (SYS.hasReturned) break; // Trapped by a RETURN block
+
+                SYS.pc++; ops++;
+                if ((ops & 127) === 0 && (performance.now() - ly) > 14) {
+                    await new Promise(r => setTimeout(r, 0));
+                    ly = performance.now();
+                }
+            }
+        } catch (e) {
+            IO.print("\n?" + e);
+            SYS.running = false;
+        }
+
+        const returnedVal = SYS.returnValue;
+
+        // 4. Restore execution state organically
+        SYS.pc = outerPc;
+        SYS.hasReturned = outerHasReturned;
+        SYS.callArgs = outerCallArgs;
+
+        return returnedVal;
     }
 };

@@ -107,6 +107,20 @@ GOTO LoopStart
 
 ## 4. Functions
 
+### User Defined Functions (`FUN` and `CALL`)
+bwxBASIC supports fully isolated, recursive function executions natively embedded inside mathematical expressions or called directly.
+Arguments passed into a `FUN` signature temporarily overwrite global variables of the exact same matching name (acting as local scope). When `RETURN` completes, the exact previous global variable values are flawlessly restored.
+
+```basic
+10 LET X = 100
+20 LET Z = CALL MYMATH(5, 5)
+30 PRINT "X is still "; X ; " and Z is "; Z
+
+100 FUN MYMATH(X, Y)
+110    LET TOTAL = X + Y
+120 RETURN TOTAL
+```
+
 ### Math
 *   `SIN(X)`, `COS(X)`, `TAN(X)`, `ATN(X)`: Trigonometry (Radians).
 *   `SQR(X)`: Square Root.

@@ -60,6 +60,20 @@ export const Compiler = {
                     next(); return `(${LIB[tu]})(${a.join(',')})`;
                 }
 
+                // Handle CALL Function Expressions
+                if (tu === 'CALL') {
+                    ctx.setAsync();
+                    const funcNameMatch = next(); // Consume target function name
+                    if (!funcNameMatch || !/^[a-zA-Z_]/.test(funcNameMatch)) throw "SYNTAX";
+                    const fnArgs = [];
+                    if (peek() === '(') {
+                        next(); // consume '('
+                        if (peek() !== ')') do { fnArgs.push(parseExp()); if (peek() === ',') next(); else break; } while (true);
+                        next(); // consume ')'
+                    }
+                    return `(await ENGINE.callFunction('${funcNameMatch}', [${fnArgs.join(',')}]))`;
+                }
+
                 // Handle Array Access
                 if (peek() === '(') {
                     next();
@@ -157,14 +171,77 @@ export const Compiler = {
                 const isSingleToken = (ctx.idx - startIdx === 1) && /^[A-Za-z_]/.test(tokens[startIdx]);
                 if (isSingleToken) {
                     const label = tokens[startIdx].toUpperCase();
-                    chunk = `if(SYS.labels['${label}']!==undefined){SYS.stack.push(SYS.pc);SYS.pc=SYS.labels['${label}']-1;} else { var _t=${tgtExp}; if(SYS.labels[_t]!==undefined){SYS.stack.push(SYS.pc);SYS.pc=SYS.labels[_t]-1;} else { IO.print("?UNDEF LABEL OR VAR "+'${label}'); SYS.running=false; } }`;
+                    chunk = `if(SYS.labels['${label}']!==undefined){SYS.stack.push({type:'GOSUB', pc:SYS.pc});SYS.pc=SYS.labels['${label}']-1;} else { var _t=${tgtExp}; if(SYS.labels[_t]!==undefined){SYS.stack.push({type:'GOSUB', pc:SYS.pc});SYS.pc=SYS.labels[_t]-1;} else { IO.print("?UNDEF LABEL OR VAR "+'${label}'); SYS.running=false; } }`;
                 } else {
-                    chunk = `var _t=${tgtExp};if(SYS.labels[_t]!==undefined){SYS.stack.push(SYS.pc);SYS.pc=SYS.labels[_t]-1;} else { IO.print("?UNDEF LINE "+_t); SYS.running=false; }`;
+                    chunk = `var _t=${tgtExp};if(SYS.labels[_t]!==undefined){SYS.stack.push({type:'GOSUB', pc:SYS.pc});SYS.pc=SYS.labels[_t]-1;} else { IO.print("?UNDEF LINE "+_t); SYS.running=false; }`;
                 }
             }
             else if (cmd === 'RETURN') {
-                // Fix: Added { ... SYS.running=false; } to the else block
-                chunk = `if(SYS.stack.length>0)SYS.pc=SYS.stack.pop(); else { IO.print("?RETURN WITHOUT GOSUB"); SYS.running=false; }`;
+                let retExp = "0";
+                // Optionally map trailing expression returns
+                if (ctx.idx < tokens.length && ![':', "'", 'THEN', 'ELSE'].includes(peekUpper())) {
+                    retExp = Compiler.genExpression(tokens, ctx);
+                }
+
+                chunk = `
+                    if(SYS.stack.length>0) {
+                        var _f = SYS.stack.pop();
+                        if(_f.type === 'GOSUB') {
+                            SYS.pc = _f.pc;
+                        } else if (_f.type === 'FUN') {
+                            SYS.returnValue = ${retExp};
+                            var _s = _f.saved;
+                            for (var _k in _s) {
+                                if (_s[_k] === SYS.NIL) { delete SYS.vars[_k]; }
+                                else { SYS.vars[_k] = _s[_k]; }
+                            }
+                            SYS.hasReturned = true;
+                        }
+                    } else { 
+                        IO.print("?RETURN WITHOUT GOSUB"); 
+                        SYS.running=false; 
+                    }
+                `;
+            }
+            else if (cmd === 'FUN') {
+                const funcName = next();
+                if (peek() !== '(') throw "SYNTAX";
+                next(); // consume '('
+                const params = [];
+                if (peek() !== ')') do { params.push(next()); if (peek() === ',') next(); else break; } while (true);
+                next(); // consume ')'
+
+                // The FUN block acts as a barrier: it initializes the local variables using the arguments provided
+                // from the callFunction array. If SYS.callArgs isn't set, then someone sequentially fell into it.
+                // We let sequential execution pass through without variable masking.
+                chunk = `
+                    if (SYS.callArgs !== null) {
+                        var _saved = {};
+                        var _args = SYS.callArgs;
+                        `;
+                params.forEach((p, idx) => {
+                    chunk += `
+                        _saved['${p}'] = SYS.vars['${p}'] !== undefined ? SYS.vars['${p}'] : SYS.NIL;
+                        SYS.vars['${p}'] = _args[${idx}] !== undefined ? _args[${idx}] : 0;
+                    `;
+                });
+                chunk += `
+                        SYS.callArgs = null;
+                        SYS.stack.push({ type: 'FUN', saved: _saved });
+                    }
+                `;
+            }
+            else if (cmd === 'CALL') {
+                async = true;
+                const funcNameMatch = next(); // Consume target function name
+                if (!funcNameMatch || !/^[a-zA-Z_]/.test(funcNameMatch)) throw "SYNTAX";
+                const fnArgs = [];
+                if (peek() === '(') {
+                    next(); // consume '('
+                    if (peek() !== ')') do { fnArgs.push(Compiler.genExpression(tokens, ctx)); if (peek() === ',') next(); else break; } while (true);
+                    next(); // consume ')'
+                }
+                chunk = `await ENGINE.callFunction('${funcNameMatch}', [${fnArgs.join(',')}]);`;
             }
             else if (cmd === 'IF') {
                 const cond = Compiler.genExpression(tokens, ctx);
@@ -223,7 +300,7 @@ export const Compiler = {
                     // We can use a recursive helper or just call Compiler.compile again with a fake object.
                     const sid = "SUB_" + Math.random().toString(36).substr(2, 9);
                     SYS[sid] = Compiler.compile({ line: lineObj.line, src: src });
-                    return `return SYS['${sid}'](SYS,IO,GRAPHICS,FS);`;
+                    return `return SYS['${sid}'](SYS,IO,GRAPHICS,FS,ENGINE);`;
                 };
 
                 const tb = compileBranch(matchThen);
@@ -476,7 +553,7 @@ export const Compiler = {
         }
 
         try {
-            const f = new (async ? AsyncFunction : Function)("SYS", "IO", "GRAPHICS", "FS", body);
+            const f = new (async ? AsyncFunction : Function)("SYS", "IO", "GRAPHICS", "FS", "ENGINE", body);
             // NEW: Attach the generated text to the function so JSPEEK can read it
             f.generatedBody = body;
             return f;
