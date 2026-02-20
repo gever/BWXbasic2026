@@ -50,6 +50,9 @@ export const EDITOR = {
                 }
                 if (i < lines.length - 1) resultHTML += "\n";
             }
+            if (rawCode === "" || rawCode.endsWith('\n')) {
+                resultHTML += "<br>";
+            }
             editorContentContext.innerHTML = resultHTML;
         };
 
