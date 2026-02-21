@@ -10,4 +10,4 @@
 - [ ] BUG: pasting code in from Linux does something weird at end of line
 - [ ] BUG: REPL scrolling is inconsistent
 - [ ] FEAT: Uppercase all input (except quoted strings), keep canonical BASIC formatting internally, show user canonical even if the paste or edit in lowercase
-- [ ] BUG: ```10 A$ = INKEY$(1)``` is generating an error
+- [ ] BUG: ```10 A$ = INKEY$(1)``` is generating an error at runtime
