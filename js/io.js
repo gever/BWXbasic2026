@@ -7,13 +7,13 @@ import { ENGINE } from './engine.js';
 import { FS } from './fs.js';
 import { GRAPHICS } from './graphics.js';
 import { HELP_DATA } from './help.js';
-import { EDITOR } from './editor.js';
 
 let inputTrap = null; // will be passed from main
 
 export const IO = {
 
     // REPL Editing State
+    buffer: [],         // Keyboard buffer for INKEY$
     history: [],
     historyIdx: -1,
     lineBuffer: "",     // Current command string being typed
@@ -233,7 +233,9 @@ export const IO = {
 
                 if (arg === "") {
                     // Start full integrated editor overlay
-                    EDITOR.open();
+                    import('./editor.js').then(({ EDITOR }) => {
+                        EDITOR.open();
+                    });
                 } else {
                     const mEdit = arg.match(/^(\d+)/);
                     if (mEdit) {

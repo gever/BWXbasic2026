@@ -529,7 +529,7 @@ export const Compiler = {
                 } else {
                     next();
                     const exp = Compiler.genExpression(tokens, ctx);
-                    chunk = `if(${exp} === SYS.NIL && SYS.arrays['${v}']) { SYS.arrays['${v}'] = { _isHash: true }; } else { SYS.vars['${v}']=${exp}; }`;
+                    chunk = `{ let _val = ${exp}; if(_val === SYS.NIL && SYS.arrays['${v}']) { SYS.arrays['${v}'] = { _isHash: true }; } else { SYS.vars['${v}'] = _val; } }`;
                 }
             }
 
