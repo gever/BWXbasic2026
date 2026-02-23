@@ -400,27 +400,39 @@ export const Compiler = {
                 }
             }
             else if (cmd === 'DIM') {
-                const v = next(); // name
-                if (peek() === '=') {
-                    next(); // consume '='
-                    const vals = [];
-                    while (ctx.idx < tokens.length) {
-                        vals.push(Compiler.genExpression(tokens, ctx));
-                        if (peek() === ',') next(); // consume ','
+                let init = "";
+                while (ctx.idx < tokens.length) {
+                    const v = next(); // name
+                    if (peek() === '=') {
+                        next(); // consume '='
+                        const vals = [];
+                        while (ctx.idx < tokens.length) {
+                            vals.push(Compiler.genExpression(tokens, ctx));
+                            if (peek() === ',') next(); // consume ','
+                            else break;
+                        }
+                        init += `SYS.arrays['${v}']=[${vals.join(',')}]; SYS.lastDimArray='${v}'; `;
+                        break; // Important: Array initialization (DIM A = 1, 2) consumes the rest of the statement, cannot chain other array declarations after it
+                    } else if (peek() === '(') {
+                        next(); // '('
+                        const dims = [];
+                        while (ctx.idx < tokens.length) {
+                            dims.push(Compiler.genExpression(tokens, ctx));
+                            if (peek() === ',') next(); // consume ','
+                            else break;
+                        }
+                        next(); // ')'
+                        init += `SYS.arrays['${v}']={}; SYS.lastDimArray='${v}'; `;
+                        if (peek() === ',') next(); // Consume ',' for next definition
+                        else break;
+                    } else {
+                        // Unsized array declaration (e.g. DIM A)
+                        init += `SYS.arrays['${v}']={}; SYS.lastDimArray='${v}'; `;
+                        if (peek() === ',') next(); // Consume ',' for next definition
                         else break;
                     }
-                    chunk = `SYS.arrays['${v}']=[${vals.join(',')}]; SYS.lastDimArray='${v}';`;
-                } else {
-                    next(); // '('
-                    const dims = [];
-                    while (ctx.idx < tokens.length) {
-                        dims.push(Compiler.genExpression(tokens, ctx));
-                        if (peek() === ',') next(); // consume ','
-                        else break;
-                    }
-                    next(); // ')'
-                    chunk = `SYS.arrays['${v}']={}; SYS.lastDimArray='${v}';`;
                 }
+                chunk = init;
             }
             else if (cmd === 'DICT') {
                 const v = next(); // name

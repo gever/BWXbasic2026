@@ -432,6 +432,12 @@
 2130 IF PREARR(0) <> 10 THEN ERRORS = ERRORS + 1 : PRINT "Error: PREARR(0) should be 10, got "; PREARR(0)
 2135 IF PREARR(2) <> 30 THEN ERRORS = ERRORS + 1 : PRINT "Error: PREARR(2) should be 30, got "; PREARR(2)
 2140 IF PREARR(5) <> 60 THEN ERRORS = ERRORS + 1 : PRINT "Error: PREARR(5) should be 60, got "; PREARR(5)
+2142 REM Test 13b: Multiple DIM statements on one line
+2143 DIM M1(2), M2(3), M3
+2144 LET M1(1) = 11: LET M2(2) = 22: LET M3(0) = 33
+2146 IF M1(1) <> 11 THEN ERRORS = ERRORS + 1 : PRINT "Error: M1(1) should be 11, got "; M1(1)
+2147 IF M2(2) <> 22 THEN ERRORS = ERRORS + 1 : PRINT "Error: M2(2) should be 22, got "; M2(2)
+2148 IF M3(0) <> 33 THEN ERRORS = ERRORS + 1 : PRINT "Error: M3(0) should be 33, got "; M3(0)
 
 2145 REM Test 14: Hash Tables
 2150 DICT TBL = ("foo", 10), ("bar", 20)
