@@ -54,7 +54,9 @@ export const IO = {
         ov.style.display = 'flex'; search.focus();
 
         const render = (filter = "") => {
-            let html = "<div class='help-title' style='text-align:center'>QUICK INDEX</div><div class='index-grid'>";
+            let html = "<div class='help-title' style='text-align:center'>QUICK INDEX</div>";
+            html += "<div style='text-align:center; margin-bottom: 15px;'><a href='https://github.com/gever/BWXbasic2026' target='_blank' style='color:#0056b3; font-weight:bold;'>GitHub Repo</a> &nbsp;|&nbsp; <a href='https://gever.github.io/BWXbasic2026/bwxBASIC_manual.html' target='_blank' style='color:#0056b3; font-weight:bold;'>Full Manual</a> &nbsp;|&nbsp; <a href='https://bwxbasic.org' target='_blank' style='color:#0056b3; font-weight:bold;'>bwxbasic.org</a></div>";
+            html += "<div class='index-grid'>";
             const keys = Object.keys(HELP_DATA);
             keys.forEach(cat => { html += `<button class='index-btn' onclick="document.getElementById('sec-${cat}').scrollIntoView({behavior:'smooth'})">${cat}</button>`; });
             html += "</div><hr/><br/>";
