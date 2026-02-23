@@ -44,6 +44,8 @@ export const HELP_DATA = {
         { c: "INKEY(M)", d: "Reads char. M=1 wait, M=0 async.", e: "A$ = INKEY(1)" },
         { c: "GOTO", d: "Unconditional jump to line number.", e: "50 GOTO 10" },
         { c: "GOSUB", d: "Jump to subroutine. Returns on RETURN.", e: "10 GOSUB 1000" },
+        { c: "ON...GOTO", d: "Jump to Nth line in list. ON N GOTO L1,L2", e: "10 ON N GOTO 100,200" },
+        { c: "ON...GOSUB", d: "Subroutine to Nth line in list.", e: "10 ON N GOSUB 100,200" },
         { c: "RETURN", d: "Return from subroutine or function.", e: "1000 RETURN" },
         { c: "FUN..RETURN", d: "Define a sub-program function with local scoped arguments.", e: "FUN MATH(X) ... RETURN X" },
         { c: "CALL", d: "Execute a function natively returning isolated values.", e: "Z = CALL MATH(1)" },

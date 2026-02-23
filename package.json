@@ -4,7 +4,7 @@
   "description": "bwxBASIC Interpreter and Web App",
   "type": "module",
   "scripts": {
-    "test": "node tests/run_regression.js",
+    "test": "node tests/run_regression.js && node tests/test_on_goto_gosub.js && node tests/test_goto.js && node tests/test_cube2.js",
     "dev": "python3 -m http.server 8000"
   },
   "author": "bwx",

@@ -154,6 +154,54 @@ export const Compiler = {
                 }
                 chunk += ` if(SYS.break){SYS.running=false;return;}`;
             }
+            else if (cmd === 'ON') {
+                const expr = Compiler.genExpression(tokens, ctx);
+                const actionT = next();
+                if (!actionT) throw "SYNTAX";
+                const action = actionT.toUpperCase();
+                if (action !== 'GOTO' && action !== 'GOSUB') throw "SYNTAX";
+
+                const targets = [];
+                while (ctx.idx < tokens.length) {
+                    if ([':', "'", 'THEN', 'ELSE'].includes(peekUpper())) break;
+
+                    const checkIdx = ctx.idx;
+                    const val = Compiler.genExpression(tokens, ctx);
+                    const isSingleToken = (ctx.idx - checkIdx === 1) && /^[A-Za-z_]/.test(tokens[checkIdx]);
+                    let label = null;
+                    if (isSingleToken) {
+                        label = tokens[checkIdx].toUpperCase();
+                    }
+                    targets.push({ exp: val, label: label });
+                    if (peek() === ',') next();
+                    else break;
+                }
+
+                let targetCode = `var _onIdx = Math.floor(${expr}); `;
+                targetCode += `if (_onIdx >= 1 && _onIdx <= ${targets.length}) { `;
+                targetCode += `  switch(_onIdx) { `;
+                targets.forEach((t, i) => {
+                    targetCode += `    case ${i + 1}: { `;
+                    if (t.label) {
+                        if (action === 'GOSUB') {
+                            targetCode += `if(SYS.labels['${t.label}']!==undefined) { SYS.stack.push({type:'GOSUB', pc:SYS.pc}); SYS.pc=SYS.labels['${t.label}']-1; } else { var _t=${t.exp}; if(SYS.labels[_t]!==undefined){SYS.stack.push({type:'GOSUB', pc:SYS.pc});SYS.pc=SYS.labels[_t]-1;} else { IO.print("?UNDEF LABEL OR VAR "+'${t.label}'); SYS.running=false; } }`;
+                        } else {
+                            targetCode += `if(SYS.labels['${t.label}']!==undefined) { SYS.pc=SYS.labels['${t.label}']-1; } else { var _t=${t.exp}; if(SYS.labels[_t]!==undefined){SYS.pc=SYS.labels[_t]-1;} else { IO.print("?UNDEF LABEL OR VAR "+'${t.label}'); SYS.running=false; } }`;
+                        }
+                    } else {
+                        if (action === 'GOSUB') {
+                            targetCode += `var _t=${t.exp}; if(SYS.labels[_t]!==undefined){SYS.stack.push({type:'GOSUB', pc:SYS.pc});SYS.pc=SYS.labels[_t]-1;} else { IO.print("?UNDEF LINE "+_t); SYS.running=false; }`;
+                        } else {
+                            targetCode += `var _t=${t.exp}; if(SYS.labels[_t]!==undefined){SYS.pc=SYS.labels[_t]-1;} else { IO.print("?UNDEF LINE "+_t); SYS.running=false; }`;
+                        }
+                    }
+                    targetCode += ` break; } `;
+                });
+                targetCode += `  } `;
+                targetCode += `} `;
+
+                chunk = targetCode;
+            }
             else if (cmd === 'GOTO') {
                 const startIdx = ctx.idx;
                 const tgtExp = Compiler.genExpression(tokens, ctx);

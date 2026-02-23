@@ -93,6 +93,18 @@ Jumping and Subroutines. The target can be a line number, label, or an expressio
 110 RETURN
 ```
 
+### ON ... GOTO / ON ... GOSUB
+Computed jumps. Evaluates an expression and jumps to the Nth target in the list. If the value is out of bounds (less than 1 or greater than the number of targets), execution continues to the next statement.
+```basic
+10 INPUT "CHOOSE 1, 2, OR 3: "; C
+20 ON C GOTO 100, 200, 300
+30 PRINT "INVALID CHOICE"
+40 END
+100 PRINT "YOU CHOSE 1": END
+200 PRINT "YOU CHOSE 2": END
+300 PRINT "YOU CHOSE 3": END
+```
+
 ### Labels & Optional Line Numbers
 bwxBASIC allows both traditional line numbers and modern alphanumeric labels. Programs execute top-to-bottom sequentially.
 *   **Line Numbers**: Optional. `10 PRINT "HELLO"`
