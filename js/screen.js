@@ -41,8 +41,15 @@ export const SCREEN = {
             0, 0, CONFIG.width, CONFIG.height - CONFIG.charH
         );
         ctx.fillStyle = CONFIG.bgColor;
-        ctx.fillRect(0, CONFIG.height - CONFIG.charH, CONFIG.width, CONFIG.charH);
+        // Erase the last logical row AND any dead space below it
+        const lastRowY = (CONFIG.rows - 1) * CONFIG.charH;
+        ctx.fillRect(0, lastRowY, CONFIG.width, CONFIG.height - lastRowY);
         SCREEN.drawCursor();
+
+        // Let the IO system know we scrolled, so it can adjust its prompt start Y
+        if (typeof IO !== 'undefined' && IO.scrollHook) {
+            IO.scrollHook();
+        }
     },
 
     newline: () => {

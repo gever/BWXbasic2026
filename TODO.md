@@ -8,6 +8,6 @@
 - [X] BUG: ```10 DIM G(8,8),C(9,2),K(3,3),N(3),Z(8,8),D(8)``` - doesn't parse correctly
 - [X] BUG: COPY command (copies current program to the clipboard) is not documented
 - [ ] BUG: pasting code in from Linux does something weird at end of line
-- [ ] BUG: REPL scrolling is inconsistent
+- [X] BUG: REPL scrolling is inconsistent
 - [ ] FEAT: Uppercase all input (except quoted strings), keep canonical BASIC formatting internally, show user canonical even if the paste or edit in lowercase
 - [X] BUG: ```10 A$ = INKEY$(1)``` is generating an error at runtime

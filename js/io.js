@@ -26,6 +26,13 @@ export const IO = {
         inputTrap = trapElement;
     },
 
+    // --- Scrolling Hook ---
+    scrollHook: () => {
+        if (IO.promptStartY > 0) {
+            IO.promptStartY--;
+        }
+    },
+
     // --- Runtime Input Handling ---
     bufferKey: (key) => {
         if (key.length === 1 || key === 'Enter') {
