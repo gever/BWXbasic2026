@@ -197,6 +197,7 @@ bwxBASIC uses a 256-color palette organized by hue and brightness. Colors are ac
         *   Click **SAVE & CLOSE** to apply changes and seamlessly rebuild the program array.
 *   `EDIT Ln`: Edit a specific line number directly via the REPL prompt string.
 *   `NEW`: Clear program and variables.
+*   `COPY`: Copy the current program source code to your clipboard.
 *   `SAVE "NAME"`: Save to local storage.
 *   `LOAD "NAME"`: Load from local storage or demos.
 *   `DIR`: List files.

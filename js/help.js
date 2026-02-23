@@ -4,6 +4,7 @@ export const HELP_DATA = {
         { c: "LIST", d: "Displays the source code of the current program.", e: "LIST" },
         { c: "EDIT", d: "Opens the full-screen code editor. Or use 'EDIT <line>' for single line.", e: "EDIT" },
         { c: "NEW", d: "Clears the current program from memory and resets variables.", e: "NEW" },
+        { c: "COPY", d: "Copies the current program source code to your clipboard.", e: "COPY" },
         { c: "SAVE", d: "Saves current program to browser local storage.", e: "SAVE \"MYGAME\"" },
         { c: "LOAD", d: "Loads a program from local storage or demo library.", e: "LOAD \"DEMO/GRAPHICS.BAS\"" },
         { c: "DIR", d: "Lists all saved files and available demos.", e: "DIR" },
