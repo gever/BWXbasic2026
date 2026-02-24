@@ -48,7 +48,7 @@ prompts the user to enter a value.
 
 ### INKEY
 Reads a single character from the keyboard.
-*   **Usage**: `INKEY(Mode)`
+*   **Usage**: `INKEY(Mode)` (or `INKEY$(Mode)`)
     *   `Mode 1`: Blocking (wait for key).
     *   `Mode 0`: Non-blocking (return "" if no key).
 
@@ -57,6 +57,16 @@ Reads a single character from the keyboard.
 20 K$ = INKEY(1)
 30 IF K$ = "" THEN GOTO 20
 40 PRINT "YOU PRESSED: "; K$
+```
+
+### DELAY
+Pauses execution.
+*   **Usage**: `DELAY ms`
+
+```basic
+10 PRINT "WAITING..."
+20 DELAY 1000
+30 PRINT "DONE!"
 ```
 
 ## 3. Control Flow
@@ -88,7 +98,7 @@ Jumping and Subroutines. The target can be a line number, label, or an expressio
 10 LET X = 100
 20 GOSUB X
 30 PRINT "Back in Main"
-40 END
+40 END  ' Or STOP
 100 PRINT "I am a subroutine"
 110 RETURN
 ```
@@ -139,6 +149,7 @@ Arguments passed into a `FUN` signature temporarily overwrite global variables o
 *   `ABS(X)`: Absolute Value.
 *   `INT(X)`: Floor integer.
 *   `EXP(X)`, `LOG(X)`: Exponential and Natural Log.
+*   `SGN(X)`: Returns 1 (positive), -1 (negative), or 0.
 *   `RND(N)`: Random 0 to N.
 *   `SEED(N)`: Seed the random number generator.
 *   `TIME`: Returns milliseconds since start (high precision).
@@ -150,6 +161,9 @@ Arguments passed into a `FUN` signature temporarily overwrite global variables o
 *   `MID$(S$, I, N)`: N chars starting at index I (1-based).
 *   `STR$(N)`: Convert number to string.
 *   `VAL(S$)`: Convert string to number.
+*   `ASC(S$)`: ASCII code of first character.
+*   `CHR$(N)`: Single-char string from ASCII code.
+*   `INSTR([Start], S$, Sub$)`: Returns index (1-based) of substring.
 
 ## 5. Graphics Commands
 
@@ -185,8 +199,28 @@ bwxBASIC features a vector-like graphics API with a stateful "turtle" cursor.
 
 bwxBASIC uses a 256-color palette organized by hue and brightness. Colors are accessed via index `0` through `255`. LOAD "demo/palette.bas" to see the complete palette.
 
+## 7. Off-Screen Graphics Buffers
 
-## 7. System Commands
+bwxBASIC supports multiple isolated drawing buffers, enabling double-buffering and sophisticated composites. The main screen is permanently `ID 0`.
+
+*   `GR_CANVAS(W, H)`: Clones the state and creates an off-screen canvas. Returns its unique `ID`.
+*   `GR_FREE ID`: Destroys the canvas and frees RAM.
+*   `GR_SET_CANVAS ID`: Routes all subsequent graphics commands (`GR_COLOR`, `GR_FRECT`, etc) explicitly into this canvas instead of the main screen. 
+*   `GR_GET_CANVAS()`: Returns the currently targeted canvas ID.
+*   `GR_CANVAS_WIDTH()`, `GR_CANVAS_HEIGHT()`: Returns the dimensions of the currently targeted canvas.
+*   `GR_COPY SrcID, X, Y [, W, H]`: Fast copy from `SrcID` onto the currently targeted canvas at `X, Y`. Optional `W, H` allow for image scaling.
+
+**Example: Double Buffering**
+```basic
+10 X = GR_CANVAS(400, 300)
+20 GR_SET_CANVAS X
+30 GR_CLS : GR_COLOR = 33 : GR_FRECT 10,10,50,50
+40 GR_SET_CANVAS 0   ' Back to main
+50 GR_COPY X, 0, 0   ' Blit to screen
+60 GR_FREE X
+```
+
+## 8. System Commands
 
 *   `RUN`: Execute program.
 *   `LIST`: View source code (supports ranges like `LIST 10-50`).
@@ -201,7 +235,7 @@ bwxBASIC uses a 256-color palette organized by hue and brightness. Colors are ac
 *   `COPY`: Copy the current program source code to your clipboard.
 *   `SAVE "NAME"`: Save to local storage.
 *   `LOAD "NAME"`: Load from local storage or demos.
-*   `DIR`: List files.
+*   `DIR` or `CATALOG`: List files.
 *   `DOWNLOAD "NAME"`: Download .BAS file to computer.
 *   `WHERE`: Show line number of last stop.
 *   `VARS`: Lists all currently defined variables.

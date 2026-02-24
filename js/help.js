@@ -12,6 +12,7 @@ export const HELP_DATA = {
         { c: "UPLOAD", d: "Uploads a .BAS text file from your computer into memory.", e: "UPLOAD" },
         { c: "WHERE", d: "Shows the line number where the last program stopped.", e: "WHERE" },
         { c: "JSECHO", d: "Toggles echoing of output to the browser console for debugging.", e: "JSECHO" },
+        { c: "JSPEEK", d: "See what your BASIC code looks like compiled to JavaScript.", e: "JSPEEK" },
         { c: "HELP", d: "Opens this reference manual.", e: "HELP" },
         { c: "REM", d: "Remark/Comment. Line is ignored by interpreter.", e: "10 REM SETUP VARIABLES" },
         { c: "VARS", d: "Lists all currently defined variables.", e: "VARS" }
@@ -41,6 +42,15 @@ export const HELP_DATA = {
         { c: "VTAB", d: "Moves cursor to vertical row Y (1-24).", e: "20 VTAB 12" },
         { c: "SETPOS", d: "Moves cursor to X, Y coordinates (Custom).", e: "30 SETPOS 15, 10" }
     ],
+    "OFF-SCREEN BUFFERS": [
+        { c: "GR_CANVAS(W, H)", d: "Function: Creates an off-screen canvas dimensioned WxH and returns ID.", e: "ID = GR_CANVAS(100, 100)" },
+        { c: "GR_GET_CANVAS()", d: "Function: Returns the ID of the currently active canvas.", e: "C = GR_GET_CANVAS()" },
+        { c: "GR_CANVAS_WIDTH", d: "Function: Returns width of the active canvas.", e: "W = GR_CANVAS_WIDTH()" },
+        { c: "GR_CANVAS_HEIGHT", d: "Function: Returns height of the active canvas.", e: "H = GR_CANVAS_HEIGHT()" },
+        { c: "GR_SET_CANVAS(ID)", d: "Command: Sets the active drawing target to canvas ID. ID 0 is main screen.", e: "10 GR_SET_CANVAS 1" },
+        { c: "GR_COPY", d: "Command: Copies canvas ID to X, Y on active canvas with optional W, H scaling.", e: "20 GR_COPY 1, 50, 50, 100, 100" },
+        { c: "GR_FREE", d: "Command: Frees memory for canvas ID.", e: "30 GR_FREE 1" }
+    ],
     "I/O & CONTROL": [
         { c: "PRINT", d: "Outputs text or variables. Use ; to suppress newline.", e: "10 PRINT \"SCORE: \"; S" },
         { c: "INPUT", d: "Pauses to get value from user.", e: "20 INPUT \"NAME? \"; N$" },
@@ -54,7 +64,9 @@ export const HELP_DATA = {
         { c: "CALL", d: "Execute a function natively returning isolated values.", e: "Z = CALL MATH(1)" },
         { c: "IF...THEN", d: "Conditional execution.", e: "10 IF A > 10 THEN GOTO 50" },
         { c: "FOR...NEXT", d: "Loop structure.", e: "10 FOR I=1 TO 10 STEP 2 ... 50 NEXT I" },
+        { c: "DELAY", d: "Pauses execution for M milliseconds.", e: "10 DELAY 500" },
         { c: "END", d: "Stops program execution.", e: "99 END" },
+        { c: "STOP", d: "Stops program execution (Same as END).", e: "99 STOP" },
         { c: "DIM", d: "Defines array size or initializes values.", e: "10 DIM A(100) or 20 DIM B = 1, 2, 3" },
         { c: "DICT", d: "Defines an associative array/hash table.", e: "10 DICT T = (\"A\", 1), (\"B\", 2)" },
         { c: "DATA", d: "Appends values sequentially to the last initialized DIM or DICT array.", e: "30 DATA 4, 5, 6" },
@@ -69,6 +81,7 @@ export const HELP_DATA = {
         { c: "ATN(X)", d: "Arctangent of X.", e: "Y = ATN(1)" },
         { c: "SQR(X)", d: "Square root.", e: "Y = SQR(16)" },
         { c: "ABS(X)", d: "Absolute value.", e: "Y = ABS(-5)" },
+        { c: "SGN(X)", d: "Sign value. Returns 1 for positive, -1 for negative, 0 for 0.", e: "Y = SGN(-10)" },
         { c: "INT(X)", d: "Integer part (Floor).", e: "Y = INT(3.9)" },
         { c: "EXP(X)", d: "e raised to power X.", e: "Y = EXP(1)" },
         { c: "LOG(X)", d: "Natural logarithm.", e: "Y = LOG(10)" },
@@ -85,6 +98,8 @@ export const HELP_DATA = {
         { c: "MID$(S$,I,N)", d: "N chars starting at I.", e: "A$ = MID$(\"ABC\", 2, 1)" },
         { c: "STR$(N)", d: "Convert number to string.", e: "A$ = STR$(123)" },
         { c: "VAL(S$)", d: "Convert string to number.", e: "N = VAL(\"12.5\")" },
+        { c: "ASC(S$)", d: "ASCII code of first character.", e: "C = ASC(\"A\")" },
+        { c: "CHR$(N)", d: "Single-char string from ASCII code.", e: "A$ = CHR$(65)" },
         { c: "INSTR(N,S$,Sub$)", d: "Search for string.", e: "P = INSTR(\"ABC\",\"B\")" }
     ]
 };
