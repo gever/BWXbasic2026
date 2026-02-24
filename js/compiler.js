@@ -563,7 +563,33 @@ export const Compiler = {
             else if (cmd === 'GR_FONT') {
                 chunk = `GRAPHICS.fontSize = ${Compiler.genExpression(tokens, ctx)};`;
             }
+            else if (cmd === 'GR_COPY') {
+                const id = Compiler.genExpression(tokens, ctx);
+                if (peek() === ',') next();
+                const x = Compiler.genExpression(tokens, ctx);
+                if (peek() === ',') next();
+                const y = Compiler.genExpression(tokens, ctx);
 
+                // Allow optional w and h
+                let w = 'undefined', h = 'undefined';
+                if (peek() === ',') {
+                    next();
+                    w = Compiler.genExpression(tokens, ctx);
+                    if (peek() === ',') {
+                        next();
+                        h = Compiler.genExpression(tokens, ctx);
+                    }
+                }
+                chunk = `GRAPHICS.copyCanvas(${id},${x},${y},${w},${h});`;
+            }
+            else if (cmd === 'GR_FREE') {
+                const id = Compiler.genExpression(tokens, ctx);
+                chunk = `GRAPHICS.freeCanvas(${id});`;
+            }
+            else if (cmd === 'GR_SET_CANVAS') {
+                const id = Compiler.genExpression(tokens, ctx);
+                chunk = `GRAPHICS.setCanvas(${id});`;
+            }
 
             else if (cmd === 'SEED') {
                 if (peek() === '(') {

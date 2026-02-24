@@ -9,9 +9,13 @@ export const GRAPHICS = {
     legacyColors: ['#000000', '#14F53C', '#A040A0', '#FFFFFF', '#000000', '#FF6000', '#3040FF', '#FFFFFF'],
     palette: [],
     fontSize: 26,
+    buffers: {},
+    nextBufferId: 1,
+    currentCanvasId: 0,
 
     init: (appCtx) => {
         ctx = appCtx;
+        GRAPHICS.buffers[0] = { ctx: appCtx, canvas: appCtx.canvas, logicalW: CONFIG.width / CONFIG.scaleX, logicalH: CONFIG.height / CONFIG.scaleY };
         const hslToHex = (h, s, l) => {
             l /= 100;
             const a = s * Math.min(l, 1 - l) / 100;
@@ -42,7 +46,59 @@ export const GRAPHICS = {
     mapX: (x) => Math.floor(x * CONFIG.scaleX),
     mapY: (y) => Math.floor(y * CONFIG.scaleY),
     setMode: (m) => { if (m > 0) SCREEN.clear(); },
-    clear: () => SCREEN.clear(),
+    clear: () => {
+        if (GRAPHICS.currentCanvasId === 0) SCREEN.clear();
+        else GRAPHICS.clearToColor();
+    },
+
+    createCanvas: (w, h) => {
+        const id = GRAPHICS.nextBufferId++;
+        const pw = Math.ceil(w * CONFIG.scaleX);
+        const ph = Math.ceil(h * CONFIG.scaleY);
+        let canvasElement;
+        if (typeof OffscreenCanvas !== 'undefined') {
+            canvasElement = new OffscreenCanvas(pw, ph);
+        } else {
+            canvasElement = document.createElement('canvas');
+            canvasElement.width = pw;
+            canvasElement.height = ph;
+        }
+        GRAPHICS.buffers[id] = { canvas: canvasElement, ctx: canvasElement.getContext('2d'), logicalW: w, logicalH: h };
+        return id;
+    },
+    freeCanvas: (id) => {
+        if (id !== 0 && GRAPHICS.buffers[id]) {
+            if (GRAPHICS.currentCanvasId === id) GRAPHICS.setCanvas(0);
+            delete GRAPHICS.buffers[id];
+        }
+    },
+    setCanvas: (id) => {
+        if (GRAPHICS.buffers[id]) {
+            GRAPHICS.currentCanvasId = id;
+            ctx = GRAPHICS.buffers[id].ctx;
+        }
+    },
+    getCanvas: () => {
+        return GRAPHICS.currentCanvasId;
+    },
+    getCanvasWidth: () => {
+        if (GRAPHICS.currentCanvasId === 0) return CONFIG.width / CONFIG.scaleX;
+        return GRAPHICS.buffers[GRAPHICS.currentCanvasId].logicalW;
+    },
+    getCanvasHeight: () => {
+        if (GRAPHICS.currentCanvasId === 0) return CONFIG.height / CONFIG.scaleY;
+        return GRAPHICS.buffers[GRAPHICS.currentCanvasId].logicalH;
+    },
+    copyCanvas: (id, x, y, w, h) => {
+        if (GRAPHICS.buffers[id]) {
+            const srcCanvas = GRAPHICS.buffers[id].canvas;
+            const dx = GRAPHICS.mapX(x);
+            const dy = GRAPHICS.mapY(y);
+            const dw = w !== undefined ? Math.ceil(w * CONFIG.scaleX) : srcCanvas.width;
+            const dh = h !== undefined ? Math.ceil(h * CONFIG.scaleY) : srcCanvas.height;
+            ctx.drawImage(srcCanvas, 0, 0, srcCanvas.width, srcCanvas.height, dx, dy, dw, dh);
+        }
+    },
 
     setLegacyColor: (c) => {
         GRAPHICS.color = GRAPHICS.legacyColors[Math.floor(Math.abs(c)) % 8];
@@ -53,9 +109,11 @@ export const GRAPHICS = {
     },
 
     clearToColor: () => {
-        SCREEN.removeCursor();
+        if (GRAPHICS.currentCanvasId === 0) SCREEN.removeCursor();
         ctx.fillStyle = GRAPHICS.color;
-        ctx.fillRect(0, 0, CONFIG.width, CONFIG.height);
+        const cw = GRAPHICS.currentCanvasId === 0 ? CONFIG.width : GRAPHICS.buffers[GRAPHICS.currentCanvasId].canvas.width;
+        const ch = GRAPHICS.currentCanvasId === 0 ? CONFIG.height : GRAPHICS.buffers[GRAPHICS.currentCanvasId].canvas.height;
+        ctx.fillRect(0, 0, cw, ch);
     },
 
     moveTo: (x, y) => {
@@ -63,7 +121,7 @@ export const GRAPHICS = {
         GRAPHICS.lastY = GRAPHICS.mapY(y);
     },
     plot: (x, y) => {
-        SCREEN.removeCursor();
+        if (GRAPHICS.currentCanvasId === 0) SCREEN.removeCursor();
         ctx.globalCompositeOperation = 'source-over';
         ctx.fillStyle = GRAPHICS.color;
         const cx = GRAPHICS.mapX(x), cy = GRAPHICS.mapY(y);
@@ -71,7 +129,7 @@ export const GRAPHICS = {
         GRAPHICS.lastX = cx; GRAPHICS.lastY = cy;
     },
     lineTo: (x, y) => {
-        SCREEN.removeCursor();
+        if (GRAPHICS.currentCanvasId === 0) SCREEN.removeCursor();
         ctx.globalCompositeOperation = 'source-over';
         ctx.strokeStyle = GRAPHICS.color; ctx.lineWidth = 2; ctx.beginPath();
         const tx = GRAPHICS.mapX(x), ty = GRAPHICS.mapY(y);
@@ -81,7 +139,7 @@ export const GRAPHICS = {
         GRAPHICS.lastX = tx; GRAPHICS.lastY = ty;
     },
     rect: (w, h, fill) => {
-        SCREEN.removeCursor();
+        if (GRAPHICS.currentCanvasId === 0) SCREEN.removeCursor();
         ctx.globalCompositeOperation = 'source-over';
         const gw = w * CONFIG.scaleX;
         const gh = h * CONFIG.scaleY;
@@ -95,7 +153,7 @@ export const GRAPHICS = {
         }
     },
     ellipse: (w, h, fill) => {
-        SCREEN.removeCursor();
+        if (GRAPHICS.currentCanvasId === 0) SCREEN.removeCursor();
         ctx.globalCompositeOperation = 'source-over';
         const gw = Math.abs(w * CONFIG.scaleX);
         const gh = Math.abs(h * CONFIG.scaleY);
@@ -115,7 +173,7 @@ export const GRAPHICS = {
         }
     },
     triangle: (x2, y2, x3, y3, fill) => {
-        SCREEN.removeCursor();
+        if (GRAPHICS.currentCanvasId === 0) SCREEN.removeCursor();
         ctx.globalCompositeOperation = 'source-over';
         const tx1 = GRAPHICS.lastX;
         const ty1 = GRAPHICS.lastY;
@@ -140,7 +198,7 @@ export const GRAPHICS = {
         }
     },
     print: (str) => {
-        SCREEN.removeCursor();
+        if (GRAPHICS.currentCanvasId === 0) SCREEN.removeCursor();
         ctx.globalCompositeOperation = 'source-over';
         ctx.fillStyle = GRAPHICS.color;
         ctx.font = `${GRAPHICS.fontSize}px VT323`;
