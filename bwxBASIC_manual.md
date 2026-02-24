@@ -167,6 +167,7 @@ bwxBASIC features a vector-like graphics API with a stateful "turtle" cursor.
 *   `GR_FTRI X2,Y2,X3,Y3`: Draws filled triangle.
 *   `GR_PRINT Expr`: Prints text at the graphical cursor position.
 *   `GR_FONT Size`: Sets the font size for `GR_PRINT` (default 26).
+*   `GR_RGB(R, G, B)`: Returns the nearest palette color index for given R, G, B values (0-255).
 
 **Example:**
 ```basic

@@ -30,6 +30,8 @@ export const HELP_DATA = {
         { c: "GR_FTRI", d: "Draws filled triangle.", e: "95 GR_FTRI 200,200,100,200" },
         { c: "GR_PRINT", d: "Prints text at graphics cursor.", e: "10 GR_PRINT \"SCORE: \"; S" },
         { c: "GR_FONT", d: "Sets font size for GR_PRINT.", e: "20 GR_FONT 10" },
+        { c: "GR_FONT", d: "Sets font size for GR_PRINT.", e: "20 GR_FONT 10" },
+        { c: "GR_RGB(r,g,b)", d: "Returns nearest palette color index for RGB values 0-255.", e: "10 GR_COLOR GR_RGB(255,128,0)" },
         { c: "TEXT", d: "Legacy command (Clears screen in Mixed Mode).", e: "100 TEXT" },
         { c: "HGR", d: "Legacy command (Clears screen in Mixed Mode).", e: "10 HGR" },
         { c: "HGR2", d: "Legacy command (Clears screen in Mixed Mode).", e: "10 HGR2" },

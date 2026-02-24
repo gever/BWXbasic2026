@@ -108,6 +108,24 @@ export const GRAPHICS = {
         GRAPHICS.color = GRAPHICS.palette[Math.floor(Math.abs(c)) % 256];
     },
 
+    getRGBIndex: (r, g, b) => {
+        let minDistance = Infinity;
+        let bestIndex = 0;
+        for (let i = 0; i < GRAPHICS.palette.length; i++) {
+            const hex = GRAPHICS.palette[i];
+            const pr = parseInt(hex.substring(1, 3), 16);
+            const pg = parseInt(hex.substring(3, 5), 16);
+            const pb = parseInt(hex.substring(5, 7), 16);
+
+            const dist = (pr - r) ** 2 + (pg - g) ** 2 + (pb - b) ** 2;
+            if (dist < minDistance) {
+                minDistance = dist;
+                bestIndex = i;
+            }
+        }
+        return bestIndex;
+    },
+
     clearToColor: () => {
         if (GRAPHICS.currentCanvasId === 0) SCREEN.removeCursor();
         ctx.fillStyle = GRAPHICS.color;
