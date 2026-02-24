@@ -1,7 +1,8 @@
 {
   "name": "bwxbasic",
-  "version": "1.0.0",
-  "description": "bwxBASIC Interpreter and Web App",
+  "version": "0.8.0",
+  "description": "bwxBASIC is a pure Javascript implementation of BASIC running in a retro-inspired REPL environment.",
+  "main": "index.js",
   "type": "module",
   "scripts": {
     "test": "node tests/run_regression.js && node tests/test_on_goto_gosub.js && node tests/test_goto.js && node tests/test_cube2.js",
