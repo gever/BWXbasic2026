@@ -13,4 +13,4 @@
 - [X] BUG: ```10 A$ = INKEY$(1)``` is generating an error at runtime
 - [X] FEAT: save code to CURRENT.BAS before running it
 - [ ] FEAT: add support for GR_RGB R, G, B (0-255) to set the current color
-
+- [ ] FEAT: accept '?' as shorthand for PRINT
