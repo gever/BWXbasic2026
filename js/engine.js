@@ -31,6 +31,7 @@ export const ENGINE = {
     },
 
     run: async () => {
+        FS.save("CURRENT.BAS", true);
         SYS.compiled = []; SYS.labels = {}; SYS.funSkipMap = {};
         const funIndices = [];
 

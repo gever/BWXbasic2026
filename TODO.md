@@ -11,3 +11,5 @@
 - [X] BUG: REPL scrolling is inconsistent
 - [ ] FEAT: Uppercase all input (except quoted strings), keep canonical BASIC formatting internally, show user canonical even if the paste or edit in lowercase
 - [X] BUG: ```10 A$ = INKEY$(1)``` is generating an error at runtime
+- [ ] FEAT: save code to CURRENT.BAS before running it
+

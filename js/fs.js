@@ -7,12 +7,14 @@ export const FS = {
     PREFIX: 'bwxBASIC_PROG_',
     currentFilename: "bwxBASIC_program.bas",
 
-    save: (fn) => {
+    save: (fn, quiet = false) => {
         try {
             localStorage.setItem(FS.PREFIX + fn.toUpperCase(), JSON.stringify(SYS.program));
-            FS.currentFilename = fn;
-            IO.print("SAVED " + fn);
-        } catch (e) { IO.print("?ERROR SAVING"); }
+            if (!quiet) {
+                FS.currentFilename = fn;
+                IO.print("SAVED " + fn);
+            }
+        } catch (e) { if (!quiet) IO.print("?ERROR SAVING"); }
     },
 
     load: async (fn) => {
