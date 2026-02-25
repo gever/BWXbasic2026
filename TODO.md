@@ -24,3 +24,4 @@
 - [ ] FEAT: format FUN definitions with indentation (and maybe a different background color?) in the editor and listing.
 - [ ] FEAT: add '!' as shorthand for CALL
 - [ ] FEAT: add '?' as shorthand for PRINT
+- [ ] BUG: ```20 INPUT "What's your name? "; $NAME // 30 PRINT $NAME, "is a great name!"``` -- this prints "NaN is a great name!" 
