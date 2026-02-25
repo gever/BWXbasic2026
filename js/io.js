@@ -269,7 +269,7 @@ export const IO = {
                     IO.prompt();
                 }
             }
-            else if (c === 'NEW') { SYS.program = []; SYS.vars = {}; SCREEN.clear(); IO.prompt(); }
+            else if (c === 'NEW') { SYS.program = []; SYS.vars = {}; FS.currentFilename = null; SCREEN.clear(); IO.prompt(); }
             else if (c === 'COPY') {
                 // 1. Convert program objects back to text format in current internal order
                 const text = SYS.program.map(l => l.line !== null ? `${l.line} ${l.src}` : l.src).join("\n");

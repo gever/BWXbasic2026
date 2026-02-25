@@ -17,3 +17,4 @@
 - [ ] BUG: NEW should reset ENGINE.lastExecLine to zero
 - [ ] BUG: FUN body should be indented in the listing (and the editor?)
 - [X] BUG: GR_CANVAS_WIDTH and GR_CANVAS_HEIGHT (and other parameterless functions) are not working in math expressions.
+- [X] BUG: REPL doesn't keep track of the current filename (LOAD/SAVE/NEW not setting/using FS.currentFilename appropriately)

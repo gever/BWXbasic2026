@@ -8,6 +8,8 @@ export const FS = {
     currentFilename: "bwxBASIC_program.bas",
 
     save: (fn, quiet = false) => {
+        if (!fn || fn === 0 || fn === "0") fn = FS.currentFilename;
+        if (!fn) { if (!quiet) IO.print("?MISSING FILE NAME"); return; }
         try {
             localStorage.setItem(FS.PREFIX + fn.toUpperCase(), JSON.stringify(SYS.program));
             if (!quiet) {
@@ -18,6 +20,8 @@ export const FS = {
     },
 
     load: async (fn) => {
+        if (!fn || fn === 0 || fn === "0") fn = FS.currentFilename;
+        if (!fn) { IO.print("?MISSING FILE NAME"); return; }
         const f = fn.toUpperCase();
         let path = DEMOS[f];
 
