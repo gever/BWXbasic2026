@@ -55,9 +55,13 @@ export const Compiler = {
 
                 // Handle Math Functions (SIN, LEN, etc)
                 if (LIB[tu]) {
-                    next(); const a = [];
-                    if (peek() !== ')') do { a.push(parseExp()); if (peek() === ',') next(); else break; } while (true);
-                    next(); return `(${LIB[tu]})(${a.join(',')})`;
+                    const a = [];
+                    if (peek() === '(') {
+                        next(); // consume '('
+                        if (peek() !== ')') do { a.push(parseExp()); if (peek() === ',') next(); else break; } while (true);
+                        if (peek() === ')') next(); // consume ')'
+                    }
+                    return `(${LIB[tu]})(${a.join(',')})`;
                 }
 
                 // Handle CALL Function Expressions

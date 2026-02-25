@@ -46,6 +46,9 @@
 270 IF ABS(EXP(1) - 2.71828) > 0.001 THEN ERRORS = ERRORS + 1 : PRINT "Error: EXP(1) not ~2.718, got "; EXP(1)
 280 IF ABS(LOG(10) - 2.30259) > 0.001 THEN ERRORS = ERRORS + 1 : PRINT "Error: LOG(10) not ~2.303, got "; LOG(10)
 
+285 REM Test parameterless functions
+286 IF (GR_CANVAS_WIDTH + 100) <> 420 THEN ERRORS = ERRORS + 1 : PRINT "Error: GR_CANVAS_WIDTH + 100 should be 420, got "; (GR_CANVAS_WIDTH + 100)
+
 290 REM Test FOR loops
 300 LET SUM = 0
 310 FOR I = 1 TO 5
