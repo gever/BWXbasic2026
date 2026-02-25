@@ -242,3 +242,4 @@ bwxBASIC supports multiple isolated drawing buffers, enabling double-buffering a
 *   `HELP`: Show internal help.
 *   `JSECHO`: Toggle console logging (for debugging).
 *   `JSPEEK`: See what your BASIC code looks like in JavaScript.
+*   `VIZ`: Generates an interactive, zoomable flowchart visualization of your program's basic block structure. Opens in an overlay that can be closed with `<ESC>` or the "Close" button.

@@ -13,6 +13,7 @@ export const HELP_DATA = {
         { c: "WHERE", d: "Shows the line number where the last program stopped.", e: "WHERE" },
         { c: "JSECHO", d: "Toggles echoing of output to the browser console for debugging.", e: "JSECHO" },
         { c: "JSPEEK", d: "See what your BASIC code looks like compiled to JavaScript.", e: "JSPEEK" },
+        { c: "VIZ", d: "Generates an interactive flowchart visualization of your program's structure.", e: "VIZ" },
         { c: "HELP", d: "Opens this reference manual.", e: "HELP" },
         { c: "REM", d: "Remark/Comment. Line is ignored by interpreter.", e: "10 REM SETUP VARIABLES" },
         { c: "VARS", d: "Lists all currently defined variables.", e: "VARS" }
