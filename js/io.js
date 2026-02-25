@@ -269,6 +269,12 @@ export const IO = {
                     IO.prompt();
                 }
             }
+            else if (c === 'VIZ') {
+                import('./viz.js').then(({ VIZ }) => {
+                    VIZ.open(SYS.program);
+                });
+                IO.prompt();
+            }
             else if (c === 'NEW') { SYS.program = []; SYS.vars = {}; FS.currentFilename = null; SCREEN.clear(); IO.prompt(); }
             else if (c === 'COPY') {
                 // 1. Convert program objects back to text format in current internal order

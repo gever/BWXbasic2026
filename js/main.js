@@ -31,6 +31,23 @@ breakBtn.onclick = (e) => {
 window.onkeydown = (e) => {
     // Allow default key behavior if typing in the help search box or the editor is active
     if (EDITOR.active) return;
+
+    // 0. Close Overlays (ESC)
+    if (e.key === 'Escape') {
+        const helpOverlay = document.getElementById('help-overlay');
+        if (helpOverlay && helpOverlay.style.display === 'flex') {
+            helpOverlay.style.display = 'none';
+            document.getElementById('input-trap').focus();
+            return;
+        }
+        const vizOverlay = document.getElementById('viz-overlay');
+        if (vizOverlay && vizOverlay.style.display === 'flex') {
+            const vizBtn = document.getElementById('viz-close-btn');
+            if (vizBtn) vizBtn.click();
+            return;
+        }
+    }
+
     if (e.target && e.target.id === 'help-search') return;
     // 1. Handle Break (ESC)
     if (e.key === 'Escape' && SYS.running) {

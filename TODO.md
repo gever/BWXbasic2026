@@ -18,3 +18,9 @@
 - [ ] BUG: FUN body should be indented in the listing (and the editor?)
 - [X] BUG: GR_CANVAS_WIDTH and GR_CANVAS_HEIGHT (and other parameterless functions) are not working in math expressions.
 - [X] BUG: REPL doesn't keep track of the current filename (LOAD/SAVE/NEW not setting/using FS.currentFilename appropriately)
+- [ ] BUG: https://bwxbasic.org/BWXbasic_manual.html is not working to see the (github rendered version) of the markdown manual.
+- [ ] FEAT: restructure HELP screen to be iframe that loads the markdown manual (https://bwxbasic.org/BWXbasic_manual.html) and add a link to the repo (https://github.com/gever/BWXbasic2026)
+- [ ] FEAT: Add GR_HIDE_STOP and GR_SHOW_STOP (default to GR_SHOW_STOP) to allow programs to hide the stop button during execution.
+- [ ] FEAT: format FUN definitions with indentation (and maybe a different background color?) in the editor and listing.
+- [ ] FEAT: add '!' as shorthand for CALL
+- [ ] FEAT: add '?' as shorthand for PRINT
