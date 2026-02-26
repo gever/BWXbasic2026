@@ -24,4 +24,5 @@
 - [ ] FEAT: format FUN definitions with indentation (and maybe a different background color?) in the editor and listing.
 - [ ] FEAT: add '!' as shorthand for CALL
 - [ ] FEAT: add '?' as shorthand for PRINT
-- [ ] BUG: ```20 INPUT "What's your name? "; $NAME // 30 PRINT $NAME, "is a great name!"``` -- this prints "NaN is a great name!" - [X] BUG: LIST -100 should show the first 100 lines of the program, but it is also listing all of the un-numbered lines in mixed code. This affects all forms of LIST (e.g. LIST 100-200, LIST 200-, etc.)
+- [ ] BUG: ```20 INPUT "What's your name? "; $NAME // 30 PRINT $NAME, "is a great name!"``` -- this prints "NaN is a great name!" 
+- [X] BUG: LIST -100 should show the first 100 lines of the program, but it is also listing all of the un-numbered lines in mixed code. This affects all forms of LIST (e.g. LIST 100-200, LIST 200-, etc.)
