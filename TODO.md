@@ -22,7 +22,7 @@
 - [ ] FEAT: restructure HELP screen to be iframe that loads the markdown manual (https://bwxbasic.org/BWXbasic_manual.html) and add a link to the repo (https://github.com/gever/BWXbasic2026)
 - [ ] FEAT: Add GR_HIDE_STOP and GR_SHOW_STOP (default to GR_SHOW_STOP) to allow programs to hide the stop button during execution.
 - [ ] FEAT: format FUN definitions with indentation (and maybe a different background color?) in the editor and listing.
-- [ ] FEAT: add '!' as shorthand for CALL
-- [ ] FEAT: add '?' as shorthand for PRINT
+- [X] FEAT: add '!' as shorthand for CALL
+- [X] FEAT: add '?' as shorthand for PRINT
 - [X] BUG: ```20 INPUT "What's your name? "; $NAME // 30 PRINT $NAME, "is a great name!"``` -- this prints "NaN is a great name!" 
 - [X] BUG: LIST -100 should show the first 100 lines of the program, but it is also listing all of the un-numbered lines in mixed code. This affects all forms of LIST (e.g. LIST 100-200, LIST 200-, etc.)

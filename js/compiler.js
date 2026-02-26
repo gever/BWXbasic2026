@@ -131,7 +131,12 @@ export const Compiler = {
             if (cmdRaw === ':') continue; if (cmdRaw.toUpperCase() === 'REM' || cmdRaw === "'") break;
 
             // Normalize command to uppercase for switching
-            const cmd = cmdRaw.toUpperCase();
+            let cmd = cmdRaw.toUpperCase();
+
+            // Handle shorthands
+            if (cmd === '?') cmd = 'PRINT';
+            else if (cmd === '!') cmd = 'CALL';
+
             let chunk = "";
 
             if (cmd === 'PRINT') {

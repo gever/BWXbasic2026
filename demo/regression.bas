@@ -474,6 +474,11 @@ IF Y <> 500 THEN ERRORS = ERRORS + 1 : PRINT "Error: Outer Y was mutated! Got ";
 CALL MUTATE_GLOBAL()
 IF Z <> 999 THEN ERRORS = ERRORS + 1 : PRINT "Error: Function failed to mutate true global variable Z."
 
+2480 REM Test 17: Shorthand syntax (? and !)
+2485 LET SHTH_TEST = 0
+2490 ! MUTATE_SHORTHAND()
+2495 IF SHTH_TEST <> 777 THEN ERRORS = ERRORS + 1 : ? "Error: ! shorthand failed to CALL MUTATE_SHORTHAND"
+
 2510 REM Skip to final summary section
 2520 GOTO 3000
 
@@ -483,6 +488,10 @@ RETURN TOTAL
 
 FUN MUTATE_GLOBAL()
   LET Z = 999
+RETURN
+
+FUN MUTATE_SHORTHAND()
+  LET SHTH_TEST = 777
 RETURN
 
 1999 GOTO -1 : REM This line should never be executed
