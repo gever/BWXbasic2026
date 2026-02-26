@@ -1,7 +1,7 @@
 import { LIB } from './library.js';
 
 export const Tokenizer = {
-    regex: /([0-9]*\.?[0-9]+)|(".*?")|([a-zA-Z][a-zA-Z0-9_]*\$?)|(<=|>=|<>|<|>|=)|([\+\-\*\/\^])|(\()|(\))|(:)|(,)|(;)|(')/g,
+    regex: /([0-9]*\.?[0-9]+)|(".*?")|([a-zA-Z][a-zA-Z0-9_]*\$?)|(<=|>=|<>|<|>|=)|([\+\-\*\/\^])|(\()|(\))|(:)|(,)|(;)|(')|(\S)/g,
     tokenize: (str) => { const t = []; let m; while ((m = Tokenizer.regex.exec(str)) !== null) t.push(m[0]); return t; },
     scan: (str) => {
         const results = [];
