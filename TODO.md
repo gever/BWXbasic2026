@@ -12,7 +12,7 @@
 - [ ] FEAT: Uppercase all input (except quoted strings), keep canonical BASIC formatting internally, show user canonical even if the paste or edit in lowercase
 - [X] BUG: ```10 A$ = INKEY$(1)``` is generating an error at runtime
 - [X] FEAT: save code to CURRENT.BAS before running it
-- [ ] FEAT: add support for GR_RGB R, G, B (0-255) to set the current color
+- [X] FEAT: add support for GR_SET_COLOR GR_RGB R, G, B (0-255) to set the current color
 - [ ] FEAT: accept '?' as shorthand for PRINT
 - [ ] BUG: NEW should reset ENGINE.lastExecLine to zero
 - [ ] BUG: FUN body should be indented in the listing (and the editor?)
@@ -24,4 +24,4 @@
 - [ ] FEAT: format FUN definitions with indentation (and maybe a different background color?) in the editor and listing.
 - [ ] FEAT: add '!' as shorthand for CALL
 - [ ] FEAT: add '?' as shorthand for PRINT
-- [X] BUG: LIST -100 should show the first 100 lines of the program, but it is also listing all of the un-numbered lines in mixed code. This affects all forms of LIST (e.g. LIST 100-200, LIST 200-, etc.)
+- [ ] BUG: ```20 INPUT "What's your name? "; $NAME // 30 PRINT $NAME, "is a great name!"``` -- this prints "NaN is a great name!" - [X] BUG: LIST -100 should show the first 100 lines of the program, but it is also listing all of the un-numbered lines in mixed code. This affects all forms of LIST (e.g. LIST 100-200, LIST 200-, etc.)
