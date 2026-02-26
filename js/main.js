@@ -15,7 +15,7 @@ EDITOR.init();
 
 document.addEventListener('click', (e) => {
     if (e.target.id === 'help-search') return;
-    if (EDITOR.active || e.target.closest('#editor-overlay')) return;
+    if (EDITOR.active || e.target.closest('#editor-overlay') || e.target.closest('#js-overlay') || e.target.closest('#help-overlay') || e.target.closest('#viz-overlay')) return;
     inputTrap.focus();
 });
 breakBtn.onclick = (e) => {
