@@ -175,7 +175,10 @@ export const IO = {
                 }
 
                 let indent = 0;
+                let currentEffectiveLine = 0;
                 SYS.program.forEach(l => {
+                    if (l.line !== null) currentEffectiveLine = l.line;
+
                     // Calculate indentation
                     const tokens = Tokenizer.tokenize(l.src);
                     let tempIndent = indent;
@@ -196,13 +199,14 @@ export const IO = {
                             IO.print(`${l.line} `, false);
                         }
                     } else {
-                        // Un-numbered blocks (like FUN or inline nested closures) are technically line 0 natively inside arrays
-                        if (0 >= min && 0 <= max) {
+                        // Un-numbered blocks (like FUN or inline nested closures) natively sit inside arrays
+                        // We check them against the currentEffectiveLine they belong to.
+                        if (currentEffectiveLine >= min && currentEffectiveLine <= max) {
                             IO.print(`     `, false);
                         }
                     }
 
-                    const shouldDraw = (l.line !== null && l.line >= min && l.line <= max) || (l.line === null && 0 >= min && 0 <= max);
+                    const shouldDraw = (l.line !== null && l.line >= min && l.line <= max) || (l.line === null && currentEffectiveLine >= min && currentEffectiveLine <= max);
 
                     if (shouldDraw) {
                         // Draw Indentation

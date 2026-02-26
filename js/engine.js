@@ -71,6 +71,7 @@ export const ENGINE = {
         SYS.break = false;
         SYS.vars = {};
         SYS.arrays = {};
+        SYS.defFn = {};
         SYS.stack = [];
         SYS.forStack = {};
         SYS.lastExecLine = 0;

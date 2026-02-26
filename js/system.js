@@ -1,5 +1,5 @@
 export const SYS = {
-    vars: {}, arrays: {}, program: [], compiled: [],
+    vars: {}, arrays: {}, program: [], compiled: [], defFn: {},
     transpiledSource: "", // NEW: Storage for JSPEEK
     NIL: { _isNil: true, toString: () => "NIL" }, // NEW: Hash Table missing item constant
     pc: 0, labels: {}, stack: [], forStack: {},

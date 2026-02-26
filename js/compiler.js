@@ -78,6 +78,23 @@ export const Compiler = {
                     return `(await ENGINE.callFunction('${funcNameMatch}', [${fnArgs.join(',')}]))`;
                 }
 
+                // Handle DEF FN function calls
+                if (tu.startsWith('FN') && tu !== 'FUN') {
+                    let fnNameFull = tu;
+                    if (fnNameFull === 'FN') {
+                        fnNameFull += next().toUpperCase();
+                    }
+                    if (peek() === '(') {
+                        next(); // consume '('
+                        const fnArgs = [];
+                        if (peek() !== ')') do { fnArgs.push(parseExp()); if (peek() === ',') next(); else break; } while (true);
+                        next(); // consume ')'
+                        return `(SYS.defFn['${fnNameFull}'] ? SYS.defFn['${fnNameFull}'](${fnArgs.join(',')}) : 0)`;
+                    } else {
+                        return `(SYS.defFn['${fnNameFull}'] ? SYS.defFn['${fnNameFull}']() : 0)`;
+                    }
+                }
+
                 // Handle Array Access
                 if (peek() === '(') {
                     next();
@@ -284,6 +301,38 @@ export const Compiler = {
                     SYS.callArgs = null;
                     SYS.stack.push({ type: 'FUN', saved: _saved });
                 `;
+            }
+            else if (cmd === 'DEF') {
+                let fnNameFull = next().toUpperCase();
+                if (fnNameFull === 'FN') {
+                    fnNameFull += next().toUpperCase();
+                } else if (!fnNameFull.startsWith('FN')) {
+                    throw "SYNTAX";
+                }
+                const fnName = fnNameFull;
+                if (peek() !== '(') throw "SYNTAX";
+                next(); // consume '('
+                const params = [];
+                if (peek() !== ')') do { params.push(next()); if (peek() === ',') next(); else break; } while (true);
+                next(); // consume ')'
+                if (peek() !== '=') throw "SYNTAX";
+                next(); // consume '='
+
+                const expCode = Compiler.genExpression(tokens, ctx);
+
+                let df = `SYS.defFn['${fnName}'] = function(`;
+                if (params.length > 0) df += params.map(p => `_arg_${p}`).join(',');
+                df += `) { `;
+                params.forEach(p => {
+                    df += `let _save_${p} = SYS.vars['${p}']; SYS.vars['${p}'] = _arg_${p}; `;
+                });
+                df += `let _ret = ${expCode}; `;
+                params.forEach(p => {
+                    df += `if (_save_${p} === undefined) { delete SYS.vars['${p}']; } else { SYS.vars['${p}'] = _save_${p}; } `;
+                });
+                df += `return _ret; };`;
+
+                chunk = df;
             }
             else if (cmd === 'CALL') {
                 async = true;
