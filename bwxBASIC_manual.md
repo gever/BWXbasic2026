@@ -166,6 +166,8 @@ Arguments passed into a `FUN` signature temporarily overwrite global variables o
 *   `LEFT$(S$, N)`: First N chars.
 *   `RIGHT$(S$, N)`: Last N chars.
 *   `MID$(S$, I, N)`: N chars starting at index I (1-based).
+*   `UPPER$(S$)`: Convert string to uppercase.
+*   `LOWER$(S$)`: Convert string to lowercase.
 *   `STR$(N)`: Convert number to string.
 *   `VAL(S$)`: Convert string to number.
 *   `ASC(S$)`: ASCII code of first character.

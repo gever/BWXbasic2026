@@ -88,6 +88,12 @@
 550 IF RIGHT$(TESTSTR$, 5) <> "World" THEN ERRORS = ERRORS + 1 : PRINT "Error: RIGHT$(TESTSTR$, 5) failed"
 560 IF RIGHT$(TESTSTR$, 0) <> "" THEN ERRORS = ERRORS + 1 : PRINT "Error: RIGHT$(TESTSTR$, 0) not empty"
 
+562 REM UPPER$ and LOWER$ function tests
+564 IF UPPER$(TESTSTR$) <> "HELLO WORLD" THEN ERRORS = ERRORS + 1 : PRINT "Error: UPPER$(TESTSTR$) failed, got "; UPPER$(TESTSTR$)
+566 IF LOWER$(TESTSTR$) <> "hello world" THEN ERRORS = ERRORS + 1 : PRINT "Error: LOWER$(TESTSTR$) failed, got "; LOWER$(TESTSTR$)
+568 IF UPPER$("abc") <> "ABC" THEN ERRORS = ERRORS + 1 : PRINT "Error: UPPER$('abc') failed"
+569 IF LOWER$("XYZ") <> "xyz" THEN ERRORS = ERRORS + 1 : PRINT "Error: LOWER$('XYZ') failed"
+
 570 REM MID function tests
 580 IF MID$(TESTSTR$, 7, 5) <> "World" THEN ERRORS = ERRORS + 1 : PRINT "Error: MID$(TESTSTR$, 7, 5) failed"
 590 IF MID$(TESTSTR$, 1, 5) <> "Hello" THEN ERRORS = ERRORS + 1 : PRINT "Error: MID$(TESTSTR$, 1, 5) failed"

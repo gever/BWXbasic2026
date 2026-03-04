@@ -44,7 +44,7 @@ export const SYNTAX = {
 
         if (['ON', 'FOR', 'FORKEYS', 'NEXT', 'IF', 'THEN', 'ELSE', 'GOTO', 'GOSUB', 'RETURN', 'STEP', 'TO', 'END', 'STOP', 'NIL', 'FUN', 'CALL', 'DEF', 'AND', 'OR', '!'].includes(tu)) return SYNTAX.colors.KEYWORD;
 
-        if (['SIN', 'COS', 'TAN', 'ATN', 'EXP', 'LOG', 'SQR', 'ABS', 'SGN', 'INT', 'RND', 'RAND', 'LEN', 'LEFT$', 'RIGHT$', 'MID$', 'STR$', 'VAL', 'ASC', 'CHR$', 'INKEY', 'INKEY$', 'TIME', 'INSTR', 'GR_CANVAS', 'GR_GET_CANVAS', 'GR_CANVAS_WIDTH', 'GR_CANVAS_HEIGHT', 'GR_RGB'].includes(tu)) return SYNTAX.colors.FUNCTION;
+        if (['SIN', 'COS', 'TAN', 'ATN', 'EXP', 'LOG', 'SQR', 'ABS', 'SGN', 'INT', 'RND', 'RAND', 'LEN', 'LEFT$', 'RIGHT$', 'MID$', 'STR$', 'VAL', 'ASC', 'CHR$', 'UPPER$', 'LOWER$', 'INKEY', 'INKEY$', 'TIME', 'INSTR', 'GR_CANVAS', 'GR_GET_CANVAS', 'GR_CANVAS_WIDTH', 'GR_CANVAS_HEIGHT', 'GR_RGB'].includes(tu)) return SYNTAX.colors.FUNCTION;
 
         return SYNTAX.colors.DEFAULT;
     }

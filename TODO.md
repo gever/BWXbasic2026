@@ -26,3 +26,7 @@
 - [X] FEAT: add '?' as shorthand for PRINT
 - [X] BUG: ```20 INPUT "What's your name? "; $NAME // 30 PRINT $NAME, "is a great name!"``` -- this prints "NaN is a great name!" 
 - [X] BUG: LIST -100 should show the first 100 lines of the program, but it is also listing all of the un-numbered lines in mixed code. This affects all forms of LIST (e.g. LIST 100-200, LIST 200-, etc.)
+- [X] BUG: add missing AND/OR operators to transpiler and manual
+- [X] BUG: add missing LOWER$(*str-expr*) and UPPER$(*str-expr*) functions to transpiler and manual
+- [ ] FEAT: enforce indentation in the editor (e.g. 2 spaces per indent level)
+- [ ] BUG: paste sometimes causes the cursor to jump to the end of the file

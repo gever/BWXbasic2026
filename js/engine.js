@@ -55,7 +55,7 @@ export const ENGINE = {
                 funIndices.push(i);
             }
 
-            console.log(`Compiling line ${compileChunk.line}: ${compileChunk.src}`);
+            // console.log(`Compiling line ${compileChunk.line}: ${compileChunk.src}`);
             const f = Compiler.compile(compileChunk);
             SYS.compiled.push(f);
         });
