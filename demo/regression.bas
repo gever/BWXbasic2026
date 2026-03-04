@@ -161,6 +161,15 @@
 940 IF COMPOUND5 <> 2 THEN ERRORS = ERRORS + 1 : PRINT "Error: Compound IF true case - COMPOUND5 should be 2, got "; COMPOUND5
 945 IF COMPOUND6 <> 3 THEN ERRORS = ERRORS + 1 : PRINT "Error: Compound IF true case - COMPOUND6 should be 3, got "; COMPOUND6
 
+946 REM Test Nested DICT arrays
+947 DICT D1 = ("foo", 1), ("bar", 2)
+948 DICT D2 = ("nested", D1), ("val", 3)
+949 IF D2("val") <> 3 THEN ERRORS = ERRORS + 1 : PRINT "Error: DICT nested val failed"
+950 LET SUB = D2("nested")
+951 IF SUB("foo") <> 1 THEN ERRORS = ERRORS + 1 : PRINT "Error: DICT nested extraction failed"
+952 LET FMT$ = STR$(D1)
+953 IF FMT$ <> "{" + CHR$(34) + "foo" + CHR$(34) + " = 1, " + CHR$(34) + "bar" + CHR$(34) + " = 2}" THEN ERRORS = ERRORS + 1 : PRINT "Error: DICT to string formatting failed"
+
 950 REM Test 3: False condition with mixed statement types
 955 LET COMPOUND7 = 0 : LET COMPOUND8$ = "unchanged"
 960 IF 5 > 10 THEN COMPOUND7 = 99 : COMPOUND8$ = "changed" : PRINT "This should not print"

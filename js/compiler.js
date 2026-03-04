@@ -127,7 +127,7 @@ export const Compiler = {
                 }
 
                 // Handle Variables (Use raw 't' to preserve case)
-                return `(SYS.vars['${t}']!==undefined?SYS.vars['${t}']:0)`;
+                return `(SYS.arrays['${t}']!==undefined?SYS.arrays['${t}']:SYS.vars['${t}']!==undefined?SYS.vars['${t}']:0)`;
             }
             return "0";
         };

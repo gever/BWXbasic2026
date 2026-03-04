@@ -7,15 +7,17 @@ export const SYS = {
     lastDimArray: null, // NEW: Track last DIM initialized array for DATA
     running: false, break: false, inputCallback: null,
     getArray: (n, i) => {
-        if (!SYS.arrays[n]) throw `UNDEFINED VARIABLE ${n}`;
-        const isHash = SYS.arrays[n]._isHash;
-        if (isHash) return SYS.arrays[n][i] === undefined ? SYS.NIL : SYS.arrays[n][i];
-        return SYS.arrays[n][i] === undefined ? (n.endsWith('$') ? "" : 0) : SYS.arrays[n][i];
+        let arr = SYS.arrays[n] || SYS.vars[n];
+        if (!arr || typeof arr !== 'object') throw `UNDEFINED VARIABLE ${n}`;
+        const isHash = arr._isHash;
+        if (isHash) return arr[i] === undefined ? SYS.NIL : arr[i];
+        return arr[i] === undefined ? (n.endsWith('$') ? "" : 0) : arr[i];
     },
     setArray: (n, i, v) => {
-        if (!SYS.arrays[n]) throw `UNDEFINED VARIABLE ${n}`;
-        if (v === SYS.NIL) { delete SYS.arrays[n][i]; }
-        else { SYS.arrays[n][i] = v; }
+        let arr = SYS.arrays[n] || SYS.vars[n];
+        if (!arr || typeof arr !== 'object') throw `UNDEFINED VARIABLE ${n}`;
+        if (v === SYS.NIL) { delete arr[i]; }
+        else { arr[i] = v; }
     },
 
     // --- PRNG ---

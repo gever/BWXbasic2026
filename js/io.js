@@ -52,6 +52,23 @@ export const IO = {
             // Round to 3 decimals, strip trailing zeros
             return parseFloat(val.toFixed(3));
         }
+        if (typeof val === 'object' && val !== null) {
+            if (val._isNil) return "NIL";
+            if (Array.isArray(val)) {
+                return "[" + val.map(v => IO.format(v)).join(", ") + "]";
+            }
+            if (val._isHash) {
+                const parts = [];
+                for (const k in val) {
+                    if (k !== '_isHash') {
+                        let fv = IO.format(val[k]);
+                        if (typeof val[k] === 'string') fv = `"${fv}"`;
+                        parts.push(`"${k}" = ${fv}`);
+                    }
+                }
+                return "{" + parts.join(", ") + "}";
+            }
+        }
         return val;
     },
 

@@ -30,3 +30,5 @@
 - [X] BUG: add missing LOWER$(*str-expr*) and UPPER$(*str-expr*) functions to transpiler and manual
 - [ ] FEAT: enforce indentation in the editor (e.g. 2 spaces per indent level)
 - [ ] BUG: paste sometimes causes the cursor to jump to the end of the file
+- [X] FEAT: PRINT should support DICT type better. e.g. ```10 DICT D : D("foo") = 1 : PRINT D``` should print ```{"foo" = 1}```
+- [X] FEAT: added support for storing DICTs in arrays and DICTs
