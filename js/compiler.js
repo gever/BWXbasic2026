@@ -7,6 +7,26 @@ const AsyncFunction = Object.getPrototypeOf(async function () { }).constructor;
 export const Compiler = {
     genExpression: (tokens, ctx) => {
         const peek = () => tokens[ctx.idx], next = () => tokens[ctx.idx++];
+        const peekUpper = () => (tokens[ctx.idx] || "").toUpperCase();
+
+        const parseLogicalOR = () => {
+            let l = parseLogicalAND();
+            while (ctx.idx < tokens.length && peekUpper() === 'OR') {
+                next(); // consume OR
+                l = `(${l} | ${parseLogicalAND()}?1:0)`;
+            }
+            return l;
+        };
+
+        const parseLogicalAND = () => {
+            let l = parseExp();
+            while (ctx.idx < tokens.length && peekUpper() === 'AND') {
+                next(); // consume AND
+                l = `(${l} & ${parseExp()}?1:0)`;
+            }
+            return l;
+        };
+
         const parseExp = () => { let l = parseTerm(); while (ctx.idx < tokens.length && (peek() === '+' || peek() === '-')) l = `(${l} ${next()} ${parseTerm()})`; if (ctx.idx < tokens.length && ['=', '<', '>', '<=', '>=', '<>'].includes(peek())) { let op = next(), jop = op === '=' ? '===' : op === '<>' ? '!==' : op; l = `(${l} ${jop} ${parseExp()}?1:0)`; } return l; };
         const parseTerm = () => { let l = parsePower(); while (ctx.idx < tokens.length && (peek() === '*' || peek() === '/')) l = `(${l} ${next()} ${parsePower()})`; return l; };
         const parsePower = () => {
@@ -30,7 +50,7 @@ export const Compiler = {
                 return t;
             }
             if (t.startsWith('"')) return t;
-            if (t === '(') { const e = parseExp(); next(); return `(${e})`; }
+            if (t === '(') { const e = parseLogicalOR(); next(); return `(${e})`; }
             if (t === '-') return `-${parseFactor()}`;
             if (t === '+') return parseFactor();
 
@@ -44,7 +64,7 @@ export const Compiler = {
                 if (tu === 'INKEY$' || tu === 'INKEY') {
                     ctx.setAsync();
                     next(); // consume '('
-                    const mode = parseExp();
+                    const mode = parseLogicalOR();
                     next(); // consume ')'
                     return `(await IO.inkey(${mode}))`;
                 }
@@ -58,7 +78,7 @@ export const Compiler = {
                     const a = [];
                     if (peek() === '(') {
                         next(); // consume '('
-                        if (peek() !== ')') do { a.push(parseExp()); if (peek() === ',') next(); else break; } while (true);
+                        if (peek() !== ')') do { a.push(parseLogicalOR()); if (peek() === ',') next(); else break; } while (true);
                         if (peek() === ')') next(); // consume ')'
                     }
                     return `(${LIB[tu]})(${a.join(',')})`;
@@ -72,7 +92,7 @@ export const Compiler = {
                     const fnArgs = [];
                     if (peek() === '(') {
                         next(); // consume '('
-                        if (peek() !== ')') do { fnArgs.push(parseExp()); if (peek() === ',') next(); else break; } while (true);
+                        if (peek() !== ')') do { fnArgs.push(parseLogicalOR()); if (peek() === ',') next(); else break; } while (true);
                         next(); // consume ')'
                     }
                     return `(await ENGINE.callFunction('${funcNameMatch}', [${fnArgs.join(',')}]))`;
@@ -87,7 +107,7 @@ export const Compiler = {
                     if (peek() === '(') {
                         next(); // consume '('
                         const fnArgs = [];
-                        if (peek() !== ')') do { fnArgs.push(parseExp()); if (peek() === ',') next(); else break; } while (true);
+                        if (peek() !== ')') do { fnArgs.push(parseLogicalOR()); if (peek() === ',') next(); else break; } while (true);
                         next(); // consume ')'
                         return `(SYS.defFn['${fnNameFull}'] ? SYS.defFn['${fnNameFull}'](${fnArgs.join(',')}) : 0)`;
                     } else {
@@ -99,7 +119,7 @@ export const Compiler = {
                 if (peek() === '(') {
                     next();
                     const dims = [];
-                    if (peek() !== ')') do { dims.push(parseExp()); if (peek() === ',') next(); else break; } while (true);
+                    if (peek() !== ')') do { dims.push(parseLogicalOR()); if (peek() === ',') next(); else break; } while (true);
                     next();
                     // To handle multi-dimensional arrays without a complex descriptor, we can use a string key or flat math.
                     // let's just make the index a string joined by commas
@@ -111,7 +131,7 @@ export const Compiler = {
             }
             return "0";
         };
-        return parseExp();
+        return parseLogicalOR();
     },
     compile: (lineObj) => {
         // CHANGE: Do NOT uppercase the source string here.

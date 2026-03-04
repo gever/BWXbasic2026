@@ -64,6 +64,7 @@ export const HELP_DATA = {
         { c: "FUN..RETURN", d: "Define a sub-program function with local scoped arguments.", e: "FUN MATH(X) ... RETURN X" },
         { c: "CALL", d: "Execute a function natively returning isolated values.", e: "Z = CALL MATH(1)" },
         { c: "IF...THEN", d: "Conditional execution.", e: "10 IF A > 10 THEN GOTO 50" },
+        { c: "AND / OR", d: "Logical operators for multiple conditions.", e: "10 IF A > 10 AND A < 20 THEN GOTO 50" },
         { c: "FOR...NEXT", d: "Loop structure.", e: "10 FOR I=1 TO 10 STEP 2 ... 50 NEXT I" },
         { c: "DELAY", d: "Pauses execution for M milliseconds.", e: "10 DELAY 500" },
         { c: "END", d: "Stops program execution.", e: "99 END" },

@@ -131,6 +131,16 @@
 886 REM Test compound IF-THEN statements (the bug case)
 887 REM ================================================
 
+888 REM Test AND and OR Logical Operators
+889 LET TESTED = 0 : IF 1 = 1 AND 2 = 2 THEN TESTED = 1
+890 IF TESTED <> 1 THEN ERRORS = ERRORS + 1 : PRINT "Error: 1=1 AND 2=2 failed"
+891 LET TESTED = 0 : IF 1 = 2 AND 1 = 1 THEN TESTED = 1
+892 IF TESTED <> 0 THEN ERRORS = ERRORS + 1 : PRINT "Error: 1=2 AND 1=1 executed"
+893 LET TESTED = 0 : IF 1 = 2 OR 2 = 2 THEN TESTED = 1
+894 IF TESTED <> 1 THEN ERRORS = ERRORS + 1 : PRINT "Error: 1=2 OR 2=2 failed"
+895 LET TESTED = 0 : IF 1 = 2 OR 2 = 3 THEN TESTED = 1
+896 IF TESTED <> 0 THEN ERRORS = ERRORS + 1 : PRINT "Error: 1=2 OR 2=3 executed"
+
 890 REM Test 1: False condition should skip all statements on line
 895 LET COMPOUND1 = 0 : LET COMPOUND2 = 0 : LET COMPOUND3 = 0
 900 IF 1 = 2 THEN COMPOUND1 = 1 : COMPOUND2 = 1 : COMPOUND3 = 1

@@ -78,6 +78,13 @@ Conditional execution.
 20 IF Name$ = "BOB" THEN GOTO 100
 ```
 
+### AND / OR Logical Operators
+Combine multiple conditions.
+```basic
+10 IF A > 10 AND A < 20 THEN PRINT "IN RANGE"
+20 IF B = 1 OR B = 2 THEN PRINT "VALID OPTION"
+```
+
 ### FOR ... NEXT
 Loops.
 ```basic
