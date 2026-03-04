@@ -5,5 +5,6 @@ export const DEMOS = {
     "MIXED.BAS": "demo/mixed.bas",
     "PALETTE.BAS": "demo/palette.bas",
     "GRAPHICS_API.BAS": "demo/graphics_api.bas",
-    "REGRESSION.BAS": "demo/regression.bas"
+    "REGRESSION.BAS": "demo/regression.bas",
+    "DICT.BAS": "demo/dict.bas"
 };
