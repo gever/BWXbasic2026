@@ -9,18 +9,32 @@ bwxBASIC is a modern web-based implementation of BASIC, inspired by Applesoft BA
     *   `C = -50`
 *   **Strings**: Text enclosed in double quotes. Variable names must end with `$`.
     *   `N$ = "bwxBASIC"`
-*   **Arrays**: Defined with `DIM`. Zero-indexed.
-    *   `DIM A(10)` (Create array with 11 array slots, 0-10)
-    *   `A(0) = 99`
-    *   **Array Initialization**: Arrays can be pre-filled using `=` instead of `()`.
-        *   `DIM B = 1, 2, 3` (Creates array `B` with elements `B(0)=1, B(1)=2, B(2)=3`)
-    *   **Appending (DATA)**: Appends values to the most recently `DIM` declared array.
-        *   `DATA 4, 5, 6` (Appends values `4, 5, 6` extending the previous array to size 6)
+*   **Arrays**: Defined with `DIM` for allocation or `ARRAY` for initialization. Zero-indexed.
+    *   **Allocation**: `DIM A(10)` (Creates array with 11 array slots, 0-10). Multi-dimensional supported: `DIM MAT(5, 5)`.
+    *   **Initialization**: `ARRAY A(1, 2, 3)` (Creates array `A` with elements `A(0)=1, A(1)=2, A(2)=3`).
+    *   **Multi-line Parsing**: Unbalanced parentheses allow multi-line initialization without stringing commands together:
+        ```basic
+        10 ARRAY A(
+        20   1, 2, 3
+        30 )
+        ```
 *   **Associative Arrays (Dictionaries)**: Defined with `DICT`.
-    *   **Initialization**: `DICT TBL = ("foo", 10), ("bar", 20)`
-    *   **Appending (DATA)**: Appends pairs to the last `DICT`. `DATA ("baz", 30)`
+    *   **Initialization**: `DICT TBL("foo", 10, "bar", 20)`
     *   **Deletion & Missing Keys**: Missing keys resolve to the constant `NIL`. Assigning `NIL` (e.g. `TBL("foo") = NIL`) removes the key.
     *   **Iteration**: Loop through keys using `FORKEYS K, TBL ... NEXT K`.
+
+## 1.5. DATA, READ, and RESTORE
+
+For bulk data loading into Arrays or Dicts, you can embed `DATA` variables in your programs.
+*   **DATA**: Stores unexecuted static values in memory. String keys do not require tuples. `DATA 1, 2, "key", 99`.
+*   **READ**: Reads `N` items sequentially from `DATA` into an instantiated array or dict. 
+    *   **Arguments**: `READ <Variable>, <Count> [, <Start Indices...>]`
+    *   *Examples*: 
+        *   `READ R_MAT, 10` reads 10 values linearly. 
+        *   `READ R_MAT, 10, 2, 0` reads 10 values into a 2D matrix starting at row `2`, column `0`. The index wraps correctly across dimensions.
+*   **RESTORE**: Repositions the data pointer.
+    *   `RESTORE 50` resets the pointer to read from line `50`.
+    *   `RESTORE` with no arguments resets the reading pointer to the very first `DATA` item in the file.
 
 ## 2. Input / Output
 
@@ -248,6 +262,8 @@ bwxBASIC supports multiple isolated drawing buffers, enabling double-buffering a
 *   `DOWNLOAD "NAME"`: Download .BAS file to computer.
 *   `WHERE`: Show line number of last stop.
 *   `VARS`: Lists all currently defined variables.
+*   `READ`: Read values from DATA arrays into variables.
+*   `RESTORE`: Reset the data loading pointer to a specific line.
 *   `HELP`: Show internal help.
 *   `JSECHO`: Toggle console logging (for debugging).
 *   `JSPEEK`: See what your BASIC code looks like in JavaScript.

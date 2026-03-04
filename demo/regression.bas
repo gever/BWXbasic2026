@@ -162,8 +162,8 @@
 945 IF COMPOUND6 <> 3 THEN ERRORS = ERRORS + 1 : PRINT "Error: Compound IF true case - COMPOUND6 should be 3, got "; COMPOUND6
 
 946 REM Test Nested DICT arrays
-947 DICT D1 = ("foo", 1), ("bar", 2)
-948 DICT D2 = ("nested", D1), ("val", 3)
+947 DICT D1("foo", 1, "bar", 2)
+948 DICT D2("nested", D1, "val", 3)
 949 IF D2("val") <> 3 THEN ERRORS = ERRORS + 1 : PRINT "Error: DICT nested val failed"
 950 LET SUB = D2("nested")
 951 IF SUB("foo") <> 1 THEN ERRORS = ERRORS + 1 : PRINT "Error: DICT nested extraction failed"
@@ -454,9 +454,9 @@
 2105 IF LARGE(50) <> 51 THEN ERRORS = ERRORS + 1 : PRINT "Error: LARGE(50) should be 51, got "; LARGE(50)
 2110 IF LARGE(100) <> 101 THEN ERRORS = ERRORS + 1 : PRINT "Error: LARGE(100) should be 101, got "; LARGE(100)
 
-2115 REM Test 13: DIM A = 1, 2, 3 and DATA statement
-2120 DIM PREARR = 10, 20, 30
-2125 DATA 40, 50, 60
+2115 REM Test 13: ARRAY A(1, 2, 3) statement
+2120 ARRAY PREARR(10, 20, 30,
+2125 40, 50, 60)
 2130 IF PREARR(0) <> 10 THEN ERRORS = ERRORS + 1 : PRINT "Error: PREARR(0) should be 10, got "; PREARR(0)
 2135 IF PREARR(2) <> 30 THEN ERRORS = ERRORS + 1 : PRINT "Error: PREARR(2) should be 30, got "; PREARR(2)
 2140 IF PREARR(5) <> 60 THEN ERRORS = ERRORS + 1 : PRINT "Error: PREARR(5) should be 60, got "; PREARR(5)
@@ -468,8 +468,10 @@
 2148 IF M3(0) <> 33 THEN ERRORS = ERRORS + 1 : PRINT "Error: M3(0) should be 33, got "; M3(0)
 
 2145 REM Test 14: Hash Tables
-2150 DICT TBL = ("foo", 10), ("bar", 20)
-2155 DATA ("baz", 30)
+2150 DICT TBL(
+2151   "foo", 10,
+2152   "bar", 20,
+2155   "baz", 30)
 2160 IF TBL("foo") <> 10 THEN ERRORS = ERRORS + 1 : PRINT "Error: TBL('foo') should be 10, got "; TBL("foo")
 2165 LET TBL("foo") = NIL
 2170 IF TBL("foo") <> NIL THEN ERRORS = ERRORS + 1 : PRINT "Error: TBL('foo') should be deleted and return NIL."
@@ -481,13 +483,39 @@
 2200 LET TBL = NIL
 2205 IF TBL("bar") <> NIL THEN ERRORS = ERRORS + 1 : PRINT "Error: TBL('bar') should be NIL after whole table clear."
 
-2210 REM Test 15: Internal Order Indexing
-2220 LET X = 0
+2205 IF TBL("bar") <> NIL THEN ERRORS = ERRORS + 1 : PRINT "Error: TBL('bar') should be NIL after whole table clear."
+
+2210 REM Test 15: RESTORE, READ and DATA
+2212 DIM R_ARR(5), R_MAT(2, 2)
+2214 DICT R_DICT
+2215 RESTORE 2220
+2216 READ R_ARR, 5
+2218 READ R_MAT, 4, 1, 0
+2219 READ R_DICT, 2
+2220 DATA 100, 200, 300, 400, 500
+2222 DATA 11, 12, 20, 21
+2224 DATA "key1", 99, "key2", 100
+2226 IF R_ARR(0) <> 100 THEN ERRORS = ERRORS + 1 : PRINT "Error: RESTORE/READ failed for R_ARR(0) = "; R_ARR(0)
+2228 IF R_ARR(4) <> 500 THEN ERRORS = ERRORS + 1 : PRINT "Error: RESTORE/READ failed for R_ARR(4) = "; R_ARR(4)
+2230 IF R_MAT(1, 0) <> 11 THEN ERRORS = ERRORS + 1 : PRINT "Error: READ multi-dim start failed for R_MAT(1, 0) = "; R_MAT(1, 0)
+2232 IF R_MAT(2, 0) <> 21 THEN ERRORS = ERRORS + 1 : PRINT "Error: READ multi-dim wrap failed for R_MAT(2, 0) = "; R_MAT(2, 0)
+2234 IF R_DICT("key1") <> 99 THEN ERRORS = ERRORS + 1 : PRINT "Error: READ dict failed for R_DICT('key1') = "; R_DICT("key1")
+2236 IF R_DICT("key2") <> 100 THEN ERRORS = ERRORS + 1 : PRINT "Error: READ dict failed for R_DICT('key2') = "; R_DICT("key2")
+2238 RESTORE
+2239 LET R_DYN = DIM(2)
+2241 READ R_DYN, 3
+2243 IF R_DYN(0) <> 100 THEN ERRORS = ERRORS + 1 : PRINT "Error: READ LET failed for R_DYN(0) = "; R_DYN(0)
+2244 RESTORE
+2246 READ R_ARR, 1
+2248 IF R_ARR(0) <> 100 THEN ERRORS = ERRORS + 1 : PRINT "Error: Default RESTORE failed for R_ARR(0) = "; R_ARR(0)
+
+2245 REM Test 16: Internal Order Indexing
+2250 LET X = 0
 LoopBlock: LET X = X + 1
 IF X < 3 THEN LoopBlock
-GOTO 2250
-2240 GOTO 2210
-2250 IF X <> 3 THEN ERRORS = ERRORS + 1 : PRINT "Error: Un-numbered interleaving failed."
+GOTO 2270
+2260 GOTO 2245
+2270 IF X <> 3 THEN ERRORS = ERRORS + 1 : PRINT "Error: Un-numbered interleaving failed."
 
 2260 REM Test 16: User Functions and Scoping
 LET X = 100

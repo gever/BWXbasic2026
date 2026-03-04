@@ -4,8 +4,44 @@ export const SYS = {
     NIL: { _isNil: true, toString: () => "NIL" }, // NEW: Hash Table missing item constant
     pc: 0, labels: {}, stack: [], forStack: {},
     lastExecLine: 0, // NEW: Track last executed line for WHERE
-    lastDimArray: null, // NEW: Track last DIM initialized array for DATA
+    dataStore: [], dataPtr: 0, // NEW: Store for DATA statements and pointer
     running: false, break: false, inputCallback: null,
+    allocArray: (...dims) => {
+        const build = (dIdx) => {
+            if (dIdx >= dims.length) return undefined;
+            return Array.from({ length: dims[dIdx] + 1 }, () => build(dIdx + 1));
+        };
+        return dims.length ? build(0) : [];
+    },
+    writeAndAdvanceIndices: (arr, indices, val) => {
+        if (!Array.isArray(arr)) throw "NOT AN ARRAY";
+        let curr = arr;
+        let depth = 0;
+
+        while (Array.isArray(curr)) {
+            curr = curr[0];
+            depth++;
+        }
+        while (indices.length < depth) indices.push(0);
+
+        curr = arr;
+        for (let i = 0; i < indices.length - 1; i++) {
+            if (curr[indices[i]] === undefined) curr[indices[i]] = [];
+            curr = curr[indices[i]];
+        }
+        curr[indices[indices.length - 1]] = val;
+        if (indices.length > 1) {
+            arr[indices.join(',')] = val;
+        }
+
+        for (let i = indices.length - 1; i >= 0; i--) {
+            indices[i]++;
+            let level = arr;
+            for (let j = 0; j < i; j++) level = level[indices[j]];
+            if (!Array.isArray(level) || indices[i] < level.length) return;
+            indices[i] = 0; // Wrap around and let the next inner dimension increment
+        }
+    },
     getArray: (n, i) => {
         let arr = SYS.arrays[n] || SYS.vars[n];
         if (!arr || typeof arr !== 'object') throw `UNDEFINED VARIABLE ${n}`;

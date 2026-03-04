@@ -40,7 +40,7 @@ export const SYNTAX = {
         const tu = token.toUpperCase();
         if (tu === 'REM' || token === "'") return SYNTAX.colors.COMMENT;
 
-        if (['PRINT', 'INPUT', 'LET', 'DIM', 'DICT', 'DATA', 'HOME', 'CLS', 'GR_CLEAR', 'GR_CLS', 'GR_COLOR', 'GR_MOVETO', 'GR_LINETO', 'GR_RECT', 'GR_FRECT', 'GR_ELLIPSE', 'GR_FELLIPSE', 'GR_TRI', 'GR_FTRI', 'GR_PRINT', 'GR_FONT', 'GR_COPY', 'GR_SET_CANVAS', 'GR_FREE', 'HGR', 'HGR2', 'TEXT', 'HCOLOR', 'HPLOT', 'VTAB', 'HTAB', 'SETPOS', 'SAVE', 'LOAD', 'DIR', 'CATALOG', 'DOWNLOAD', 'UPLOAD', 'JSECHO', 'DEL', 'SEED', 'DELAY', 'STOP', '?'].includes(tu)) return SYNTAX.colors.COMMAND;
+        if (['PRINT', 'INPUT', 'LET', 'DIM', 'DICT', 'ARRAY', 'READ', 'RESTORE', 'DATA', 'HOME', 'CLS', 'GR_CLEAR', 'GR_CLS', 'GR_COLOR', 'GR_MOVETO', 'GR_LINETO', 'GR_RECT', 'GR_FRECT', 'GR_ELLIPSE', 'GR_FELLIPSE', 'GR_TRI', 'GR_FTRI', 'GR_PRINT', 'GR_FONT', 'GR_COPY', 'GR_SET_CANVAS', 'GR_FREE', 'HGR', 'HGR2', 'TEXT', 'HCOLOR', 'HPLOT', 'VTAB', 'HTAB', 'SETPOS', 'SAVE', 'LOAD', 'DIR', 'CATALOG', 'DOWNLOAD', 'UPLOAD', 'JSECHO', 'DEL', 'SEED', 'DELAY', 'STOP', '?'].includes(tu)) return SYNTAX.colors.COMMAND;
 
         if (['ON', 'FOR', 'FORKEYS', 'NEXT', 'IF', 'THEN', 'ELSE', 'GOTO', 'GOSUB', 'RETURN', 'STEP', 'TO', 'END', 'STOP', 'NIL', 'FUN', 'CALL', 'DEF', 'AND', 'OR', '!'].includes(tu)) return SYNTAX.colors.KEYWORD;
 

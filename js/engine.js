@@ -4,13 +4,33 @@ import { GRAPHICS } from './graphics.js';
 import { FS } from './fs.js';
 import { Compiler } from './compiler.js';
 import { SCREEN } from './screen.js';
+import { Tokenizer } from './parser.js';
 
 export const ENGINE = {
     // NEW: Helper to generate source for JSPEEK without running
     generateOnly: () => {
         let fullSource = "// APPLESCRIPT -> JAVASCRIPT TRANSPILER OUTPUT\n\n";
+        SYS.dataStore = [];
+        SYS.dataPtr = 0;
 
-        SYS.program.forEach(lineObj => {
+        const preprocessed = [];
+        let pCount = 0;
+        let mergeIdx = -1;
+        for (let i = 0; i < SYS.program.length; i++) {
+            const x = SYS.program[i];
+            let chunk = { line: x.line, src: x.src };
+            if (pCount > 0 && mergeIdx !== -1) {
+                preprocessed[mergeIdx].src += " " + x.src;
+                chunk.src = "' CONTINUATION";
+            } else { mergeIdx = i; }
+            const tokens = Tokenizer.tokenize(chunk.src === "' CONTINUATION" ? preprocessed[mergeIdx].src : chunk.src);
+            pCount = 0;
+            for (const t of tokens) { if (t === '(') pCount++; else if (t === ')') pCount--; }
+            if (pCount < 0) pCount = 0;
+            preprocessed.push(chunk);
+        }
+
+        preprocessed.forEach(lineObj => {
             fullSource += `// --- LINE ${lineObj.line}: ${lineObj.src} ---\n`;
 
             // Temporary object for compilation preview to strip labels
@@ -18,6 +38,25 @@ export const ENGINE = {
             const labelMatch = x.src.match(/^\s*([A-Za-z_][A-Za-z0-9_]*)\s*:(.*)$/);
             if (labelMatch) {
                 x.src = labelMatch[2].trim() || "REM";
+            }
+
+            if (typeof x.src === 'string' && x.src.toUpperCase().trim().startsWith('DATA')) {
+                const dataTokens = Tokenizer.tokenize(x.src);
+                let ctxIdx = 1; // Skip 'DATA'
+                while (ctxIdx < dataTokens.length) {
+                    const peek = () => dataTokens[ctxIdx];
+                    const next = () => dataTokens[ctxIdx++];
+                    const expTokens = [];
+                    while (ctxIdx < dataTokens.length && peek() !== ',') {
+                        expTokens.push(next());
+                    }
+                    if (expTokens.length > 0) {
+                        const tmpCtx = { idx: 0, jsLoops: [] };
+                        const expSrc = Compiler.genExpression(expTokens, tmpCtx);
+                        SYS.dataStore.push({ line: x.line, src: expSrc });
+                    }
+                    if (peek() === ',') next();
+                }
             }
 
             // Compile to get the body attached
@@ -33,9 +72,27 @@ export const ENGINE = {
     run: async () => {
         FS.save("CURRENT.BAS", true);
         SYS.compiled = []; SYS.labels = {}; SYS.funSkipMap = {};
+        SYS.dataStore = []; SYS.dataPtr = 0;
         const funIndices = [];
 
-        SYS.program.forEach((x, i) => {
+        const preprocessed = [];
+        let pCount = 0;
+        let mergeIdx = -1;
+        for (let i = 0; i < SYS.program.length; i++) {
+            const x = SYS.program[i];
+            let chunk = { line: x.line, src: x.src };
+            if (pCount > 0 && mergeIdx !== -1) {
+                preprocessed[mergeIdx].src += " " + x.src;
+                chunk.src = "' CONTINUATION";
+            } else { mergeIdx = i; }
+            const tokens = Tokenizer.tokenize(chunk.src === "' CONTINUATION" ? preprocessed[mergeIdx].src : chunk.src);
+            pCount = 0;
+            for (const t of tokens) { if (t === '(') pCount++; else if (t === ')') pCount--; }
+            if (pCount < 0) pCount = 0;
+            preprocessed.push(chunk);
+        }
+
+        preprocessed.forEach((x, i) => {
             if (x.line !== null) SYS.labels[x.line] = i;
 
             // Clone x locally to prevent destructive global mapping out of SYS.program
@@ -53,6 +110,25 @@ export const ENGINE = {
             if (funMatch) {
                 SYS.labels[funMatch[1].toUpperCase()] = i;
                 funIndices.push(i);
+            }
+
+            if (typeof compileChunk.src === 'string' && compileChunk.src.toUpperCase().trim().startsWith('DATA')) {
+                const dataTokens = Tokenizer.tokenize(compileChunk.src);
+                let ctxIdx = 1; // Skip 'DATA'
+                while (ctxIdx < dataTokens.length) {
+                    const peek = () => dataTokens[ctxIdx];
+                    const next = () => dataTokens[ctxIdx++];
+                    const expTokens = [];
+                    while (ctxIdx < dataTokens.length && peek() !== ',') {
+                        expTokens.push(next());
+                    }
+                    if (expTokens.length > 0) {
+                        const tmpCtx = { idx: 0, jsLoops: [] };
+                        const expSrc = Compiler.genExpression(expTokens, tmpCtx);
+                        SYS.dataStore.push({ line: compileChunk.line, src: expSrc });
+                    }
+                    if (peek() === ',') next();
+                }
             }
 
             // console.log(`Compiling line ${compileChunk.line}: ${compileChunk.src}`);

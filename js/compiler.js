@@ -84,6 +84,45 @@ export const Compiler = {
                     return `(${LIB[tu]})(${a.join(',')})`;
                 }
 
+                if (tu === 'DIM') {
+                    const dims = [];
+                    if (peek() === '(') {
+                        next();
+                        if (peek() !== ')') do { dims.push(parseLogicalOR()); if (peek() === ',') next(); else break; } while (true);
+                        if (peek() === ')') next();
+                    }
+                    return `SYS.allocArray(${dims.join(',')})`;
+                }
+
+                if (tu === 'ARRAY') {
+                    const vals = [];
+                    if (peek() === '(') {
+                        next();
+                        if (peek() !== ')') do { vals.push(parseLogicalOR()); if (peek() === ',') next(); else break; } while (true);
+                        if (peek() === ')') next();
+                    }
+                    return `([${vals.join(',')}])`;
+                }
+
+                if (tu === 'DICT') {
+                    const pairs = [];
+                    if (peek() === '(') {
+                        next();
+                        if (peek() !== ')') do {
+                            const k = parseLogicalOR();
+                            if (peek() === ',') next(); else break;
+                            const v = parseLogicalOR();
+                            pairs.push({ k, v });
+                            if (peek() === ',') next(); else break;
+                        } while (true);
+                        if (peek() === ')') next();
+                    }
+                    let obj = "{ _isHash: true";
+                    for (const p of pairs) { obj += `, [${p.k}]: ${p.v}`; }
+                    obj += " }";
+                    return `(${obj})`;
+                }
+
                 // Handle CALL Function Expressions
                 if (tu === 'CALL') {
                     ctx.setAsync();
@@ -481,77 +520,125 @@ export const Compiler = {
                 let init = "";
                 while (ctx.idx < tokens.length) {
                     const v = next(); // name
-                    if (peek() === '=') {
-                        next(); // consume '='
-                        const vals = [];
-                        while (ctx.idx < tokens.length) {
-                            vals.push(Compiler.genExpression(tokens, ctx));
-                            if (peek() === ',') next(); // consume ','
-                            else break;
-                        }
-                        init += `SYS.arrays['${v}']=[${vals.join(',')}]; SYS.lastDimArray='${v}'; `;
-                        break; // Important: Array initialization (DIM A = 1, 2) consumes the rest of the statement, cannot chain other array declarations after it
-                    } else if (peek() === '(') {
+                    if (peek() === '(') {
                         next(); // '('
                         const dims = [];
-                        while (ctx.idx < tokens.length) {
+                        while (ctx.idx < tokens.length && peek() !== ')') {
                             dims.push(Compiler.genExpression(tokens, ctx));
                             if (peek() === ',') next(); // consume ','
                             else break;
                         }
-                        next(); // ')'
-                        init += `SYS.arrays['${v}']={}; SYS.lastDimArray='${v}'; `;
+                        if (peek() === ')') next(); // ')'
+                        init += `SYS.arrays['${v}']=SYS.allocArray(${dims.join(',')}); `;
                         if (peek() === ',') next(); // Consume ',' for next definition
+                        else break;
+                    } else if (peek() === '=') {
+                        next(); // consume '='
+                        const exp = Compiler.genExpression(tokens, ctx);
+                        init += `SYS.arrays['${v}']=${exp}; `;
+                        if (peek() === ',') next();
                         else break;
                     } else {
                         // Unsized array declaration (e.g. DIM A)
-                        init += `SYS.arrays['${v}']={}; SYS.lastDimArray='${v}'; `;
+                        init += `SYS.arrays['${v}']=[]; `;
                         if (peek() === ',') next(); // Consume ',' for next definition
                         else break;
                     }
                 }
                 chunk = init;
             }
+            else if (cmd === 'ARRAY') {
+                const v = next(); // name
+                if (peek() === '(') {
+                    next(); // consume '('
+                    const vals = [];
+                    while (ctx.idx < tokens.length && peek() !== ')') {
+                        vals.push(Compiler.genExpression(tokens, ctx));
+                        if (peek() === ',') next(); // consume ','
+                        else break;
+                    }
+                    if (peek() === ')') next(); // consume ')'
+                    chunk = `SYS.arrays['${v}']=[${vals.join(',')}]; `;
+                } else if (peek() === '=') {
+                    next(); // consume '='
+                    const exp = Compiler.genExpression(tokens, ctx);
+                    chunk = `SYS.arrays['${v}']=${exp}; `;
+                } else {
+                    throw "SYNTAX";
+                }
+            }
             else if (cmd === 'DICT') {
                 const v = next(); // name
-                if (peek() === '=') next(); // consume '='
-                const pairs = [];
-                while (ctx.idx < tokens.length) {
-                    if (peek() === '(') {
-                        next();
+                if (peek() === '(') {
+                    next(); // consume '('
+                    const pairs = [];
+                    while (ctx.idx < tokens.length && peek() !== ')') {
                         const k = Compiler.genExpression(tokens, ctx);
-                        if (peek() === ',') next();
+                        if (peek() === ',') next(); else break;
                         const val = Compiler.genExpression(tokens, ctx);
-                        if (peek() === ')') next();
                         pairs.push({ k, val });
+                        if (peek() === ',') next();
+                        else break;
                     }
-                    if (peek() === ',') next();
-                    else break;
+                    if (peek() === ')') next(); // consume ')'
+                    let init = `SYS.arrays['${v}'] = { _isHash: true }; `;
+                    pairs.forEach(p => { init += `SYS.arrays['${v}'][${p.k}] = ${p.val}; `; });
+                    chunk = init;
+                } else if (peek() === '=') {
+                    next(); // consume '='
+                    const exp = Compiler.genExpression(tokens, ctx);
+                    chunk = `SYS.arrays['${v}']=${exp}; `;
+                } else {
+                    chunk = `SYS.arrays['${v}'] = { _isHash: true }; `;
                 }
-                let init = `SYS.arrays['${v}'] = { _isHash: true }; SYS.lastDimArray='${v}'; `;
-                pairs.forEach(p => {
-                    init += `SYS.arrays['${v}'][${p.k}] = ${p.val}; `;
-                });
-                chunk = init;
             }
             else if (cmd === 'DATA') {
-                let init = `if(!SYS.lastDimArray) throw "DATA WITHOUT DIM/DICT"; var a = SYS.arrays[SYS.lastDimArray]; `;
-                while (ctx.idx < tokens.length) {
-                    if (peek() === '(') {
-                        next();
-                        const k = Compiler.genExpression(tokens, ctx);
-                        if (peek() === ',') next();
-                        const val = Compiler.genExpression(tokens, ctx);
-                        if (peek() === ')') next();
-                        init += `if(a._isHash) a[${k}] = ${val}; else throw "DATA TUPLE ON NON-DICT ARRAY"; `;
-                    } else {
-                        const val = Compiler.genExpression(tokens, ctx);
-                        init += `if(Array.isArray(a)) a.push(${val}); else throw "DATA SCALAR ON DICT ARRAY"; `;
-                    }
-                    if (peek() === ',') next();
-                    else break;
+                while (ctx.idx < tokens.length && ![':', "'", 'THEN', 'ELSE'].includes(peekUpper())) {
+                    next();
                 }
-                chunk = init;
+                chunk = "";
+            }
+            else if (cmd === 'RESTORE') {
+                if (ctx.idx < tokens.length && ![':', "'", 'THEN', 'ELSE'].includes(peekUpper())) {
+                    const lineExp = Compiler.genExpression(tokens, ctx);
+                    chunk = `var _rl = ${lineExp}; SYS.dataPtr = 0; for(let i=0; i<SYS.dataStore.length; i++) { if(SYS.dataStore[i].line >= _rl) { SYS.dataPtr = i; break; } }`;
+                } else {
+                    chunk = `SYS.dataPtr = 0;`;
+                }
+            }
+            else if (cmd === 'READ') {
+                const v = next(); // variable name
+                if (peek() === ',') next();
+                const countExp = Compiler.genExpression(tokens, ctx);
+
+                const startIndices = [];
+                while (ctx.idx < tokens.length && peek() === ',') {
+                    next(); // Consume ','
+                    startIndices.push(Compiler.genExpression(tokens, ctx));
+                }
+
+                chunk = `
+                    let _count = ${countExp};
+                    let _starts = [${startIndices.join(',')}];
+                    let _arr = SYS.arrays['${v}'] || SYS.vars['${v}'];
+                    if (!_arr) throw "UNDEFINED ARRAY OR DICT ${v}";
+                    
+                    if (_arr._isHash) {
+                        for (let _i=0; _i<_count; _i++) {
+                            if (!SYS.dataStore || SYS.dataPtr + 1 >= SYS.dataStore.length) { IO.print("?OUT OF DATA"); SYS.running = false; break; }
+                            let _k = eval(SYS.dataStore[SYS.dataPtr++].src);
+                            let _val = eval(SYS.dataStore[SYS.dataPtr++].src);
+                            _arr[_k] = _val;
+                        }
+                    } else {
+                        if (_starts.length === 0) _starts.push(0);
+                        for (let _i=0; _i<_count; _i++) {
+                            if (!SYS.dataStore || SYS.dataPtr >= SYS.dataStore.length) { IO.print("?OUT OF DATA"); SYS.running = false; break; }
+                            let _val = eval(SYS.dataStore[SYS.dataPtr++].src);
+                            SYS.writeAndAdvanceIndices(_arr, _starts, _val);
+                        }
+                    }
+                `;
             }
             else if (cmd === 'INPUT') { async = true; let p = "?"; if (peek().startsWith('"')) { p = next().replace(/"/g, ''); if (peek() === ';') next(); } const v = next(), str = v.endsWith('$'); chunk = `IO.print("${p}",false);var val=await IO.input();SYS.vars['${v}']=${str ? 'val' : 'parseFloat(val)'};`; }
 
@@ -714,7 +801,7 @@ export const Compiler = {
             else if (['LIST', 'RUN', 'EDIT', 'NEW', 'COPY', 'VARS', 'WHERE', 'JSPEEK'].includes(cmd)) {
                 chunk = `IO.print("?ILLEGAL COMMAND IN LINE ${lineObj.line}"); SYS.running=false;`;
             }
-            else chunk = `IO.print("?SYNTAX ERROR"); SYS.running=false;`;
+            else chunk = `IO.print("?SYNTAX ERROR IN LINE " + ${lineObj.line === null ? 'SYS.lastExecLine' : lineObj.line} + " COMMAND " + "${cmd}"); SYS.running=false;`;
 
             body += chunk + "\n";
         }
