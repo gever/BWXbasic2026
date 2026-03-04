@@ -11,7 +11,9 @@ bwxBASIC is a modern web-based implementation of BASIC, inspired by Applesoft BA
     *   `N$ = "bwxBASIC"`
 *   **Arrays**: Defined with `DIM` for allocation or `ARRAY` for initialization. Zero-indexed.
     *   **Allocation**: `DIM A(10)` (Creates array with 11 array slots, 0-10). Multi-dimensional supported: `DIM MAT(5, 5)`.
+        *   Can also be used as a function: `LET A = DIM(10)`
     *   **Initialization**: `ARRAY A(1, 2, 3)` (Creates array `A` with elements `A(0)=1, A(1)=2, A(2)=3`).
+        *   Can also be used as a function: `LET A = ARRAY(1, 2, 3)`
     *   **Multi-line Parsing**: Unbalanced parentheses allow multi-line initialization without stringing commands together:
         ```basic
         10 ARRAY A(
@@ -20,6 +22,7 @@ bwxBASIC is a modern web-based implementation of BASIC, inspired by Applesoft BA
         ```
 *   **Associative Arrays (Dictionaries)**: Defined with `DICT`.
     *   **Initialization**: `DICT TBL("foo", 10, "bar", 20)`
+        *   Can also be used as a function: `LET TBL = DICT("foo", 10)`
     *   **Deletion & Missing Keys**: Missing keys resolve to the constant `NIL`. Assigning `NIL` (e.g. `TBL("foo") = NIL`) removes the key.
     *   **Iteration**: Loop through keys using `FORKEYS K, TBL ... NEXT K`.
 
