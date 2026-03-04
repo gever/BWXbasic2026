@@ -812,7 +812,7 @@ export const Compiler = {
             f.generatedBody = body;
             return f;
         } catch (e) {
-            return () => { IO.print(`?COMPILE ERROR ${lineObj.line}`); SYS.running = false; };
+            return (SYS, IO) => { IO.print(`?COMPILE ERROR IN LINE ${lineObj.line}`); SYS.running = false; };
         }
     }
 };
