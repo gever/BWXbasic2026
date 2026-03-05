@@ -30,7 +30,6 @@ NEXT i
 REM --- Main Input Phase ---
 InputPhase:
   GOSUB DrawScene
-  GOSUB DrawScene
 
   GR_MOVETO 10, 20
   GR_COLOR = 7
