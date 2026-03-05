@@ -95,11 +95,10 @@ export const EDITOR = {
 
         // 2. Re-parse code identically to FS.load() behavior
         for (let line of lines) {
-            line = line.trim();
-            if (!line) continue;
+            line = line.trimRight();
 
             // Match optional line numbers explicitly
-            const m = line.match(/^(\d+)\s+(.*)/);
+            const m = line.match(/^\s*(\d+)\s+(.*)/);
             if (m) {
                 SYS.program.push({ line: parseInt(m[1]), src: m[2] });
             } else {

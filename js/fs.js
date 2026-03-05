@@ -43,9 +43,8 @@ export const FS = {
                 const lines = text.split(/\r\n|\n|\r/);
                 const prog = [];
                 for (let line of lines) {
-                    line = line.trim();
-                    if (!line) continue;
-                    const m = line.match(/^(\d+)\s+(.*)/);
+                    line = line.trimRight();
+                    const m = line.match(/^\s*(\d+)\s+(.*)/);
                     if (m) {
                         const ln = parseInt(m[1]);
                         prog.push({ line: ln, src: m[2] });
@@ -121,14 +120,12 @@ export const FS = {
                     SYS.program = [];
                     FS.currentFilename = file.name;
                     text.split(/\r?\n/).forEach(line => {
-                        line = line.replace(/\r/g, "");
-                        if (line.trim().length > 0) {
-                            const m = line.match(/^(\d+)\s+(.*)/);
-                            if (m) {
-                                SYS.program.push({ line: parseInt(m[1]), src: m[2] });
-                            } else {
-                                SYS.program.push({ line: null, src: line });
-                            }
+                        line = line.replace(/\r/g, "").trimRight();
+                        const m = line.match(/^\s*(\d+)\s+(.*)/);
+                        if (m) {
+                            SYS.program.push({ line: parseInt(m[1]), src: m[2] });
+                        } else {
+                            SYS.program.push({ line: null, src: line });
                         }
                     });
                     IO.print(`Uploaded ${file.name}`);
