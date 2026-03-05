@@ -3,9 +3,8 @@
 30 REM This example demonstrates associative arrays 
 40 REM inside associative arrays!
 50 REM ==========================================
-60 GR_COLOR = 63 : GR_CLEAR
-70 GR_COLOR = 33 : GR_PRINT "==== DICTIONARY DEMO ====" : PRINT
-80 GR_COLOR = 7
+60 PRINT "==== DICTIONARY DEMO ===="
+70 PRINT
 
 90 REM 1. Define three people as dictionaries
 100 DICT P1("name", "Alice", "job", "Engineer", "age", 28)
@@ -19,8 +18,8 @@
 160 REM 3. Print the raw underlying structure using the new formatter!
 170 PRINT 
 180 PRINT "Raw stringified DIRECTORY:"
-190 GR_COLOR = 44 : PRINT DIRECTORY : PRINT
-200 GR_COLOR = 7 : DELAY 500
+190 PRINT DIRECTORY : PRINT
+200 DELAY 500
 
 210 REM 4. Extract data cleanly
 220 PRINT "Iterating over employees..." : PRINT
@@ -31,4 +30,4 @@
 270   PRINT ID; " -> "; PERSON("name"); " ("; PERSON("job"); ", Age: "; PERSON("age"); ")"
 280 NEXT ID
 
-290 PRINT : GR_COLOR = 36 : PRINT "Done!"
+290 PRINT : PRINT "Done!"
