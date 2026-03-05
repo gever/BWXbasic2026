@@ -38,8 +38,8 @@ InputPhase:
   GR_PRINT "ENTER ANGLE (0-180):"
   INPUT a
 
-  IF a < 0 THEN LET a = 0
-  IF a > 180 THEN LET a = 180
+  IF a < 0 THEN a = 0
+  IF a > 180 THEN a = 180
 
   REM Compute initial velocity based on input angle
   REM Angle 90 is straight up, 0 is right, 180 is left. We map standard geometry.
