@@ -4,116 +4,119 @@ REM Demonstrate modern features: DICT, FUN, Labels
 REM ==========================================
 
 REM --- Constants & Initialization ---
-LET W = GR_CANVAS_WIDTH()
-LET H = GR_CANVAS_HEIGHT()
-LET GRAVITY = 0.5
-LET ARROW_LEN = 15
+LET w = GR_CANVAS_WIDTH
+LET h = GR_CANVAS_HEIGHT
+LET gravity = 0.5
+LET arrow_len = 15
 
 REM --- Setup Turret Position ---
-LET TX = 50 + RND(W - 100)
-LET TY = H
-LET SCORE = 0
+LET tx = 50 + RND(w - 100)
+LET ty = h - 10
+LET score = 0
 
 RoundStart: REM Initialize Turret & Arrows
-DICT ARROW("x", TX, "y", TY, "dx", 0, "dy", 1)REM Generate Balloons (1 to 3)
-LET NUM_BALLOONS = 1 + RND(3)
-ARRAY BALLOONS(NUM_BALLOONS - 1)
-FOR I = 0 TO NUM_BALLOONS - 1
-  LET BX = 20 + RND(W - 40)
-  LET BY = 20 + RND((H / 2) - 40)
-  LET BD = 15 + RND(20)
-  LET BC = 32 + RND(60)
-  DICT B("x", BX, "y", BY, "dia", BD, "col", BC, "active", 1)
-  LET BALLOONS(I) = B
-NEXT I
+DICT arrow("x", tx, "y", ty, "dx", 0, "dy", 1) : REM Generate Balloons (1 to 3)
+LET num_balloons = INT(1 + RND(3))
+ARRAY balloons(num_balloons - 1)
+FOR i = 0 TO num_balloons - 1
+  LET bx = 20 + RND(w - 40)
+  LET by = 20 + RND((h / 2) - 40)
+  LET bd = 15 + RND(20)
+  LET bc = 32 + RND(60)
+  DICT b("x", bx, "y", by, "dia", bd, "col", bc, "active", 1)
+  LET balloons(i) = b
+NEXT i
 
 REM --- Main Input Phase ---
-InputPhase: GOSUB DrawScene
-GOSUB DrawScene
+InputPhase:
+  GOSUB DrawScene
+  GOSUB DrawScene
 
-GR_MOVETO 10, 20
-GR_COLOR = 7
-GR_PRINT "SCORE: " ; SCORE
-GR_MOVETO 10, 50
-GR_PRINT "ENTER ANGLE (0-180):"
-INPUT A
+  GR_MOVETO 10, 20
+  GR_COLOR = 7
+  GR_PRINT "SCORE: " ; score
+  GR_MOVETO 10, 50
+  GR_PRINT "ENTER ANGLE (0-180):"
+  INPUT a
 
-IF A < 0 THEN LET A = 0
-IF A > 180 THEN LET A = 180
+  IF a < 0 THEN LET a = 0
+  IF a > 180 THEN LET a = 180
 
-REM Compute initial velocity based on input angle
-REM Angle 90 is straight up, 0 is right, 180 is left. We map standard geometry.
-LET RAD = CALL RADIANS(A)
+  REM Compute initial velocity based on input angle
+  REM Angle 90 is straight up, 0 is right, 180 is left. We map standard geometry.
+  LET rad = CALL radians(a)
 
-REM Assign start position to Turret nose
-ARROW("x") = TX
-ARROW("y") = TY - 20
+  REM Assign start position to Turret nose
+  arrow("x") = tx
+  arrow("y") = ty - 20
 
-REM Initialize Velocity vector component
-ARROW("dx") = 15 * COS(RAD)
-ARROW("dy") = -15 * SIN(RAD)
+  REM Initialize Velocity vector component
+  arrow("dx") = 15 * COS(rad)
+  arrow("dy") = -15 * SIN(rad)
 
-REM --- Shoot & Animate Loop ---
-AnimateLoop: REM Apply Physics
-REM Apply Physics
-ARROW("x") = ARROW("x") + ARROW("dx")
-ARROW("y") = ARROW("y") + ARROW("dy")
-ARROW("dy") = ARROW("dy") + GRAVITY
+  REM --- Shoot & Animate Loop ---
+  AnimateLoop:
+    REM Apply Physics
+    arrow("x") = arrow("x") + arrow("dx")
+    arrow("y") = arrow("y") + arrow("dy")
+    arrow("dy") = arrow("dy") + gravity
 
-REM Draw the Frame
-GOSUB DrawScene
+    REM Draw the Frame
+    GOSUB DrawScene
 
-REM Draw the Arrow
-LET AX = ARROW("x")
-LET AY = ARROW("y")
-LET ADX = ARROW("dx")
-LET ADY = ARROW("dy")
+    REM Draw the Arrow
+    LET ax = arrow("x")
+    LET ay = arrow("y")
+    LET adx = arrow("dx")
+    LET ady = arrow("dy")
 
-REM Calculate tail of arrow based on velocity vector
-REM Normalize ADX/ADY to length ARROW_LEN
-LET VLEN = SQR(ADX * ADX + ADY * ADY)
-LET N_DX = (ADX / VLEN) * ARROW_LEN
-LET N_DY = (ADY / VLEN) * ARROW_LEN
+    REM Calculate tail of arrow based on velocity vector
+    REM Normalize adx/ady to length arrow_len
+    LET vlen = SQR(adx * adx + ady * ady)
+    LET n_dx = (adx / vlen) * arrow_len
+    LET n_dy = (ady / vlen) * arrow_len
 
-LET TAIL_X = AX - N_DX
-LET TAIL_Y = AY - N_DY
-GR_COLOR = 7 : REM White Arrow
-GR_MOVETO TAIL_X, TAIL_Y
-GR_LINETO AX, AY
+    LET tail_x = ax - n_dx
+    LET tail_y = ay - n_dy
+    GR_COLOR = 7 : REM White Arrow
+    GR_MOVETO tail_x, tail_y
+    GR_LINETO ax, ay
 
-REM Check Balllons Collision
-LET POPPED_THIS_FRAME = 0
-LET ACTIVE_COUNT = 0
+    REM Check Balllons Collision
+    LET popped_this_frame = 0
+    LET active_count = 0
 
-FOR I = 0 TO NUM_BALLOONS - 1
-    LET B = BALLOONS(I)
-    IF B("active") = 0 THEN GOTO SkipBalloon
+    FOR i = 0 TO num_balloons - 1
+      LET b = balloons(i)
+      IF b("active") = 0 THEN GOTO SkipBalloon
 
-    LET DIST = CALL DISTANCE(AX, AY, B("x"), B("y"))
-    IF DIST >= (B("dia") / 2) THEN GOTO MissedBalloon
+      LET dist = CALL distance(ax, ay, b("x"), b("y"))
+      IF dist >= (b("dia") / 2) THEN GOTO MissedBalloon
 
-    B("active") = 0
-    LET POPPED_THIS_FRAME = 1
-    LET SCORE = SCORE + 10
-    GOTO SkipBalloon
+      b("active") = 0
+      LET popped_this_frame = 1
+      LET score = score + 10
+      GOTO SkipBalloon
 
-MissedBalloon: LET ACTIVE_COUNT = ACTIVE_COUNT + 1
+      MissedBalloon: LET active_count = active_count + 1
 
-SkipBalloon: NEXT I
+    SkipBalloon:
+    NEXT i
 
-REM Pause frame
-DELAY 30
+  REM Pause frame
+  DELAY 30
 
-REM Condition checks to break animation
-IF POPPED_THIS_FRAME = 1 THEN GOTO CheckWin
-IF AY > H THEN GOTO InputPhase
-IF AX < 0 OR AX > W THEN GOTO InputPhase
+  REM Condition checks to break animation
+  IF popped_this_frame = 1 THEN GOTO CheckWin
+  IF ay > h THEN GOTO InputPhase
+  IF ax < 0 OR ax > w THEN GOTO InputPhase
 
 GOTO AnimateLoop
 
-CheckWin: IF ACTIVE_COUNT > 0 THEN GOTO AnimateLoop
+CheckWin:
+  IF active_count > 0 THEN GOTO AnimateLoop
 
-GR_MOVETO W/2 - 100, H/2
+GR_MOVETO w/2 - 100, h/2
 GR_COLOR = 36 : REM Green
 GR_PRINT "ROUND CLEARED!"
 DELAY 2000
@@ -121,38 +124,40 @@ GOTO RoundStart
 
 
 REM --- Subroutines ---
-DrawScene: GR_COLOR = 255 : GR_CLEAR
+DrawScene:
+  GR_COLOR = 255 : GR_CLEAR
 
-REM Draw Active Balloons
-FOR I = 0 TO NUM_BALLOONS - 1
-    LET B = BALLOONS(I)
-    IF B("active") = 0 THEN GOTO SkipDrawBalloon
+  REM Draw Active Balloons
+  FOR i = 0 TO num_balloons - 1
+    LET b = balloons(i)
+    IF b("active") = 0 THEN GOTO SkipDrawBalloon
 
-    GR_COLOR = B("col")
-    GR_MOVETO B("x"), B("y")
-    GR_FELLIPSE B("dia"), B("dia")
+    GR_COLOR = b("col")
+    GR_MOVETO b("x"), b("y")
+    GR_FELLIPSE b("dia"), b("dia")
     
     REM Draw string
     GR_COLOR = 63 : REM Dark grey
-    GR_MOVETO B("x"), B("y") + (B("dia")/2)
-    GR_LINETO B("x"), B("y") + (B("dia")/2) + 10
+    GR_MOVETO b("x") + (b("dia")/2), b("y") + b("dia")
+    GR_LINETO b("x") + (b("dia")/2), b("y") + b("dia") + 10
 
-SkipDrawBalloon: NEXT I
+  SkipDrawBalloon:
+  NEXT i
 
-REM Draw Turret Base
-GR_COLOR = 44 : REM Orange
-GR_MOVETO TX - 15, TY
-GR_FRECT 30, 20
+  REM Draw Turret Base
+  GR_COLOR = 44 : REM Orange
+  GR_MOVETO tx - 15, ty
+  GR_FRECT 30, 20
 RETURN
 
 
 REM --- Helper Functions ---
-FUN RADIANS(DEG)
-  LET R = DEG * 3.141592653589 / 180.0
-RETURN R
+FUN radians(deg)
+  LET r = deg * 3.141592653589 / 180.0
+RETURN r
 
-FUN DISTANCE(X1, Y1, X2, Y2)
-  LET DX = X2 - X1
-  LET DY = Y2 - Y1
-  LET D = SQR((DX * DX) + (DY * DY))
-RETURN D
+FUN distance(x1, y1, x2, y2)
+  LET dx = x2 - x1
+  LET dy = y2 - y1
+  LET d = SQR((dx * dx) + (dy * dy))
+RETURN d
