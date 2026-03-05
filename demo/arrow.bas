@@ -3,6 +3,8 @@ REM ARROW.BAS - A simple bwxBASIC Game
 REM Demonstrate modern features: DICT, FUN, Labels
 REM ==========================================
 
+CLS
+
 REM --- Constants & Initialization ---
 LET w = GR_CANVAS_WIDTH
 LET h = GR_CANVAS_HEIGHT
@@ -29,12 +31,8 @@ FOR i = 0 TO num_balloons - 1
   LET bd = 15 + RND(20)
   LET bc = 32 + RND(60)
   DICT b("x", bx, "y", by, "dia", bd, "col", bc, "active", 1)
-  GR_COLOR = bc : GR_MOVETO bx, by : GR_ELLIPSE bd, bd : 'debug
   LET balloons(i) = b
 NEXT i
-
-GR_MOVETO 10, 12 : GR_PRINT "Press any key to start"
-LET k$ = INKEY$(1)
 
 REM --- Main Input Phase ---
 InputPhase:
@@ -97,12 +95,15 @@ InputPhase:
       DICT b = balloons(i)
       IF b("active") = 0 THEN GOTO SkipBalloon
 
-      LET dist = CALL distance(ax, ay, b("x"), b("y"))
+      LET cx = b("x") + (b("dia") / 2)
+      LET cy = b("y") + (b("dia") / 2)
+      LET dist = CALL distance(ax, ay, cx, cy)
       IF dist >= (b("dia") / 2) THEN GOTO MissedBalloon
 
       b("active") = 0
       LET popped_this_frame = 1
       LET score = score + 10
+      GOSUB PopAnimation
       GOTO SkipBalloon
 
       MissedBalloon: LET active_count = active_count + 1
@@ -161,6 +162,28 @@ DrawScene:
   GR_COLOR = 44 : REM Orange
   GR_MOVETO tx - 15, ty
   GR_FRECT 30, 20
+RETURN
+
+PopAnimation:
+  REM b is already the active balloon dict
+  LET px = b("x") + (b("dia") / 2)
+  LET py = b("y") + (b("dia") / 2)
+  LET pc = b("col")
+
+  FOR f = 1 TO 5
+    GOSUB DrawScene
+    
+    GR_COLOR = pc
+    FOR p = 0 TO 7
+      LET pr = CALL radians(p * 45)
+      LET pdx = COS(pr) * (f * 4)
+      LET pdy = SIN(pr) * (f * 4)
+      GR_MOVETO px + pdx, py + pdy
+      GR_FELLIPSE 3, 3
+    NEXT p
+    
+    DELAY 30
+  NEXT f
 RETURN
 
 
