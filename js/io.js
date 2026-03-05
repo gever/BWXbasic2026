@@ -338,17 +338,16 @@ export const IO = {
             }
             else if (c === 'VARS') {
                 const keys = Object.keys(SYS.vars).sort();
-                if (keys.length === 0) {
-                    // Optional: IO.print("NO VARIABLES DEFINED");
-                } else {
-                    for (const k of keys) {
-                        let val = SYS.vars[k];
-                        if (typeof val === 'string') {
-                            IO.print(`${k} = "${val}"`);
-                        } else {
-                            IO.print(`${k} = ${val}`);
-                        }
-                    }
+                for (const k of keys) {
+                    let val = SYS.vars[k];
+                    let formatted = IO.format(val);
+                    if (typeof val === 'string') formatted = `"${formatted}"`;
+                    IO.print(`${k} = ${formatted}`);
+                }
+                const arrKeys = Object.keys(SYS.arrays).sort();
+                for (const k of arrKeys) {
+                    let val = SYS.arrays[k];
+                    IO.print(`${k}[] = ${IO.format(val)}`);
                 }
                 IO.prompt();
             }
