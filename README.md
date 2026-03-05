@@ -38,6 +38,33 @@ Then open your browser to: `http://localhost:8000/bwxBASIC.html`
 
 ---
 
+## Command-Line Execution (Node.js)
+
+bwxBASIC includes headless runner scripts allowing you to execute `.bas` scripts directly from your terminal using Node.js. These are located in the `tests/` directory.
+
+### run_code.js
+Executes a BASIC script and prints the output to the terminal, exiting immediately when finished. Useful for testing or scripting.
+
+```bash
+node tests/run_code.js path/to/script.bas
+```
+
+### run_repl.js
+Executes a BASIC script and then purposefully drops you into an interactive REPL loop, allowing you to run commands like `VARS` and `PRINT` against the engine state. Type `EXIT` or `QUIT` to end the session.
+
+```bash
+node tests/run_repl.js path/to/script.bas
+```
+
+### run_regression.js
+Runs the built-in test suite (`demo/regression.bas`) to ensure the language features and transpiler are working correctly.
+
+```bash
+node tests/run_regression.js
+```
+
+---
+
 ## Production Deployment
 
 bwxBASIC requires no backend logic, databases, or build steps. It is a pure static site (HTML, CSS, JS). Deploying it is as simple as serving the static files.
