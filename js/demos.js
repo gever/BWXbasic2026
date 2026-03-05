@@ -7,5 +7,6 @@ export const DEMOS = {
     "GRAPHICS_API.BAS": "demo/graphics_api.bas",
     "REGRESSION.BAS": "demo/regression.bas",
     "DICT.BAS": "demo/dict.bas",
-    "ARROW.BAS": "demo/arrow.bas"
+    "ARROW.BAS": "demo/arrow.bas",
+    "ARROW_N.BAS": "demo/arrow_n.bas"
 };
