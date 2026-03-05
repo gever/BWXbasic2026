@@ -33,3 +33,5 @@
 - [X] FEAT: PRINT should support DICT type better. e.g. ```10 DICT D : D("foo") = 1 : PRINT D``` should print ```{"foo" = 1}```
 - [X] FEAT: added support for storing DICTs in arrays and DICTs
 - [X] BUG: VARS command does not display arrays or hashtable variables
+- [ ] FEAT: allow SQR and SQRT
+- [ ] FEAT: add turtle drawing commands (e.g. GR_FWD N, GR_RT N, etc)

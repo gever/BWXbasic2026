@@ -15,11 +15,14 @@ RoundStart:
 REM Initialize Turret & Arrow
 LET tx = 50 + RND(w - 100)
 LET ty = h - 10
+LET score = 0
+
+RoundStart: REM Initialize Turret & Arrows
 DICT arrow("x", tx, "y", ty, "dx", 0, "dy", 1)
 
 REM Generate Balloons (1 to 3)
 LET num_balloons = INT(1 + RAND(3))
-LET balloons = DIM(num_balloons - 1)
+ARRAY balloons(num_balloons - 1)
 FOR i = 0 TO num_balloons - 1
   LET bx = 20 + RND(w - 40)
   LET by = 20 + RND((h / 2) - 40)
