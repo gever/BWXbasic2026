@@ -16,7 +16,7 @@ LET score = 0
 
 RoundStart: REM Initialize Turret & Arrows
 DICT arrow("x", tx, "y", ty, "dx", 0, "dy", 1) : REM Generate Balloons (1 to 3)
-LET num_balloons = INT(1 + RND(3))
+LET num_balloons = INT(1 + RAND(3))
 ARRAY balloons(num_balloons - 1)
 FOR i = 0 TO num_balloons - 1
   LET bx = 20 + RND(w - 40)
