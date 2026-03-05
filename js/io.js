@@ -336,18 +336,42 @@ export const IO = {
                 }
                 return;
             }
-            else if (c === 'VARS') {
-                const keys = Object.keys(SYS.vars).sort();
-                for (const k of keys) {
-                    let val = SYS.vars[k];
-                    let formatted = IO.format(val);
-                    if (typeof val === 'string') formatted = `"${formatted}"`;
-                    IO.print(`${k} = ${formatted}`);
+            else if (c === 'VARS' || c.startsWith('VARS ') || c.startsWith('VARS"')) {
+                let targetVar = cRaw.substring(4).trim();
+                if (targetVar.startsWith('"') && targetVar.endsWith('"') && targetVar.length >= 2) {
+                    targetVar = targetVar.substring(1, targetVar.length - 1).trim();
                 }
-                const arrKeys = Object.keys(SYS.arrays).sort();
-                for (const k of arrKeys) {
-                    let val = SYS.arrays[k];
-                    IO.print(`${k}[] = ${IO.format(val)}`);
+
+                if (targetVar === "") {
+                    const keys = Object.keys(SYS.vars).sort();
+                    for (const k of keys) {
+                        let val = SYS.vars[k];
+                        let formatted = IO.format(val);
+                        if (typeof val === 'string') formatted = `"${formatted}"`;
+                        IO.print(`${k} = ${formatted}`);
+                    }
+                    const arrKeys = Object.keys(SYS.arrays).sort();
+                    for (const k of arrKeys) {
+                        let val = SYS.arrays[k];
+                        IO.print(`${k}[] = ${IO.format(val)}`);
+                    }
+                } else {
+                    let found = false;
+                    if (SYS.vars.hasOwnProperty(targetVar)) {
+                        let val = SYS.vars[targetVar];
+                        let formatted = IO.format(val);
+                        if (typeof val === 'string') formatted = `"${formatted}"`;
+                        IO.print(`${targetVar} = ${formatted}`);
+                        found = true;
+                    }
+                    if (SYS.arrays.hasOwnProperty(targetVar)) {
+                        let val = SYS.arrays[targetVar];
+                        IO.print(`${targetVar}[] = ${IO.format(val)}`);
+                        found = true;
+                    }
+                    if (!found) {
+                        IO.print(`?UNDEFINED VARIABLE ${targetVar}`);
+                    }
                 }
                 IO.prompt();
             }

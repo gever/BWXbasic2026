@@ -6,41 +6,45 @@ REM ==========================================
 REM --- Constants & Initialization ---
 LET w = GR_CANVAS_WIDTH
 LET h = GR_CANVAS_HEIGHT
+LET TEXT_YELLOW = 152 : LET ARROW_COLOR = 156 : LET STRING_COLOR = 63
 LET gravity = 0.5
-LET arrow_len = 15
-
-REM --- Setup Turret Position ---
-LET tx = 50 + RND(w - 100)
-LET ty = h - 10
+LET arrow_len = 8
 LET score = 0
 
-RoundStart: REM Initialize Turret & Arrows
-DICT arrow("x", tx, "y", ty, "dx", 0, "dy", 1) : REM Generate Balloons (1 to 3)
-LET num_balloons = INT(1 + RND(3))
-ARRAY balloons(num_balloons - 1)
+RoundStart:
+REM Initialize Turret & Arrow
+LET tx = 50 + RND(w - 100)
+LET ty = h - 10
+DICT arrow("x", tx, "y", ty, "dx", 0, "dy", 1)
+
+REM Generate Balloons (1 to 3)
+LET num_balloons = INT(1 + RAND(3))
+LET balloons = DIM(num_balloons - 1)
 FOR i = 0 TO num_balloons - 1
   LET bx = 20 + RND(w - 40)
   LET by = 20 + RND((h / 2) - 40)
   LET bd = 15 + RND(20)
   LET bc = 32 + RND(60)
   DICT b("x", bx, "y", by, "dia", bd, "col", bc, "active", 1)
+  GR_COLOR = bc : GR_MOVETO bx, by : GR_ELLIPSE bd, bd : 'debug
   LET balloons(i) = b
 NEXT i
+
+GR_MOVETO 10, 12 : GR_PRINT "Press any key to start"
+LET k$ = INKEY$(1)
 
 REM --- Main Input Phase ---
 InputPhase:
   GOSUB DrawScene
-  GOSUB DrawScene
 
-  GR_MOVETO 10, 20
-  GR_COLOR = 7
-  GR_PRINT "SCORE: " ; score
-  GR_MOVETO 10, 50
-  GR_PRINT "ENTER ANGLE (0-180):"
-  INPUT a
+  GR_FONT 16 : GR_COLOR = TEXT_YELLOW
+  GR_MOVETO 10, 12 : GR_PRINT "balloons: "; num_balloons
+  GR_MOVETO 10, 20 : GR_PRINT "SCORE: " ; score
+  GR_MOVETO 10, 28 : GR_PRINT "ENTER ANGLE (0-180):"
+  SETPOS 15, 3 : INPUT a
 
-  IF a < 0 THEN LET a = 0
-  IF a > 180 THEN LET a = 180
+  IF a < 0 THEN a = 0
+  IF a > 180 THEN a = 180
 
   REM Compute initial velocity based on input angle
   REM Angle 90 is straight up, 0 is right, 180 is left. We map standard geometry.
@@ -78,7 +82,7 @@ InputPhase:
 
     LET tail_x = ax - n_dx
     LET tail_y = ay - n_dy
-    GR_COLOR = 7 : REM White Arrow
+    GR_COLOR = ARROW_COLOR
     GR_MOVETO tail_x, tail_y
     GR_LINETO ax, ay
 
@@ -127,21 +131,27 @@ REM --- Subroutines ---
 DrawScene:
   GR_COLOR = 255 : GR_CLEAR
 
-  REM Draw Active Balloons
+  REM Draw Active Balloons 
   FOR i = 0 TO num_balloons - 1
     LET b = balloons(i)
     IF b("active") = 0 THEN GOTO SkipDrawBalloon
 
+    bx = b("x") : by = b("y") : dia = b("dia")
+    ' balloon
     GR_COLOR = b("col")
-    GR_MOVETO b("x"), b("y")
-    GR_FELLIPSE b("dia"), b("dia")
-    
-    REM Draw string
-    GR_COLOR = 63 : REM Dark grey
+    GR_MOVETO bx, by
+    GR_FELLIPSE dia, dia
+
+    ' knot
+    GR_MOVETO bx + (b("dia")/2), b("y") + b("dia")
+    GR_FTRI b("x") + (b("dia")/2), b("y") + b("dia")
+
+    ' string
+    GR_COLOR = STRING_COLOR
     GR_MOVETO b("x") + (b("dia")/2), b("y") + b("dia")
     GR_LINETO b("x") + (b("dia")/2), b("y") + b("dia") + 10
 
-  SkipDrawBalloon:
+    SkipDrawBalloon:
   NEXT i
 
   REM Draw Turret Base

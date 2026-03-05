@@ -264,7 +264,7 @@ bwxBASIC supports multiple isolated drawing buffers, enabling double-buffering a
 *   `DIR` or `CATALOG`: List files.
 *   `DOWNLOAD "NAME"`: Download .BAS file to computer.
 *   `WHERE`: Show line number of last stop.
-*   `VARS`: Lists all currently defined variables.
+*   `VARS`: Lists all currently defined variables, or a specific variable if provided (e.g., `VARS FOO` or `VARS "FOO"`). Quotes are optional.
 *   `READ`: Read values from DATA arrays into variables.
 *   `RESTORE`: Reset the data loading pointer to a specific line.
 *   `HELP`: Show internal help.

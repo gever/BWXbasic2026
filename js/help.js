@@ -16,7 +16,7 @@ export const HELP_DATA = {
         { c: "VIZ", d: "Generates an interactive flowchart visualization of your program's structure.", e: "VIZ" },
         { c: "HELP", d: "Opens this reference manual.", e: "HELP" },
         { c: "REM", d: "Remark/Comment. Line is ignored by interpreter.", e: "10 REM SETUP VARIABLES" },
-        { c: "VARS", d: "Lists all currently defined variables.", e: "VARS" }
+        { c: "VARS", d: "Lists all currently defined variables, or a specific variable if provided. Quotes are optional.", e: "VARS [\"varname\"]" }
     ],
     "SCREEN & GRAPHICS": [
         { c: "HOME or CLS", d: "Clears the text screen and moves cursor to top-left.", e: "10 HOME" },
