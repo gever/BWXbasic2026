@@ -21,7 +21,7 @@ RoundStart: REM Initialize Turret & Arrows
 DICT arrow("x", tx, "y", ty, "dx", 0, "dy", 1)
 
 REM Generate Balloons (1 to 3)
-LET num_balloons = INT(1 + RAND(3))
+LET num_balloons = 3 : ' INT(1 + RAND(3))
 ARRAY balloons(num_balloons - 1)
 FOR i = 0 TO num_balloons - 1
   LET bx = 20 + RND(w - 40)
@@ -94,7 +94,7 @@ InputPhase:
     LET active_count = 0
 
     FOR i = 0 TO num_balloons - 1
-      LET b = balloons(i)
+      DICT b = balloons(i)
       IF b("active") = 0 THEN GOTO SkipBalloon
 
       LET dist = CALL distance(ax, ay, b("x"), b("y"))
@@ -136,7 +136,7 @@ DrawScene:
 
   REM Draw Active Balloons 
   FOR i = 0 TO num_balloons - 1
-    LET b = balloons(i)
+    DICT b = balloons(i)
     IF b("active") = 0 THEN GOTO SkipDrawBalloon
 
     bx = b("x") : by = b("y") : dia = b("dia")
@@ -146,13 +146,13 @@ DrawScene:
     GR_FELLIPSE dia, dia
 
     ' knot
-    GR_MOVETO bx + (b("dia")/2), b("y") + b("dia")
-    GR_FTRI b("x") + (b("dia")/2), b("y") + b("dia")
+    GR_MOVETO bx + (dia/2), by + dia
+    GR_FTRI bx + (dia/2) - 4, by + dia + 6, bx + (dia/2) + 4, by + dia + 6
 
     ' string
     GR_COLOR = STRING_COLOR
-    GR_MOVETO b("x") + (b("dia")/2), b("y") + b("dia")
-    GR_LINETO b("x") + (b("dia")/2), b("y") + b("dia") + 10
+    GR_MOVETO bx + (dia/2), by + dia
+    GR_LINETO bx + (dia/2), by + dia + 10
 
     SkipDrawBalloon:
   NEXT i
