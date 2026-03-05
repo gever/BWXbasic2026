@@ -19,7 +19,6 @@
 170 PRINT 
 180 PRINT "Raw stringified DIRECTORY:"
 190 PRINT DIRECTORY : PRINT
-200 DELAY 500
 
 210 REM 4. Extract data cleanly
 220 PRINT "Iterating over employees..." : PRINT
