@@ -5,15 +5,20 @@ import { DEMOS } from './demos.js';
 
 export const FS = {
     PREFIX: 'bwxBASIC_PROG_',
-    currentFilename: "bwxBASIC_program.bas",
+    _currentFilename: "bwxBASIC_program.bas",
+    get currentFilename() { return this._currentFilename; },
+    set currentFilename(v) {
+        this._currentFilename = v;
+        document.title = v ? `${v} - bwxBASIC` : "bwxBASIC";
+    },
 
     save: (fn, quiet = false) => {
         if (!fn || fn === 0 || fn === "0") fn = FS.currentFilename;
         if (!fn) { if (!quiet) IO.print("?MISSING FILE NAME"); return; }
         try {
             localStorage.setItem(FS.PREFIX + fn.toUpperCase(), JSON.stringify(SYS.program));
+            FS.currentFilename = fn;
             if (!quiet) {
-                FS.currentFilename = fn;
                 IO.print("SAVED " + fn);
             }
         } catch (e) { if (!quiet) IO.print("?ERROR SAVING"); }
@@ -138,3 +143,6 @@ export const FS = {
         });
     }
 };
+
+// Initialize document title on load
+document.title = FS.currentFilename ? `${FS.currentFilename} - bwxBASIC` : "bwxBASIC";
