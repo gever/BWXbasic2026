@@ -209,6 +209,18 @@ bwxBASIC features a vector-like graphics API with a stateful "turtle" cursor.
 *   `GR_FONT Size`: Sets the font size for `GR_PRINT` (default 26).
 *   `GR_RGB(R, G, B)`: Returns the nearest palette color index for given R, G, B values (0-255).
 
+### Turtle \u0026 Stack Graphics
+bwxBASIC also includes a logo-style Turtle graphics API. It maintains a state containing `X`, `Y`, `Heading` (0-359, where 0 is Up), `PenDown`, `Color`, and `Font Size`.
+*   `GR_FWD Dist` (or `GR_FD`): Moves turtle forward by distance, drawing a line if pen is down.
+*   `GR_BK Dist`: Moves turtle backward by distance.
+*   `GR_RT Deg`: Turns turtle right (clockwise) by degrees.
+*   `GR_LT Deg`: Turns turtle left (counter-clockwise) by degrees.
+*   `GR_PEN_DN` (or `GR_PD`): Puts the drawing pen down.
+*   `GR_PEN_UP` (or `GR_PU`): Lifts the drawing pen up.
+*   `GR_TURTLE_RESET` (or `GR_TR`): Resets turtle to origin `0,0`, heading `0` (Up), and pen down.
+*   `GR_PUSH`: Saves the current graphics state (position, heading, pen state, color, and font size) onto a stack.
+*   `GR_POP`: Restores the graphics state from the top of the stack.
+
 **Example:**
 ```basic
 10 GR_COLOR = 63 : GR_CLEAR  : ' Clear to Black

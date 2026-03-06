@@ -755,6 +755,33 @@ export const Compiler = {
                 const id = Compiler.genExpression(tokens, ctx);
                 chunk = `GRAPHICS.setCanvas(${id});`;
             }
+            else if (cmd === 'GR_FWD' || cmd === 'GR_FD') {
+                chunk = `GRAPHICS.fwd(${Compiler.genExpression(tokens, ctx)});`;
+            }
+            else if (cmd === 'GR_BK') {
+                chunk = `GRAPHICS.bk(${Compiler.genExpression(tokens, ctx)});`;
+            }
+            else if (cmd === 'GR_RT') {
+                chunk = `GRAPHICS.rt(${Compiler.genExpression(tokens, ctx)});`;
+            }
+            else if (cmd === 'GR_LT') {
+                chunk = `GRAPHICS.lt(${Compiler.genExpression(tokens, ctx)});`;
+            }
+            else if (cmd === 'GR_PEN_DN' || cmd === 'GR_PD') {
+                chunk = `GRAPHICS.penDown();`;
+            }
+            else if (cmd === 'GR_PEN_UP' || cmd === 'GR_PU') {
+                chunk = `GRAPHICS.penUp();`;
+            }
+            else if (cmd === 'GR_TURTLE_RESET' || cmd === 'GR_TR') {
+                chunk = `GRAPHICS.resetTurtle();`;
+            }
+            else if (cmd === 'GR_PUSH') {
+                chunk = `GRAPHICS.pushState();`;
+            }
+            else if (cmd === 'GR_POP') {
+                chunk = `GRAPHICS.popState();`;
+            }
 
             else if (cmd === 'SEED') {
                 if (peek() === '(') {

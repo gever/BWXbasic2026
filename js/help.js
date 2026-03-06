@@ -43,7 +43,18 @@ export const HELP_DATA = {
         { c: "VTAB", d: "Moves cursor to vertical row Y (1-24).", e: "20 VTAB 12" },
         { c: "SETPOS", d: "Moves cursor to X, Y coordinates (Custom).", e: "30 SETPOS 15, 10" }
     ],
-    "OFF-SCREEN BUFFERS": [
+    "TURTLE GRAPHICS": [
+        { c: "GR_FWD", d: "Alias GR_FD. Moves turtle forward by distance.", e: "10 GR_FWD 50" },
+        { c: "GR_BK", d: "Moves turtle backward by distance.", e: "20 GR_BK 50" },
+        { c: "GR_RT", d: "Turns turtle right by degrees.", e: "30 GR_RT 90" },
+        { c: "GR_LT", d: "Turns turtle left by degrees.", e: "40 GR_LT 90" },
+        { c: "GR_PEN_DN", d: "Alias GR_PD. Puts the pen down to draw.", e: "50 GR_PEN_DN" },
+        { c: "GR_PEN_UP", d: "Alias GR_PU. Lifts the pen to stop drawing.", e: "60 GR_PEN_UP" },
+        { c: "GR_TURTLE_RESET", d: "Alias GR_TR. Resets turtle to 0,0 heading Up.", e: "70 GR_TURTLE_RESET" },
+        { c: "GR_PUSH", d: "Saves current graphics state (pos, heading, color, etc) to stack.", e: "80 GR_PUSH" },
+        { c: "GR_POP", d: "Restores graphics state from stack.", e: "90 GR_POP" }
+    ],
+    "CANVAS BUFFERS": [
         { c: "GR_CANVAS(W, H)", d: "Function: Creates an off-screen canvas dimensioned WxH and returns ID.", e: "ID = GR_CANVAS(100, 100)" },
         { c: "GR_GET_CANVAS()", d: "Function: Returns the ID of the currently active canvas.", e: "C = GR_GET_CANVAS()" },
         { c: "GR_CANVAS_WIDTH", d: "Function: Returns width of the active canvas.", e: "W = GR_CANVAS_WIDTH()" },

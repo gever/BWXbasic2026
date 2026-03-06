@@ -142,6 +142,7 @@ export const ENGINE = {
         }
 
         // reset state
+        GRAPHICS.resetTurtle();
         SYS.pc = 0;
         SYS.running = true;
         SYS.break = false;

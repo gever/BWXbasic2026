@@ -9,7 +9,9 @@ export const FS = {
     get currentFilename() { return this._currentFilename; },
     set currentFilename(v) {
         this._currentFilename = v;
-        document.title = v ? `${v} - bwxBASIC` : "bwxBASIC";
+        if (typeof document !== 'undefined') {
+            document.title = v ? `${v} - bwxBASIC` : "bwxBASIC";
+        }
     },
 
     save: (fn, quiet = false) => {
@@ -142,4 +144,6 @@ export const FS = {
 };
 
 // Initialize document title on load
-document.title = FS.currentFilename ? `${FS.currentFilename} - bwxBASIC` : "bwxBASIC";
+if (typeof document !== 'undefined') {
+    document.title = FS.currentFilename ? `${FS.currentFilename} - bwxBASIC` : "bwxBASIC";
+}

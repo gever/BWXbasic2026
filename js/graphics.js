@@ -12,6 +12,9 @@ export const GRAPHICS = {
     buffers: {},
     nextBufferId: 1,
     currentCanvasId: 0,
+    turtleX: 0, turtleY: 0,
+    turtleHeading: 0, turtlePenDown: true,
+    stateStack: [],
 
     init: (appCtx) => {
         ctx = appCtx;
@@ -135,6 +138,7 @@ export const GRAPHICS = {
     },
 
     moveTo: (x, y) => {
+        GRAPHICS.turtleX = x; GRAPHICS.turtleY = y;
         GRAPHICS.lastX = GRAPHICS.mapX(x);
         GRAPHICS.lastY = GRAPHICS.mapY(y);
     },
@@ -145,6 +149,7 @@ export const GRAPHICS = {
         const cx = GRAPHICS.mapX(x), cy = GRAPHICS.mapY(y);
         ctx.fillRect(cx, cy, Math.ceil(CONFIG.scaleX), Math.ceil(CONFIG.scaleY));
         GRAPHICS.lastX = cx; GRAPHICS.lastY = cy;
+        GRAPHICS.turtleX = x; GRAPHICS.turtleY = y;
     },
     lineTo: (x, y) => {
         if (GRAPHICS.currentCanvasId === 0) SCREEN.removeCursor();
@@ -155,6 +160,7 @@ export const GRAPHICS = {
         ctx.lineTo(tx + (CONFIG.scaleX / 2), ty + (CONFIG.scaleY / 2));
         ctx.stroke();
         GRAPHICS.lastX = tx; GRAPHICS.lastY = ty;
+        GRAPHICS.turtleX = x; GRAPHICS.turtleY = y;
     },
     rect: (w, h, fill) => {
         if (GRAPHICS.currentCanvasId === 0) SCREEN.removeCursor();
@@ -223,5 +229,62 @@ export const GRAPHICS = {
         ctx.textBaseline = 'top';
         ctx.fillText(str, GRAPHICS.lastX, GRAPHICS.lastY);
         GRAPHICS.lastX += ctx.measureText(str).width;
+    },
+    fwd: (dist) => {
+        const rad = (GRAPHICS.turtleHeading - 90) * (Math.PI / 180);
+        const nx = GRAPHICS.turtleX + dist * Math.cos(rad);
+        const ny = GRAPHICS.turtleY + dist * Math.sin(rad);
+        if (GRAPHICS.turtlePenDown) {
+            GRAPHICS.lineTo(nx, ny);
+        } else {
+            GRAPHICS.moveTo(nx, ny);
+        }
+    },
+    bk: (dist) => {
+        GRAPHICS.fwd(-dist);
+    },
+    rt: (deg) => {
+        GRAPHICS.turtleHeading = (GRAPHICS.turtleHeading + deg) % 360;
+    },
+    lt: (deg) => {
+        GRAPHICS.turtleHeading = (GRAPHICS.turtleHeading - deg) % 360;
+    },
+    penDown: () => {
+        GRAPHICS.turtlePenDown = true;
+    },
+    penUp: () => {
+        GRAPHICS.turtlePenDown = false;
+    },
+    resetTurtle: () => {
+        GRAPHICS.turtleX = 0;
+        GRAPHICS.turtleY = 0;
+        GRAPHICS.turtleHeading = 0;
+        GRAPHICS.turtlePenDown = true;
+        GRAPHICS.stateStack = [];
+    },
+    pushState: () => {
+        GRAPHICS.stateStack.push({
+            lastX: GRAPHICS.lastX,
+            lastY: GRAPHICS.lastY,
+            turtleX: GRAPHICS.turtleX,
+            turtleY: GRAPHICS.turtleY,
+            turtleHeading: GRAPHICS.turtleHeading,
+            turtlePenDown: GRAPHICS.turtlePenDown,
+            color: GRAPHICS.color,
+            fontSize: GRAPHICS.fontSize
+        });
+    },
+    popState: () => {
+        if (GRAPHICS.stateStack.length > 0) {
+            const state = GRAPHICS.stateStack.pop();
+            GRAPHICS.lastX = state.lastX;
+            GRAPHICS.lastY = state.lastY;
+            GRAPHICS.turtleX = state.turtleX;
+            GRAPHICS.turtleY = state.turtleY;
+            GRAPHICS.turtleHeading = state.turtleHeading;
+            GRAPHICS.turtlePenDown = state.turtlePenDown;
+            GRAPHICS.color = state.color;
+            GRAPHICS.fontSize = state.fontSize;
+        }
     }
 };
