@@ -1,6 +1,6 @@
 # TODO
 
-- [ ] FEAT: check for .bas extension in LOAD and SAVE commands
+- [X] FEAT: check for .bas extension in LOAD and SAVE commands
 - [ ] FEAT: document the color palette
 - [X] FEAT: add support for ON X [GOTO|GOSUB] A, B, C, D
 - [X] FEAT: add link to the repo and the manual in the help screen
@@ -13,12 +13,12 @@
 - [X] BUG: ```10 A$ = INKEY$(1)``` is generating an error at runtime
 - [X] FEAT: save code to CURRENT.BAS before running it
 - [X] FEAT: add support for GR_SET_COLOR GR_RGB R, G, B (0-255) to set the current color
-- [ ] FEAT: accept '?' as shorthand for PRINT
+- [X] FEAT: accept '?' as shorthand for PRINT
 - [ ] BUG: NEW should reset ENGINE.lastExecLine to zero
 - [ ] BUG: FUN body should be indented in the listing (and the editor?)
 - [X] BUG: GR_CANVAS_WIDTH and GR_CANVAS_HEIGHT (and other parameterless functions) are not working in math expressions.
 - [X] BUG: REPL doesn't keep track of the current filename (LOAD/SAVE/NEW not setting/using FS.currentFilename appropriately)
-- [ ] BUG: https://bwxbasic.org/BWXbasic_manual.html is not working to see the (github rendered version) of the markdown manual.
+- [X] BUG: https://bwxbasic.org/BWXbasic_manual.html is not working to see the (github rendered version) of the markdown manual.
 - [ ] FEAT: restructure HELP screen to be iframe that loads the markdown manual (https://bwxbasic.org/BWXbasic_manual.html) and add a link to the repo (https://github.com/gever/BWXbasic2026)
 - [ ] FEAT: Add GR_HIDE_STOP and GR_SHOW_STOP (default to GR_SHOW_STOP) to allow programs to hide the stop button during execution.
 - [ ] FEAT: format FUN definitions with indentation (and maybe a different background color?) in the editor and listing.
@@ -34,4 +34,4 @@
 - [X] FEAT: added support for storing DICTs in arrays and DICTs
 - [X] BUG: VARS command does not display arrays or hashtable variables
 - [ ] FEAT: allow SQR and SQRT
-- [ ] FEAT: add turtle drawing commands (e.g. GR_FWD N, GR_RT N, etc)
+- [X] FEAT: add turtle drawing commands (e.g. GR_FWD N, GR_RT N, etc)
