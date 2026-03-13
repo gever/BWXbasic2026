@@ -487,10 +487,10 @@ export const Compiler = {
                 for (let k = ctx.idx; k < tokens.length; k++) { if (tokens[k].toUpperCase() === 'NEXT' && tokens[k + 1] === v) { isSingle = true; break; } }
 
                 if (isSingle) {
-                    chunk = `{ const _st=${st}; for(SYS.vars['${v}']=${s}; (_st>=0?SYS.vars['${v}']<=${e}:SYS.vars['${v}']>=${e}); SYS.vars['${v}']+=_st) {`;
+                    chunk = `{ const _s=${s}; const _e=${e}; const _st=${st}; if (typeof _s !== 'number' || typeof _e !== 'number' || typeof _st !== 'number') throw "TYPE MISMATCH"; for(SYS.vars['${v}']=_s; (_st>=0?SYS.vars['${v}']<=_e:SYS.vars['${v}']>=_e); SYS.vars['${v}']+=_st) {`;
                     ctx.jsLoops.push(v);
                 } else {
-                    chunk = `SYS.vars['${v}']=${s};SYS.forStack['${v}']={target:${e},step:${st},pc:SYS.pc};`;
+                    chunk = `{ const _s=${s}; const _e=${e}; const _st=${st}; if (typeof _s !== 'number' || typeof _e !== 'number' || typeof _st !== 'number') throw "TYPE MISMATCH"; SYS.vars['${v}']=_s;SYS.forStack['${v}']={target:_e,step:_st,pc:SYS.pc}; }`;
                 }
             }
             else if (cmd === 'NEXT') {
