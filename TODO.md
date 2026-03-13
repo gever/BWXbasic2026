@@ -35,3 +35,10 @@
 - [X] BUG: VARS command does not display arrays or hashtable variables
 - [ ] FEAT: allow SQR and SQRT
 - [X] FEAT: add turtle drawing commands (e.g. GR_FWD N, GR_RT N, etc)
+- [ ] BUG: REM at the end of line without a leading colon throws exception
+- [ ] BUG: PRINT isn't printing contents of multi-dimensional arrays
+- [ ] BUG: a linenumber followed immediately by ' is a compiler exception
+- [ ] BUG: IF ... THEN ... ELSE END is a compiler exception
+- [ ] BUG: changing a line number in the editor doesn't cause the lines to resort on next edit or LIST
+- [ ] BUG: WHERE command fails for un-numbered lines
+
