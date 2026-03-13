@@ -382,7 +382,11 @@ export const IO = {
                 IO.prompt();
             }
             else if (c === 'WHERE') {
-                if (SYS.lastExecLine) {
+                if (SYS.program && SYS.program[SYS.pc]) {
+                    let srcLine = SYS.program[SYS.pc].line !== null ? ` IN ${SYS.program[SYS.pc].line}` : "";
+                    let srcCode = `\n  ${SYS.program[SYS.pc].src}`;
+                    IO.print(`BREAK${srcLine}${srcCode}`);
+                } else if (SYS.lastExecLine) {
                     IO.print("BREAK IN " + SYS.lastExecLine);
                 } else {
                     IO.print("?NO RUN DATA");

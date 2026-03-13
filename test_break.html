@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>bwxBASIC Break Test</title>
+</head>
+<body>
+    <canvas id="main-canvas" width="640" height="400" tabindex="0"></canvas>
+    <input type="text" id="input-trap">
+    <div id="break-btn" style="display:none;">[ESC] BREAK</div>
+    <div id="help-overlay">
+        <div id="help-content"></div>
+        <input type="text" id="help-search">
+    </div>
+    <div id="js-overlay">
+        <pre id="js-content"></pre>
+    </div>
+
+    <script type="module">
+        import { CONFIG } from './js/config.js';
+        import { SYS } from './js/system.js';
+        import { IO } from './js/io.js';
+        import { SCREEN } from './js/screen.js';
+        import { GRAPHICS } from './js/graphics.js';
+        import { ENGINE } from './js/engine.js';
+        import { DEMOS } from './js/demos.js';
+
+        async function init() {
+            const canvas = document.getElementById('main-canvas');
+            const ctx = canvas.getContext('2d', { willReadFrequently: true });
+            const trap = document.getElementById('input-trap');
+            
+            GRAPHICS.init(ctx);
+            SCREEN.init(canvas, ctx);
+            IO.init(trap);
+
+            // Mock program
+            SYS.program = [
+                { line: 10, src: '10 PRINT "Start"' },
+                { line: null, src: 'PRINT "Waiting"' },
+                { line: null, src: 'DELAY 5' },
+                { line: null, src: 'GOTO 10' }
+            ];
+
+            console.log("Starting Engine...");
+            
+            // Tricking engine into thinking break button was pressed
+            setTimeout(() => { 
+                console.log("Triggering Break...");
+                SYS.break = true; 
+            }, 100);
+
+            await ENGINE.run();
+
+            console.log("Done.");
+            
+            // Re-run WHERE
+            IO.handleCommand('WHERE');
+
+            window.testDone = true;
+        }
+
+        init();
+    </script>
+</body>
+</html>

@@ -21,13 +21,14 @@ export const ENGINE = {
             let chunk = { line: x.line, src: x.src };
             if (pCount > 0 && mergeIdx !== -1) {
                 preprocessed[mergeIdx].src += " " + x.src;
-                chunk.src = "' CONTINUATION";
-            } else { mergeIdx = i; }
-            const tokens = Tokenizer.tokenize(chunk.src === "' CONTINUATION" ? preprocessed[mergeIdx].src : chunk.src);
+            } else { 
+                mergeIdx = preprocessed.length; 
+                preprocessed.push(chunk); 
+            }
+            const tokens = Tokenizer.tokenize(preprocessed[mergeIdx].src);
             pCount = 0;
             for (const t of tokens) { if (t === '(') pCount++; else if (t === ')') pCount--; }
             if (pCount < 0) pCount = 0;
-            preprocessed.push(chunk);
         }
 
         for (let i = 0; i < preprocessed.length; i++) {
@@ -97,13 +98,14 @@ export const ENGINE = {
             let chunk = { line: x.line, src: x.src };
             if (pCount > 0 && mergeIdx !== -1) {
                 preprocessed[mergeIdx].src += " " + x.src;
-                chunk.src = "' CONTINUATION";
-            } else { mergeIdx = i; }
-            const tokens = Tokenizer.tokenize(chunk.src === "' CONTINUATION" ? preprocessed[mergeIdx].src : chunk.src);
+            } else { 
+                mergeIdx = preprocessed.length; 
+                preprocessed.push(chunk); 
+            }
+            const tokens = Tokenizer.tokenize(preprocessed[mergeIdx].src);
             pCount = 0;
             for (const t of tokens) { if (t === '(') pCount++; else if (t === ')') pCount--; }
             if (pCount < 0) pCount = 0;
-            preprocessed.push(chunk);
         }
 
         for (let i = 0; i < preprocessed.length; i++) {
