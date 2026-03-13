@@ -269,15 +269,15 @@ export const Compiler = {
                     targetCode += `    case ${i + 1}: { `;
                     if (t.label) {
                         if (action === 'GOSUB') {
-                            targetCode += `if(SYS.labels['${t.label}']!==undefined) { SYS.stack.push({type:'GOSUB', pc:SYS.pc}); SYS.pc=SYS.labels['${t.label}']-1; } else { var _t=${t.exp}; if(SYS.labels[_t]!==undefined){SYS.stack.push({type:'GOSUB', pc:SYS.pc});SYS.pc=SYS.labels[_t]-1;} else { IO.print("?UNDEF LABEL OR VAR "+'${t.label}'); SYS.running=false; } }`;
+                            targetCode += `if(SYS.labels['${t.label}']!==undefined) { SYS.stack.push({type:'GOSUB', pc:SYS.pc}); SYS.pc=SYS.labels['${t.label}']-1; } else { var _t=${t.exp}; if(SYS.labels[_t]!==undefined){SYS.stack.push({type:'GOSUB', pc:SYS.pc});SYS.pc=SYS.labels[_t]-1;} else { throw "UNDEF LABEL OR VAR "+'${t.label}'; } }`;
                         } else {
-                            targetCode += `if(SYS.labels['${t.label}']!==undefined) { SYS.pc=SYS.labels['${t.label}']-1; } else { var _t=${t.exp}; if(SYS.labels[_t]!==undefined){SYS.pc=SYS.labels[_t]-1;} else { IO.print("?UNDEF LABEL OR VAR "+'${t.label}'); SYS.running=false; } }`;
+                            targetCode += `if(SYS.labels['${t.label}']!==undefined) { SYS.pc=SYS.labels['${t.label}']-1; } else { var _t=${t.exp}; if(SYS.labels[_t]!==undefined){SYS.pc=SYS.labels[_t]-1;} else { throw "UNDEF LABEL OR VAR "+'${t.label}'; } }`;
                         }
                     } else {
                         if (action === 'GOSUB') {
-                            targetCode += `var _t=${t.exp}; if(SYS.labels[_t]!==undefined){SYS.stack.push({type:'GOSUB', pc:SYS.pc});SYS.pc=SYS.labels[_t]-1;} else { IO.print("?UNDEF LINE "+_t); SYS.running=false; }`;
+                            targetCode += `var _t=${t.exp}; if(SYS.labels[_t]!==undefined){SYS.stack.push({type:'GOSUB', pc:SYS.pc});SYS.pc=SYS.labels[_t]-1;} else { throw "UNDEF LINE "+_t; }`;
                         } else {
-                            targetCode += `var _t=${t.exp}; if(SYS.labels[_t]!==undefined){SYS.pc=SYS.labels[_t]-1;} else { IO.print("?UNDEF LINE "+_t); SYS.running=false; }`;
+                            targetCode += `var _t=${t.exp}; if(SYS.labels[_t]!==undefined){SYS.pc=SYS.labels[_t]-1;} else { throw "UNDEF LINE "+_t; }`;
                         }
                     }
                     targetCode += ` break; } `;
@@ -293,9 +293,9 @@ export const Compiler = {
                 const isSingleToken = (ctx.idx - startIdx === 1) && /^[A-Za-z_]/.test(tokens[startIdx]);
                 if (isSingleToken) {
                     const label = tokens[startIdx].toUpperCase();
-                    chunk = `if(SYS.labels['${label}']!==undefined)SYS.pc=SYS.labels['${label}']-1; else { var _t=${tgtExp}; if(SYS.labels[_t]!==undefined)SYS.pc=SYS.labels[_t]-1; else { IO.print("?UNDEF LABEL OR VAR "+'${label}'); SYS.running=false; } }`;
+                    chunk = `if(SYS.labels['${label}']!==undefined)SYS.pc=SYS.labels['${label}']-1; else { var _t=${tgtExp}; if(SYS.labels[_t]!==undefined)SYS.pc=SYS.labels[_t]-1; else { throw "UNDEF LABEL OR VAR "+'${label}'; } }`;
                 } else {
-                    chunk = `var _t=${tgtExp};if(SYS.labels[_t]!==undefined)SYS.pc=SYS.labels[_t]-1; else { IO.print("?UNDEF LINE "+_t); SYS.running=false; }`;
+                    chunk = `var _t=${tgtExp};if(SYS.labels[_t]!==undefined)SYS.pc=SYS.labels[_t]-1; else { throw "UNDEF LINE "+_t; }`;
                 }
             }
             else if (cmd === 'GOSUB') {
@@ -304,9 +304,9 @@ export const Compiler = {
                 const isSingleToken = (ctx.idx - startIdx === 1) && /^[A-Za-z_]/.test(tokens[startIdx]);
                 if (isSingleToken) {
                     const label = tokens[startIdx].toUpperCase();
-                    chunk = `if(SYS.labels['${label}']!==undefined){SYS.stack.push({type:'GOSUB', pc:SYS.pc});SYS.pc=SYS.labels['${label}']-1;} else { var _t=${tgtExp}; if(SYS.labels[_t]!==undefined){SYS.stack.push({type:'GOSUB', pc:SYS.pc});SYS.pc=SYS.labels[_t]-1;} else { IO.print("?UNDEF LABEL OR VAR "+'${label}'); SYS.running=false; } }`;
+                    chunk = `if(SYS.labels['${label}']!==undefined){SYS.stack.push({type:'GOSUB', pc:SYS.pc});SYS.pc=SYS.labels['${label}']-1;} else { var _t=${tgtExp}; if(SYS.labels[_t]!==undefined){SYS.stack.push({type:'GOSUB', pc:SYS.pc});SYS.pc=SYS.labels[_t]-1;} else { throw "UNDEF LABEL OR VAR "+'${label}'; } }`;
                 } else {
-                    chunk = `var _t=${tgtExp};if(SYS.labels[_t]!==undefined){SYS.stack.push({type:'GOSUB', pc:SYS.pc});SYS.pc=SYS.labels[_t]-1;} else { IO.print("?UNDEF LINE "+_t); SYS.running=false; }`;
+                    chunk = `var _t=${tgtExp};if(SYS.labels[_t]!==undefined){SYS.stack.push({type:'GOSUB', pc:SYS.pc});SYS.pc=SYS.labels[_t]-1;} else { throw "UNDEF LINE "+_t; }`;
                 }
             }
             else if (cmd === 'RETURN') {
@@ -331,8 +331,7 @@ export const Compiler = {
                             SYS.hasReturned = true;
                         }
                     } else { 
-                        IO.print("?RETURN WITHOUT GOSUB"); 
-                        SYS.running=false; 
+                        throw "RETURN WITHOUT GOSUB";
                     }
                 `;
             }
@@ -452,13 +451,13 @@ export const Compiler = {
                     if (branchTokens.length === 1 && /^[A-Za-z_]/.test(branchTokens[0])) {
                         const label = branchTokens[0].toUpperCase();
                         const tgtExp = Compiler.genExpression(branchTokens, { idx: 0, jsLoops: ctx.jsLoops });
-                        return `if(SYS.labels['${label}']!==undefined)SYS.pc=SYS.labels['${label}']-1; else { var _t=${tgtExp}; if(SYS.labels[_t]!==undefined)SYS.pc=SYS.labels[_t]-1; else { IO.print("?UNDEF LABEL OR VAR "+'${label}'); SYS.running=false; } }`;
+                        return `if(SYS.labels['${label}']!==undefined)SYS.pc=SYS.labels['${label}']-1; else { var _t=${tgtExp}; if(SYS.labels[_t]!==undefined)SYS.pc=SYS.labels[_t]-1; else { throw "UNDEF LABEL OR VAR "+'${label}'; } }`;
                     }
                     if (branchTokens.length === 1 && !isNaN(branchTokens[0])) {
-                        return `var _t=${Number(branchTokens[0])};if(SYS.labels[_t]!==undefined)SYS.pc=SYS.labels[_t]-1; else { IO.print("?UNDEF LINE "+_t); SYS.running=false; }`;
+                        return `var _t=${Number(branchTokens[0])};if(SYS.labels[_t]!==undefined)SYS.pc=SYS.labels[_t]-1; else { throw "UNDEF LINE "+_t; }`;
                     }
                     if (branchTokens.length === 2 && branchTokens[0] === '-' && !isNaN(branchTokens[1])) {
-                        return `var _t=-${Number(branchTokens[1])};if(SYS.labels[_t]!==undefined)SYS.pc=SYS.labels[_t]-1; else { IO.print("?UNDEF LINE "+_t); SYS.running=false; }`;
+                        return `var _t=-${Number(branchTokens[1])};if(SYS.labels[_t]!==undefined)SYS.pc=SYS.labels[_t]-1; else { throw "UNDEF LINE "+_t; }`;
                     }
                     // Compile as sub-program
                     const src = branchTokens.join(" "); // Reconstruct source
@@ -513,7 +512,7 @@ export const Compiler = {
                     chunk = `{ const _keys = Object.keys(SYS.arrays['${hVar}']||{}).filter(k=>k!=='_isHash'); for(let _i=0; _i<_keys.length; _i++) { SYS.vars['${kVar}']=_keys[_i]; `;
                     ctx.jsLoops.push(kVar);
                 } else {
-                    chunk = `var _hKeys = Object.keys(SYS.arrays['${hVar}']||{}).filter(k=>k!=='_isHash'); if (_hKeys.length === 0) { var _found = false; for(var _j=SYS.pc; _j<SYS.program.length; _j++) { if(SYS.program[_j].src.toUpperCase().includes('NEXT '+ '${kVar}'.toUpperCase())) { SYS.pc = _j; _found = true; break; } } if(!_found) { IO.print("?FORKEYS WITHOUT NEXT"); SYS.running=false; } } else { SYS.forStack['${kVar}']={ type: 'hash', keys: _hKeys, idx: 0, pc: SYS.pc }; SYS.vars['${kVar}'] = _hKeys[0]; }`;
+                    chunk = `var _hKeys = Object.keys(SYS.arrays['${hVar}']||{}).filter(k=>k!=='_isHash'); if (_hKeys.length === 0) { var _found = false; for(var _j=SYS.pc; _j<SYS.program.length; _j++) { if(SYS.program[_j].src.toUpperCase().includes('NEXT '+ '${kVar}'.toUpperCase())) { SYS.pc = _j; _found = true; break; } } if(!_found) { throw "FORKEYS WITHOUT NEXT"; } } else { SYS.forStack['${kVar}']={ type: 'hash', keys: _hKeys, idx: 0, pc: SYS.pc }; SYS.vars['${kVar}'] = _hKeys[0]; }`;
                 }
             }
             else if (cmd === 'DIM') {
@@ -625,7 +624,7 @@ export const Compiler = {
                     
                     if (_arr._isHash) {
                         for (let _i=0; _i<_count; _i++) {
-                            if (!SYS.dataStore || SYS.dataPtr + 1 >= SYS.dataStore.length) { IO.print("?OUT OF DATA"); SYS.running = false; break; }
+                            if (!SYS.dataStore || SYS.dataPtr + 1 >= SYS.dataStore.length) { throw "OUT OF DATA"; }
                             let _k = eval(SYS.dataStore[SYS.dataPtr++].src);
                             let _val = eval(SYS.dataStore[SYS.dataPtr++].src);
                             _arr[_k] = _val;
@@ -633,7 +632,7 @@ export const Compiler = {
                     } else {
                         if (_starts.length === 0) _starts.push(0);
                         for (let _i=0; _i<_count; _i++) {
-                            if (!SYS.dataStore || SYS.dataPtr >= SYS.dataStore.length) { IO.print("?OUT OF DATA"); SYS.running = false; break; }
+                            if (!SYS.dataStore || SYS.dataPtr >= SYS.dataStore.length) { throw "OUT OF DATA"; }
                             let _val = eval(SYS.dataStore[SYS.dataPtr++].src);
                             SYS.writeAndAdvanceIndices(_arr, _starts, _val);
                         }
@@ -790,7 +789,7 @@ export const Compiler = {
                     if (peek() === ')') next();
                     chunk = `SYS.setSeed(${val});`;
                 } else {
-                    chunk = `IO.print("?SYNTAX ERROR"); SYS.running=false;`;
+                    chunk = `throw "SYNTAX ERROR";`;
                 }
             }
 
@@ -826,9 +825,9 @@ export const Compiler = {
             else if (cmd === 'JSECHO') chunk = `IO.jsEcho = !IO.jsEcho; IO.print("JSECHO " + (IO.jsEcho ? "ON" : "OFF"));`;
             else if (cmd === 'HELP') chunk = `IO.help();`;
             else if (['LIST', 'RUN', 'EDIT', 'NEW', 'COPY', 'VARS', 'WHERE', 'JSPEEK'].includes(cmd)) {
-                chunk = `IO.print("?ILLEGAL COMMAND IN LINE ${lineObj.line}"); SYS.running=false;`;
+                chunk = `throw "ILLEGAL COMMAND";`;
             }
-            else chunk = `IO.print("?SYNTAX ERROR IN LINE " + ${lineObj.line === null ? 'SYS.lastExecLine' : lineObj.line} + " COMMAND " + "${cmd}"); SYS.running=false;`;
+            else chunk = `throw "SYNTAX ERROR COMMAND " + "${cmd}";`;
 
             body += chunk + "\n";
         }
@@ -839,7 +838,7 @@ export const Compiler = {
             f.generatedBody = body;
             return f;
         } catch (e) {
-            return (SYS, IO) => { IO.print(`?COMPILE ERROR IN LINE ${lineObj.line}`); SYS.running = false; };
+            return (SYS, IO) => { throw "COMPILE ERROR"; };
         }
     }
 };

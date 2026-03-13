@@ -41,4 +41,4 @@
 - [ ] BUG: IF ... THEN ... ELSE END is a compiler exception
 - [ ] BUG: changing a line number in the editor doesn't cause the lines to resort on next edit or LIST
 - [ ] BUG: WHERE command fails for un-numbered lines
-
+- [ ] BUG: compiler exceptions are not returning control to the REPL

@@ -1,4 +1,5 @@
 export const CONFIG = {
+    version: "0.86",
     // These will be calculated dynamically in SCREEN.init()
     cols: 40, rows: 24,
     charW: 0, charH: 0,

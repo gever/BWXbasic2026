@@ -257,7 +257,13 @@ export const IO = {
                 });
                 IO.prompt();
             }
-            else if (c === 'RUN') ENGINE.run();
+            else if (c === 'RUN') {
+                ENGINE.run().catch(e => {
+                    IO.print("?RUNTIME ERROR");
+                    SYS.running = false;
+                    IO.prompt();
+                });
+            }
             else if (c.startsWith('EDIT')) {
                 const arg = c.substring(4).trim();
 
@@ -296,7 +302,7 @@ export const IO = {
                 });
                 IO.prompt();
             }
-            else if (c === 'NEW') { SYS.program = []; SYS.vars = {}; FS.currentFilename = null; SCREEN.clear(); IO.prompt(); }
+            else if (c === 'NEW') { SYS.program = []; SYS.resetEnvironment(); FS.currentFilename = null; SCREEN.clear(); IO.prompt(); }
             else if (c === 'COPY') {
                 // 1. Convert program objects back to text format in current internal order
                 const text = SYS.program.map(l => l.line !== null ? `${l.line} ${l.src}` : l.src).join("\n");
@@ -412,7 +418,8 @@ export const IO = {
                 }
                 catch (e) {
                     SYS.running = false;
-                    IO.print("?SYNTAX ERROR");
+                    let errStr = e.toString() === "SYNTAX" ? `SYNTAX ERROR` : e.toString();
+                    IO.print(`\n?${errStr}\n  ${cRaw}`);
                     IO.prompt();
                 }
             }

@@ -1,3 +1,5 @@
+import { CONFIG } from './config.js';
+
 export const SYS = {
     vars: {}, arrays: {}, program: [], compiled: [], defFn: {},
     transpiledSource: "", // NEW: Storage for JSPEEK
@@ -64,5 +66,13 @@ export const SYS = {
     },
     setSeed: (val) => {
         SYS.seed = Math.floor(Math.abs(val)) % 233280;
+    },
+
+    // --- Core Environment Reset ---
+    resetEnvironment: () => {
+        SYS.vars = {};
+        SYS.arrays = {};
+        // Natively expose system config tracking
+        SYS.arrays['SYS'] = { _isHash: true, "VERSION": CONFIG.version };
     }
 };

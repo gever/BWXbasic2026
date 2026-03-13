@@ -215,7 +215,7 @@ inputTrap.addEventListener('paste', (e) => {
 document.fonts.load(CONFIG.font).then(() => {
     GRAPHICS.init(ctx);
     SCREEN.init(canvas, ctx);
-    IO.print("bwxBASIC -- v0.86");
+    IO.print(`bwxBASIC -- v${CONFIG.version}`);
     IO.print("type HELP for manual");
     IO.prompt();
 });

@@ -30,41 +30,55 @@ export const ENGINE = {
             preprocessed.push(chunk);
         }
 
-        preprocessed.forEach(lineObj => {
+        for (let i = 0; i < preprocessed.length; i++) {
+            const lineObj = preprocessed[i];
             fullSource += `// --- LINE ${lineObj.line}: ${lineObj.src} ---\n`;
 
-            // Temporary object for compilation preview to strip labels
-            const x = { line: lineObj.line, src: lineObj.src };
-            const labelMatch = x.src.match(/^\s*([A-Za-z_][A-Za-z0-9_]*)\s*:(.*)$/);
-            if (labelMatch) {
-                x.src = labelMatch[2].trim() || "REM";
-            }
-
-            if (typeof x.src === 'string' && x.src.toUpperCase().trim().startsWith('DATA')) {
-                const dataTokens = Tokenizer.tokenize(x.src);
-                let ctxIdx = 1; // Skip 'DATA'
-                while (ctxIdx < dataTokens.length) {
-                    const peek = () => dataTokens[ctxIdx];
-                    const next = () => dataTokens[ctxIdx++];
-                    const expTokens = [];
-                    while (ctxIdx < dataTokens.length && peek() !== ',') {
-                        expTokens.push(next());
-                    }
-                    if (expTokens.length > 0) {
-                        const tmpCtx = { idx: 0, jsLoops: [] };
-                        const expSrc = Compiler.genExpression(expTokens, tmpCtx);
-                        SYS.dataStore.push({ line: x.line, src: expSrc });
-                    }
-                    if (peek() === ',') next();
+            try {
+                // Temporary object for compilation preview to strip labels
+                const x = { line: lineObj.line, src: lineObj.src };
+                const labelMatch = x.src.match(/^\s*([A-Za-z_][A-Za-z0-9_]*)\s*:(.*)$/);
+                if (labelMatch) {
+                    x.src = labelMatch[2].trim() || "REM";
                 }
-            }
 
-            // Compile to get the body attached
-            const func = Compiler.compile(x);
-            if (func.generatedBody) {
-                fullSource += func.generatedBody + "\n";
+                if (typeof x.src === 'string' && x.src.toUpperCase().trim().startsWith('DATA')) {
+                    const dataTokens = Tokenizer.tokenize(x.src);
+                    let ctxIdx = 1; // Skip 'DATA'
+                    while (ctxIdx < dataTokens.length) {
+                        const peek = () => dataTokens[ctxIdx];
+                        const next = () => dataTokens[ctxIdx++];
+                        const expTokens = [];
+                        while (ctxIdx < dataTokens.length && peek() !== ',') {
+                            expTokens.push(next());
+                        }
+                        if (expTokens.length > 0) {
+                            const tmpCtx = { idx: 0, jsLoops: [] };
+                            const expSrc = Compiler.genExpression(expTokens, tmpCtx);
+                            SYS.dataStore.push({ line: x.line, src: expSrc });
+                        }
+                        if (peek() === ',') next();
+                    }
+                }
+
+                // Compile to get the body attached
+                const func = Compiler.compile(x);
+                if (func.generatedBody) {
+                    fullSource += func.generatedBody + "\n";
+                }
+            } catch (e) {
+                let errStr = "?SYNTAX ERROR";
+                if (e === "SYNTAX") {
+                    errStr = `?SYNTAX ERROR IN ${lineObj.line !== null ? lineObj.line : ""}`;
+                } else {
+                    errStr = `?${e} IN ${lineObj.line !== null ? lineObj.line : ""}`;
+                }
+                IO.print(errStr);
+                SYS.running = false;
+                IO.prompt();
+                return;
             }
-        });
+        }
 
         SYS.transpiledSource = fullSource;
     },
@@ -92,49 +106,63 @@ export const ENGINE = {
             preprocessed.push(chunk);
         }
 
-        preprocessed.forEach((x, i) => {
+        for (let i = 0; i < preprocessed.length; i++) {
+            const x = preprocessed[i];
             if (x.line !== null) SYS.labels[x.line] = i;
 
             // Clone x locally to prevent destructive global mapping out of SYS.program
             const compileChunk = { line: x.line, src: x.src };
 
-            // Catch optional alphanumeric labels (e.g., LoopStart: LET X = 1)
-            const labelMatch = compileChunk.src.match(/^\s*([A-Za-z_][A-Za-z0-9_]*)\s*:(.*)$/);
-            if (labelMatch) {
-                SYS.labels[labelMatch[1].toUpperCase()] = i;
-                compileChunk.src = labelMatch[2].trim() || "REM";
-            }
-
-            // Catch FUN definitions for forward jumping (e.g., FUN MYMATH(X,Y))
-            const funMatch = compileChunk.src.match(/^\s*FUN\s+([A-Za-z_][A-Za-z0-9_]*)\s*\(/i);
-            if (funMatch) {
-                SYS.labels[funMatch[1].toUpperCase()] = i;
-                funIndices.push(i);
-            }
-
-            if (typeof compileChunk.src === 'string' && compileChunk.src.toUpperCase().trim().startsWith('DATA')) {
-                const dataTokens = Tokenizer.tokenize(compileChunk.src);
-                let ctxIdx = 1; // Skip 'DATA'
-                while (ctxIdx < dataTokens.length) {
-                    const peek = () => dataTokens[ctxIdx];
-                    const next = () => dataTokens[ctxIdx++];
-                    const expTokens = [];
-                    while (ctxIdx < dataTokens.length && peek() !== ',') {
-                        expTokens.push(next());
-                    }
-                    if (expTokens.length > 0) {
-                        const tmpCtx = { idx: 0, jsLoops: [] };
-                        const expSrc = Compiler.genExpression(expTokens, tmpCtx);
-                        SYS.dataStore.push({ line: compileChunk.line, src: expSrc });
-                    }
-                    if (peek() === ',') next();
+            try {
+                // Catch optional alphanumeric labels (e.g., LoopStart: LET X = 1)
+                const labelMatch = compileChunk.src.match(/^\s*([A-Za-z_][A-Za-z0-9_]*)\s*:(.*)$/);
+                if (labelMatch) {
+                    SYS.labels[labelMatch[1].toUpperCase()] = i;
+                    compileChunk.src = labelMatch[2].trim() || "REM";
                 }
-            }
 
-            console.log(`Compiling line ${compileChunk.line}: ${compileChunk.src}`);
-            const f = Compiler.compile(compileChunk);
-            SYS.compiled.push(f);
-        });
+                // Catch FUN definitions for forward jumping (e.g., FUN MYMATH(X,Y))
+                const funMatch = compileChunk.src.match(/^\s*FUN\s+([A-Za-z_][A-Za-z0-9_]*)\s*\(/i);
+                if (funMatch) {
+                    SYS.labels[funMatch[1].toUpperCase()] = i;
+                    funIndices.push(i);
+                }
+
+                if (typeof compileChunk.src === 'string' && compileChunk.src.toUpperCase().trim().startsWith('DATA')) {
+                    const dataTokens = Tokenizer.tokenize(compileChunk.src);
+                    let ctxIdx = 1; // Skip 'DATA'
+                    while (ctxIdx < dataTokens.length) {
+                        const peek = () => dataTokens[ctxIdx];
+                        const next = () => dataTokens[ctxIdx++];
+                        const expTokens = [];
+                        while (ctxIdx < dataTokens.length && peek() !== ',') {
+                            expTokens.push(next());
+                        }
+                        if (expTokens.length > 0) {
+                            const tmpCtx = { idx: 0, jsLoops: [] };
+                            const expSrc = Compiler.genExpression(expTokens, tmpCtx);
+                            SYS.dataStore.push({ line: compileChunk.line, src: expSrc });
+                        }
+                        if (peek() === ',') next();
+                    }
+                }
+
+                console.log(`Compiling line ${compileChunk.line}: ${compileChunk.src}`);
+                const f = Compiler.compile(compileChunk);
+                SYS.compiled.push(f);
+            } catch (e) {
+                let errStr = "?SYNTAX ERROR";
+                if (e === "SYNTAX") {
+                    errStr = `?SYNTAX ERROR IN ${compileChunk.line !== null ? compileChunk.line : ""}`;
+                } else {
+                    errStr = `?${e} IN ${compileChunk.line !== null ? compileChunk.line : ""}`;
+                }
+                IO.print(errStr);
+                SYS.running = false;
+                IO.prompt();
+                return;
+            }
+        }
 
         // Initialize block skips to jump sequential execution over subroutine blocks
         for (let j = 0; j < funIndices.length; j++) {
@@ -146,8 +174,7 @@ export const ENGINE = {
         SYS.pc = 0;
         SYS.running = true;
         SYS.break = false;
-        SYS.vars = {};
-        SYS.arrays = {};
+        SYS.resetEnvironment();
         SYS.defFn = {};
         SYS.stack = [];
         SYS.forStack = {};
@@ -183,7 +210,13 @@ export const ENGINE = {
                 if ((ops & 127) === 0 && (performance.now() - ly) > 14) { await new Promise(r => setTimeout(r, 0)); ly = performance.now(); }
             }
         } catch (e) {
-            IO.print("\n?" + e);
+            let srcLine = "";
+            let srcCode = "";
+            if (SYS.program && SYS.program[SYS.pc]) {
+                srcLine = SYS.program[SYS.pc].line !== null ? ` IN ${SYS.program[SYS.pc].line}` : "";
+                srcCode = `\n  ${SYS.program[SYS.pc].src}`;
+            }
+            IO.print(`\n?${e}${srcLine}${srcCode}`);
             SYS.running = false;
             IO.prompt();
             return;
@@ -242,7 +275,13 @@ export const ENGINE = {
                 }
             }
         } catch (e) {
-            IO.print("\n?" + e);
+            let srcLine = "";
+            let srcCode = "";
+            if (SYS.program && SYS.program[SYS.pc]) {
+                srcLine = SYS.program[SYS.pc].line !== null ? ` IN ${SYS.program[SYS.pc].line}` : "";
+                srcCode = `\n  ${SYS.program[SYS.pc].src}`;
+            }
+            IO.print(`\n?${e}${srcLine}${srcCode}`);
             SYS.running = false;
         }
 
