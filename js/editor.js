@@ -2,19 +2,25 @@ import { CodeJar } from './vendor/codejar.js';
 import { Tokenizer, SYNTAX } from './parser.js';
 import { SYS } from './system.js';
 import { IO } from './io.js';
+import { FS } from './fs.js';
 
 export const EDITOR = {
     jar: null,
     overlay: null,
+    titleSpan: null,
     saveBtn: null,
+    cancelBtn: null,
     active: false,
 
     init: () => {
         EDITOR.overlay = document.getElementById('editor-overlay');
+        EDITOR.titleSpan = document.getElementById('editor-title');
         const editorDiv = document.getElementById('editor-content');
         EDITOR.saveBtn = document.getElementById('editor-save');
+        EDITOR.cancelBtn = document.getElementById('editor-cancel');
 
         EDITOR.saveBtn.addEventListener('click', EDITOR.close);
+        EDITOR.cancelBtn.addEventListener('click', EDITOR.cancel);
 
         const highlightAdapter = (editorContentContext) => {
             const rawCode = editorContentContext.textContent;
@@ -72,6 +78,11 @@ export const EDITOR = {
         EDITOR.jar.updateCode(textSrc);
 
         // 3. Show overlay
+        if (FS.currentFilename) {
+            EDITOR.titleSpan.textContent = `bwxBASIC EDITOR - ${FS.currentFilename}`;
+        } else {
+            EDITOR.titleSpan.textContent = `bwxBASIC INTERNAL CODE EDITOR`;
+        }
         EDITOR.overlay.style.display = 'flex';
 
         // 4. Clear REPL buffer and trap focus
@@ -105,6 +116,14 @@ export const EDITOR = {
                 SYS.program.push({ line: null, src: line });
             }
         }
+
+        IO.print("\nREADY.");
+        IO.prompt();
+    },
+
+    cancel: () => {
+        EDITOR.active = false;
+        EDITOR.overlay.style.display = 'none';
 
         IO.print("\nREADY.");
         IO.prompt();

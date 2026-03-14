@@ -275,6 +275,17 @@
             font-family: 'VT323', monospace;
             font-size: 20px;
         }
+
+        #editor-cancel {
+            background: #660000;
+            color: white;
+            border: none;
+            padding: 5px 15px;
+            cursor: pointer;
+            font-weight: bold;
+            font-family: 'VT323', monospace;
+            font-size: 20px;
+        }
     </style>
 </head>
 
@@ -303,7 +314,8 @@
         </div>
         <div id="editor-overlay">
             <div class="help-header">
-                <span>bwxBASIC INTERNAL CODE EDITOR</span>
+                <button id="editor-cancel">CLOSE WITHOUT SAVE</button>
+                <span id="editor-title">bwxBASIC INTERNAL CODE EDITOR</span>
                 <button id="editor-save">SAVE & CLOSE</button>
             </div>
             <div id="editor-content"></div>
