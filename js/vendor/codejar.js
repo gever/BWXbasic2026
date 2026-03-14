@@ -402,6 +402,8 @@ export function CodeJar(editor, highlight, opt = {}) {
         return (typeof key === 'string' ? key : String.fromCharCode(key)).toUpperCase();
     }
     function insert(text) {
+        if (document.execCommand('insertText', false, text)) return;
+
         text = text
             .replace(/&/g, '&amp;')
             .replace(/</g, '&lt;')
