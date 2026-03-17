@@ -175,12 +175,12 @@ export function CodeJar(editor, highlight, opt = {}) {
             if (el.nodeType !== Node.TEXT_NODE)
                 return;
             const len = (el.nodeValue || '').length;
-            if (current + len > pos.start) {
+            if (current + len >= pos.start) {
                 if (!startNode) {
                     startNode = el;
                     startOffset = pos.start - current;
                 }
-                if (current + len > pos.end) {
+                if (current + len >= pos.end) {
                     endNode = el;
                     endOffset = pos.end - current;
                     return 'stop';
@@ -402,6 +402,24 @@ export function CodeJar(editor, highlight, opt = {}) {
         return (typeof key === 'string' ? key : String.fromCharCode(key)).toUpperCase();
     }
     function insert(text) {
+        // execCommand('insertText') mishandles \n in some browsers (inserts spaces
+        // on the wrong line, wrong cursor position).  Use the Range API directly
+        // whenever the text contains a newline so the insertion is always correct.
+        if (text.includes('\n')) {
+            const sel = getSelection();
+            if (sel.rangeCount) {
+                const range = sel.getRangeAt(0);
+                range.deleteContents();
+                const node = document.createTextNode(text);
+                range.insertNode(node);
+                const cur = document.createRange();
+                cur.setStart(node, node.length);
+                cur.collapse(true);
+                sel.removeAllRanges();
+                sel.addRange(cur);
+                return;
+            }
+        }
         if (document.execCommand('insertText', false, text)) return;
 
         text = text
@@ -409,7 +427,8 @@ export function CodeJar(editor, highlight, opt = {}) {
             .replace(/</g, '&lt;')
             .replace(/>/g, '&gt;')
             .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#039;');
+            .replace(/'/g, '&#039;')
+            .replace(/\n/g, '&#10;');
         document.execCommand('insertHTML', false, text);
     }
     function debounce(cb, wait) {
