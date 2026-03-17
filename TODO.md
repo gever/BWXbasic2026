@@ -42,4 +42,6 @@
 - [ ] BUG: changing a line number in the editor doesn't cause the lines to resort on next edit or LIST
 - [X] BUG: WHERE command fails for un-numbered lines
 - [X] BUG: compiler exceptions are not returning control to the REPL
-- [X] BUG: user cannot hit <enter> at the end of an indented line in the editor. 
+- [X] BUG: user cannot hit <enter> at the end of an indented line in the editor.
+- [ ] BUG: cursor jumps up to previous line when you hit <enter> at then end of a line
+- [ ] FEAT: editor should remember last cursor location when we re-invoke EDIT
