@@ -43,5 +43,6 @@
 - [X] BUG: WHERE command fails for un-numbered lines
 - [X] BUG: compiler exceptions are not returning control to the REPL
 - [X] BUG: user cannot hit <enter> at the end of an indented line in the editor.
-- [ ] BUG: cursor jumps up to previous line when you hit <enter> at then end of a line
+- [X] BUG: cursor jumps up to previous line when you hit <enter> at then end of a line (thanks John!)
 - [ ] FEAT: editor should remember last cursor location when we re-invoke EDIT
+- [ ] BUG: when Gaius ```PRINT A; : PRINT " is the same hand"``` produces unexpected output. If A was 27, it would print "270 is the same hand" 
