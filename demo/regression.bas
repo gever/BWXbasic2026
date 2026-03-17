@@ -290,8 +290,16 @@
 1430 NEXT J
 1435 IF TEST12 <> 30 THEN ERRORS = ERRORS + 1 : PRINT "Error: GOSUB in loop failed, TEST12 = "; TEST12
 
-1440 REM Done with GOTO/GOSUB tests, skip to next section
-1445 GOTO 1605
+1440 REM --- Test 13: IF THEN RETURN ---
+1441 LET TEST13 = 0
+1442 GOSUB 1588
+1443 IF TEST13 <> 1 THEN ERRORS = ERRORS + 1 : PRINT "Error: IF THEN RETURN failed, TEST13 = "; TEST13
+1444 REM --- Test 14: IF THEN ELSE RETURN ---
+1445 LET TEST14 = 0
+1446 GOSUB 1593
+1447 IF TEST14 <> 2 THEN ERRORS = ERRORS + 1 : PRINT "Error: IF THEN ELSE RETURN failed, TEST14 = "; TEST14
+1448 REM Done with GOTO/GOSUB tests, skip to next section
+1449 GOTO 1605
 
 1450 REM ================================================
 1451 REM Subroutines section - keep them together
@@ -334,7 +342,17 @@
 1580 REM Subroutine for Test 8 (nested call)
 1585 LET TEST8 = TEST8 + 10
 1586 RETURN
-1590 REM End of subroutines section
+1587 REM Subroutine for Test 13 (IF THEN RETURN)
+1588 LET TEST13 = 1
+1589 IF 1 = 1 THEN RETURN
+1590 LET TEST13 = 99
+1591 RETURN
+1592 REM Subroutine for Test 14 (IF THEN ELSE RETURN)
+1593 LET TEST14 = 2
+1594 IF 1 = 0 THEN PRINT "SKIP" ELSE RETURN
+1595 LET TEST14 = 99
+1596 RETURN
+1597 REM End of subroutines section
 
 1598 REM ================================================
 1599 REM Array Testing Section
