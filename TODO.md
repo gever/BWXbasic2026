@@ -46,3 +46,4 @@
 - [X] BUG: cursor jumps up to previous line when you hit <enter> at then end of a line (thanks John!)
 - [ ] FEAT: editor should remember last cursor location when we re-invoke EDIT
 - [ ] BUG: when Gaius ```PRINT A; : PRINT " is the same hand"``` produces unexpected output. If A was 27, it would print "270 is the same hand" 
+- [ ] BUG: ```IF ... THEN RETURN``` is a syntax error
