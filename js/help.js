@@ -1,123 +1,18 @@
-export const HELP_DATA = {
-    "SYSTEM & FILES": [
-        { c: "RUN", d: "Executes the program currently in memory. Clears variables. &lt;ESC&gt; to halt execution.", e: "RUN" },
-        { c: "LIST", d: "Displays the source code of the current program.", e: "LIST" },
-        { c: "EDIT", d: "Opens the full-screen code editor. Or use 'EDIT <line>' for single line.", e: "EDIT" },
-        { c: "NEW", d: "Clears the current program from memory and resets variables.", e: "NEW" },
-        { c: "COPY", d: "Copies the current program source code to your clipboard.", e: "COPY" },
-        { c: "SAVE", d: "Saves current program to browser local storage.", e: "SAVE \"MYGAME\"" },
-        { c: "LOAD", d: "Loads a program from local storage or demo library.", e: "LOAD \"DEMO/GRAPHICS.BAS\"" },
-        { c: "DIR", d: "Lists all saved files and available demos.", e: "DIR" },
-        { c: "DOWNLOAD", d: "Downloads the program as a .BAS text file to your computer.", e: "DOWNLOAD \"GAME\"" },
-        { c: "UPLOAD", d: "Uploads a .BAS text file from your computer into memory.", e: "UPLOAD" },
-        { c: "WHERE", d: "Shows the line number where the last program stopped.", e: "WHERE" },
-        { c: "JSECHO", d: "Toggles echoing of output to the browser console for debugging.", e: "JSECHO" },
-        { c: "JSPEEK", d: "See what your BASIC code looks like compiled to JavaScript.", e: "JSPEEK" },
-        { c: "VIZ", d: "Generates an interactive flowchart visualization of your program's structure.", e: "VIZ" },
-        { c: "HELP", d: "Opens this reference manual.", e: "HELP" },
-        { c: "REM", d: "Remark/Comment. Line is ignored by interpreter.", e: "10 REM SETUP VARIABLES" },
-        { c: "VARS", d: "Lists all currently defined variables, or a specific variable if provided. Quotes are optional.", e: "VARS [\"varname\"]" }
-    ],
-    "SCREEN & GRAPHICS": [
-        { c: "HOME or CLS", d: "Clears the text screen and moves cursor to top-left.", e: "10 HOME" },
-        { c: "GR_CLEAR", d: "Clears screen to current GR_COLOR.", e: "10 GR_CLEAR" },
-        { c: "GR_COLOR", d: "Sets color (0-63).", e: "20 GR_COLOR=3" },
-        { c: "GR_MOVETO", d: "Moves graphics cursor to X,Y.", e: "30 GR_MOVETO 100,100" },
-        { c: "GR_LINETO", d: "Draws line to X,Y.", e: "40 GR_LINETO 200,200" },
-        { c: "GR_RECT", d: "Draws outline rectangle W,H at cursor.", e: "50 GR_RECT 50,50" },
-        { c: "GR_FRECT", d: "Draws filled rectangle W,H at cursor.", e: "60 GR_FRECT 50,50" },
-        { c: "GR_ELLIPSE", d: "Draws outline ellipse W,H at cursor.", e: "70 GR_ELLIPSE 50,30" },
-        { c: "GR_FELLIPSE", d: "Draws filled ellipse W,H at cursor.", e: "80 GR_FELLIPSE 50,30" },
-        { c: "GR_TRI", d: "Draws triangle (x2,y2,x3,y3) from cursor.", e: "90 GR_TRI 200,200,100,200" },
-        { c: "GR_FTRI", d: "Draws filled triangle.", e: "95 GR_FTRI 200,200,100,200" },
-        { c: "GR_PRINT", d: "Prints text at graphics cursor.", e: "10 GR_PRINT \"SCORE: \"; S" },
-        { c: "GR_FONT", d: "Sets font size for GR_PRINT.", e: "20 GR_FONT 10" },
-        { c: "GR_FONT", d: "Sets font size for GR_PRINT.", e: "20 GR_FONT 10" },
-        { c: "GR_RGB(r,g,b)", d: "Returns nearest palette color index for RGB values 0-255.", e: "10 GR_COLOR GR_RGB(255,128,0)" },
-        { c: "TEXT", d: "Legacy command (Clears screen in Mixed Mode).", e: "100 TEXT" },
-        { c: "HGR", d: "Legacy command (Clears screen in Mixed Mode).", e: "10 HGR" },
-        { c: "HGR2", d: "Legacy command (Clears screen in Mixed Mode).", e: "10 HGR2" },
-        { c: "HCOLOR", d: "Legacy: Sets drawing color (0-7).", e: "20 HCOLOR = 3" },
-        { c: "HPLOT", d: "Legacy: Plots a point or draws lines.", e: "30 HPLOT 0,0 TO 100,100" },
-        { c: "HTAB", d: "Moves cursor to horizontal column X (1-40).", e: "10 HTAB 20" },
-        { c: "VTAB", d: "Moves cursor to vertical row Y (1-24).", e: "20 VTAB 12" },
-        { c: "SETPOS", d: "Moves cursor to X, Y coordinates (Custom).", e: "30 SETPOS 15, 10" }
-    ],
-    "TURTLE GRAPHICS": [
-        { c: "GR_FWD", d: "Alias GR_FD. Moves turtle forward by distance.", e: "10 GR_FWD 50" },
-        { c: "GR_BK", d: "Moves turtle backward by distance.", e: "20 GR_BK 50" },
-        { c: "GR_RT", d: "Turns turtle right by degrees.", e: "30 GR_RT 90" },
-        { c: "GR_LT", d: "Turns turtle left by degrees.", e: "40 GR_LT 90" },
-        { c: "GR_PEN_DN", d: "Alias GR_PD. Puts the pen down to draw.", e: "50 GR_PEN_DN" },
-        { c: "GR_PEN_UP", d: "Alias GR_PU. Lifts the pen to stop drawing.", e: "60 GR_PEN_UP" },
-        { c: "GR_TURTLE_RESET", d: "Alias GR_TR. Resets turtle to 0,0 heading Up.", e: "70 GR_TURTLE_RESET" },
-        { c: "GR_PUSH", d: "Saves current graphics state (pos, heading, color, etc) to stack.", e: "80 GR_PUSH" },
-        { c: "GR_POP", d: "Restores graphics state from stack.", e: "90 GR_POP" }
-    ],
-    "CANVAS BUFFERS": [
-        { c: "GR_CANVAS(W, H)", d: "Function: Creates an off-screen canvas dimensioned WxH and returns ID.", e: "ID = GR_CANVAS(100, 100)" },
-        { c: "GR_GET_CANVAS()", d: "Function: Returns the ID of the currently active canvas.", e: "C = GR_GET_CANVAS()" },
-        { c: "GR_CANVAS_WIDTH", d: "Function: Returns width of the active canvas.", e: "W = GR_CANVAS_WIDTH()" },
-        { c: "GR_CANVAS_HEIGHT", d: "Function: Returns height of the active canvas.", e: "H = GR_CANVAS_HEIGHT()" },
-        { c: "GR_SET_CANVAS(ID)", d: "Command: Sets the active drawing target to canvas ID. ID 0 is main screen.", e: "10 GR_SET_CANVAS 1" },
-        { c: "GR_COPY", d: "Command: Copies canvas ID to X, Y on active canvas with optional W, H scaling.", e: "20 GR_COPY 1, 50, 50, 100, 100" },
-        { c: "GR_FREE", d: "Command: Frees memory for canvas ID.", e: "30 GR_FREE 1" }
-    ],
-    "I/O & CONTROL": [
-        { c: "PRINT", d: "Outputs text or variables. Use ; to suppress newline.", e: "10 PRINT \"SCORE: \"; S" },
-        { c: "INPUT", d: "Pauses to get value from user.", e: "20 INPUT \"NAME? \"; N$" },
-        { c: "INKEY(M)", d: "Reads char. M=1 wait, M=0 async.", e: "A$ = INKEY(1)" },
-        { c: "GOTO", d: "Unconditional jump to line number.", e: "50 GOTO 10" },
-        { c: "GOSUB", d: "Jump to subroutine. Returns on RETURN.", e: "10 GOSUB 1000" },
-        { c: "ON...GOTO", d: "Jump to Nth line in list. ON N GOTO L1,L2", e: "10 ON N GOTO 100,200" },
-        { c: "ON...GOSUB", d: "Subroutine to Nth line in list.", e: "10 ON N GOSUB 100,200" },
-        { c: "RETURN", d: "Return from subroutine or function.", e: "1000 RETURN" },
-        { c: "FUN..RETURN", d: "Define a sub-program function with local scoped arguments.", e: "FUN MATH(X) ... RETURN X" },
-        { c: "CALL", d: "Execute a function natively returning isolated values.", e: "Z = CALL MATH(1)" },
-        { c: "IF...THEN", d: "Conditional execution.", e: "10 IF A > 10 THEN GOTO 50" },
-        { c: "AND / OR", d: "Logical operators for multiple conditions.", e: "10 IF A > 10 AND A < 20 THEN GOTO 50" },
-        { c: "FOR...NEXT", d: "Loop structure.", e: "10 FOR I=1 TO 10 STEP 2 ... 50 NEXT I" },
-        { c: "DELAY", d: "Pauses execution for M milliseconds.", e: "10 DELAY 500" },
-        { c: "END", d: "Stops program execution.", e: "99 END" },
-        { c: "STOP", d: "Stops program execution (Same as END).", e: "99 STOP" },
-        { c: "DIM", d: "Allocates an uninitialized N-dimensional array. Also a function: LET A=DIM(10)", e: "10 DIM A(10, 10)" },
-        { c: "ARRAY", d: "Instantiates an array with given values. Also a function.", e: "20 ARRAY A(1, 2, 3)" },
-        { c: "DICT", d: "Defines an associative array/hash table. Also a function.", e: "10 DICT T(\"A\", 1, \"B\", 2)" },
-        { c: "DATA", d: "Stores static values to be read by READ.", e: "30 DATA \"key\", 1, 100" },
-        { c: "READ", d: "Reads N items from DATA into an array or dict.", e: "20 READ A, 10" },
-        { c: "RESTORE", d: "Resets the DATA pointer to read from a specific line.", e: "10 RESTORE 30" },
-        { c: "NIL", d: "Constant for a missing or empty DICT value. Used to delete keys.", e: "40 T(\"A\") = NIL" },
-        { c: "LET", d: "Assigns value to variable (optional keyword).", e: "10 LET A = 5" },
-        { c: "FORKEYS", d: "Loop through keys of a DICT.", e: "10 FORKEYS K, T ... 20 NEXT K" }
-    ],
-    "MATH FUNCTIONS": [
-        { c: "SIN(X)", d: "Sine of X (radians).", e: "Y = SIN(3.14)" },
-        { c: "COS(X)", d: "Cosine of X (radians).", e: "Y = COS(0)" },
-        { c: "TAN(X)", d: "Tangent of X.", e: "Y = TAN(1)" },
-        { c: "ATN(X)", d: "Arctangent of X.", e: "Y = ATN(1)" },
-        { c: "SQR(X)", d: "Square root.", e: "Y = SQR(16)" },
-        { c: "ABS(X)", d: "Absolute value.", e: "Y = ABS(-5)" },
-        { c: "SGN(X)", d: "Sign value. Returns 1 for positive, -1 for negative, 0 for 0.", e: "Y = SGN(-10)" },
-        { c: "INT(X)", d: "Integer part (Floor).", e: "Y = INT(3.9)" },
-        { c: "EXP(X)", d: "e raised to power X.", e: "Y = EXP(1)" },
-        { c: "LOG(X)", d: "Natural logarithm.", e: "Y = LOG(10)" },
-        { c: "EXP(X)", d: "e raised to power X.", e: "Y = EXP(1)" },
-        { c: "LOG(X)", d: "Natural logarithm.", e: "Y = LOG(10)" },
-        { c: "RND(N)", d: "Random number 0 to N. Use N=1 for 0.0-1.0.", e: "R = RND(10)" },
-        { c: "RAND(X)", d: "Random number 0 to X.", e: "R = RAND(100)" },
-        { c: "SEED(N)", d: "Seed the random number generator.", e: "SEED(12345)" }
-    ],
-    "STRING FUNCTIONS": [
-        { c: "LEN(S$)", d: "Length of string.", e: "L = LEN(\"ABC\")" },
-        { c: "LEFT$(S$,N)", d: "First N chars.", e: "A$ = LEFT$(\"HELLO\", 2)" },
-        { c: "RIGHT$(S$,N)", d: "Last N chars.", e: "A$ = RIGHT$(\"WORLD\", 3)" },
-        { c: "MID$(S$,I,N)", d: "N chars starting at I.", e: "A$ = MID$(\"ABC\", 2, 1)" },
-        { c: "UPPER$(S$)", d: "Convert to uppercase.", e: "U$ = UPPER$(\"abc\")" },
-        { c: "LOWER$(S$)", d: "Convert to lowercase.", e: "L$ = LOWER$(\"XYZ\")" },
-        { c: "STR$(N)", d: "Convert number to string.", e: "A$ = STR$(123)" },
-        { c: "VAL(S$)", d: "Convert string to number.", e: "N = VAL(\"12.5\")" },
-        { c: "ASC(S$)", d: "ASCII code of first character.", e: "C = ASC(\"A\")" },
-        { c: "CHR$(N)", d: "Single-char string from ASCII code.", e: "A$ = CHR$(65)" },
-        { c: "INSTR(N,S$,Sub$)", d: "Search for string.", e: "P = INSTR(\"ABC\",\"B\")" }
-    ]
-};
+import { KEYWORDS } from './keywords.js';
+
+export const HELP_DATA = {};
+
+// Build HELP_DATA dynamically from the central KEYWORDS source
+KEYWORDS.forEach(kw => {
+    if (!kw.category) return; // Skip internal aliases/shorthands that lack a category
+    
+    if (!HELP_DATA[kw.category]) {
+        HELP_DATA[kw.category] = [];
+    }
+    
+    HELP_DATA[kw.category].push({
+        c: kw.helpSyntax || kw.name,
+        d: kw.desc,
+        e: kw.example
+    });
+});

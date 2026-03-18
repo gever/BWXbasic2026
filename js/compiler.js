@@ -1,6 +1,7 @@
 import { LIB } from './library.js';
 import { Tokenizer } from './parser.js';
 import { SYS } from './system.js';
+import { SYNTAX_COMMANDS, SYNTAX_KEYWORDS } from './keywords.js';
 
 const AsyncFunction = Object.getPrototypeOf(async function () { }).constructor;
 
@@ -448,7 +449,8 @@ export const Compiler = {
                 const compileBranch = (branchTokens) => {
                     if (!branchTokens || branchTokens.length === 0) return "";
                     // Check for single line number (GOTO shorthand, e.g. THEN 100 or THEN -1)
-                    const isKw = branchTokens.length === 1 && ['PRINT','?','ON','GOTO','GOSUB','RETURN','FUN','DEF','CALL','!','IF','FOR','NEXT','FORKEYS','DIM','ARRAY','DICT','DATA','RESTORE','READ','INPUT','GR_PRINT','HGR','HGR2','TEXT','HCOLOR','HPLOT','GR_CLEAR','GR_CLS','GR_COLOR','GR_MOVETO','GR_LINETO','GR_RECT','GR_FRECT','GR_ELLIPSE','GR_FELLIPSE','GR_TRI','GR_FTRI','GR_FONT','GR_COPY','GR_FREE','GR_SET_CANVAS','GR_FWD','GR_FD','GR_BK','GR_RT','GR_LT','GR_PEN_DN','GR_PD','GR_PEN_UP','GR_PU','GR_TURTLE_RESET','GR_TR','GR_PUSH','GR_POP','SEED','LET','HTAB','VTAB','SETPOS','HOME','CLS','END','DELAY','SAVE','LOAD','DIR','CATALOG','DOWNLOAD','UPLOAD','JSECHO','HELP'].includes(branchTokens[0].toUpperCase());
+                    const kwList = SYNTAX_COMMANDS.concat(SYNTAX_KEYWORDS);
+                    const isKw = branchTokens.length === 1 && kwList.includes(branchTokens[0].toUpperCase());
                     if (branchTokens.length === 1 && /^[A-Za-z_]/.test(branchTokens[0]) && !isKw) {
                         const label = branchTokens[0].toUpperCase();
                         const tgtExp = Compiler.genExpression(branchTokens, { idx: 0, jsLoops: ctx.jsLoops });
