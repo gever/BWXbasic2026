@@ -401,6 +401,76 @@ export const IO = {
                 ov.style.display = 'flex';
                 IO.prompt();
             }
+            else if (c === 'PASTE') {
+                if (navigator.clipboard && navigator.clipboard.readText) {
+                    navigator.clipboard.readText().then(text => {
+                        if (!text) {
+                            IO.print("?CLIPBOARD EMPTY");
+                            IO.prompt();
+                            return;
+                        }
+
+                        const lines = text.split(/\r?\n/);
+                        const numberedLines = [];
+                        const unnumberedLines = [];
+
+                        // 1. Separate existing programmatic state from unnumbered
+                        SYS.program.forEach(p => {
+                            if (p.line !== null) numberedLines.push(p);
+                            else unnumberedLines.push(p);
+                        });
+
+                        let addedCount = 0;
+
+                        // 2. Process incoming clipboard buffer
+                        for (let line of lines) {
+                            line = line.trimRight();
+                            if (!line) continue; // Skip totally blank lines to prevent bloat
+
+                            const m = line.match(/^\s*(\d+)\s+(.*)/);
+                            if (m) {
+                                const ln = parseInt(m[1]);
+                                const src = m[2];
+                                
+                                // Remove any existing line with this number (overwrite/delete)
+                                const existingIdx = numberedLines.findIndex(l => l.line === ln);
+                                if (existingIdx !== -1) {
+                                    numberedLines.splice(existingIdx, 1);
+                                }
+                                
+                                // Only push if there's actual source (e.g. "10" deletes line 10)
+                                if (src.trim() !== "") {
+                                    numberedLines.push({ line: ln, src: src });
+                                    addedCount++;
+                                }
+                            } else {
+                                // Assume it's an unnumbered line
+                                unnumberedLines.push({ line: null, src: line });
+                                addedCount++;
+                            }
+                        }
+
+                        // 3. Re-sort numbered lines mathematically to maintain structural integrity
+                        numberedLines.sort((a,b) => a.line - b.line);
+                        
+                        // 4. Update memory bank
+                        SYS.program = numberedLines.concat(unnumberedLines);
+                        
+                        IO.print(`${addedCount} LINES PASTED`);
+                        IO.prompt();
+                        
+                        // Optionally trigger a re-compile if we are smart
+                        import('./engine.js').then(({ ENGINE }) => ENGINE.generateOnly());
+                        
+                    }).catch(err => {
+                        IO.print("?CLIPBOARD PERMISSION DENIED");
+                        IO.prompt();
+                    });
+                } else {
+                    IO.print("?CLIPBOARD API NOT SUPPORTED");
+                    IO.prompt();
+                }
+            }
             else {
                 try {
                     const func = Compiler.compile({ line: 0, src: cRaw });

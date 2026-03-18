@@ -47,3 +47,4 @@
 - [ ] FEAT: editor should remember last cursor location when we re-invoke EDIT
 - [ ] BUG: ```PRINT A; : PRINT " is the same hand"``` produces unexpected output. If A was 27, it would print "270 is the same hand" 
 - [X] BUG: ```IF ... THEN RETURN``` is a syntax error
+- [X] FEAT: add PASTE command to allow safer pasting of code into the REPL. It should sort/merge numbered lines in the current code, and append un-numbered lines to the end of the current program. It should not execute the code, but rather add it to the current program. If a numbered-line conflicts with an existing numbered-line, it should replace the existing line. It should not modify the current filename.
