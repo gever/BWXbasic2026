@@ -35,15 +35,15 @@
 - [X] BUG: VARS command does not display arrays or hashtable variables
 - [ ] FEAT: allow SQR and SQRT
 - [X] FEAT: add turtle drawing commands (e.g. GR_FWD N, GR_RT N, etc)
-- [ ] BUG: REM at the end of line without a leading colon throws exception
+- [X] BUG: REM at the end of line without a leading colon throws exception
 - [ ] BUG: PRINT isn't printing contents of multi-dimensional arrays
 - [ ] BUG: a linenumber followed immediately by ' is a compiler exception
-- [ ] BUG: IF ... THEN ... ELSE END is a compiler exception
-- [ ] BUG: changing a line number in the editor doesn't cause the lines to resort on next edit or LIST
+- [X] BUG: IF ... THEN ... ELSE END is a compiler exception
+- [X] BUG: changing a line number in the editor doesn't cause the lines to resort on next edit or LIST
 - [X] BUG: WHERE command fails for un-numbered lines
 - [X] BUG: compiler exceptions are not returning control to the REPL
 - [X] BUG: user cannot hit <enter> at the end of an indented line in the editor.
 - [X] BUG: cursor jumps up to previous line when you hit <enter> at then end of a line (thanks John!)
 - [ ] FEAT: editor should remember last cursor location when we re-invoke EDIT
-- [ ] BUG: when Gaius ```PRINT A; : PRINT " is the same hand"``` produces unexpected output. If A was 27, it would print "270 is the same hand" 
-- [ ] BUG: ```IF ... THEN RETURN``` is a syntax error
+- [ ] BUG: ```PRINT A; : PRINT " is the same hand"``` produces unexpected output. If A was 27, it would print "270 is the same hand" 
+- [X] BUG: ```IF ... THEN RETURN``` is a syntax error

@@ -43,20 +43,24 @@ export const FS = {
                 const text = await response.text();
 
                 const lines = text.split(/\r\n|\n|\r/);
-                const prog = [];
+                const numberedLines = [];
+                const unnumberedLines = [];
+                
                 for (let line of lines) {
                     line = line.trimRight();
                     const m = line.match(/^\s*(\d+)\s+(.*)/);
                     if (m) {
                         const ln = parseInt(m[1]);
-                        prog.push({ line: ln, src: m[2] });
+                        numberedLines.push({ line: ln, src: m[2] });
                     } else {
                         // Un-numbered line
-                        prog.push({ line: null, src: line });
+                        unnumberedLines.push({ line: null, src: line });
                     }
                 }
 
-                SYS.program = prog;
+                numberedLines.sort((a,b) => a.line - b.line);
+                SYS.program = numberedLines.concat(unnumberedLines);
+                
                 SYS.vars = {}; SYS.arrays = {};
                 FS.currentFilename = fn;
                 SCREEN.clear();
@@ -119,17 +123,23 @@ export const FS = {
                 const reader = new FileReader();
                 reader.onload = (re) => {
                     const text = re.target.result;
-                    SYS.program = [];
+                    const numberedLines = [];
+                    const unnumberedLines = [];
+                    
                     FS.currentFilename = file.name;
                     text.split(/\r?\n/).forEach(line => {
                         line = line.replace(/\r/g, "").trimRight();
                         const m = line.match(/^\s*(\d+)\s+(.*)/);
                         if (m) {
-                            SYS.program.push({ line: parseInt(m[1]), src: m[2] });
+                            numberedLines.push({ line: parseInt(m[1]), src: m[2] });
                         } else {
-                            SYS.program.push({ line: null, src: line });
+                            unnumberedLines.push({ line: null, src: line });
                         }
                     });
+                    
+                    numberedLines.sort((a,b) => a.line - b.line);
+                    SYS.program = numberedLines.concat(unnumberedLines);
+                    
                     IO.print(`Uploaded ${file.name}`);
                     import('./engine.js').then(({ ENGINE }) => {
                         ENGINE.generateOnly();

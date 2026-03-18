@@ -501,8 +501,7 @@
 2200 LET TBL = NIL
 2205 IF TBL("bar") <> NIL THEN ERRORS = ERRORS + 1 : PRINT "Error: TBL('bar') should be NIL after whole table clear."
 
-2205 IF TBL("bar") <> NIL THEN ERRORS = ERRORS + 1 : PRINT "Error: TBL('bar') should be NIL after whole table clear."
-
+2206 REM padding
 2210 REM Test 15: RESTORE, READ and DATA
 2212 DIM R_ARR(5), R_MAT(2, 2)
 2214 DICT R_DICT
@@ -529,16 +528,16 @@
 
 2245 REM Test 16: Internal Order Indexing
 2250 LET X = 0
-LoopBlock: LET X = X + 1
-IF X < 3 THEN LoopBlock
-GOTO 2270
+2252 LoopBlock: LET X = X + 1
+2254 IF X < 3 THEN LoopBlock
+2256 GOTO 2270
 2260 GOTO 2245
 2270 IF X <> 3 THEN ERRORS = ERRORS + 1 : PRINT "Error: Un-numbered interleaving failed."
 
-2260 REM Test 16: User Functions and Scoping
-LET X = 100
-LET Y = 500
-LET FUNC_RES = CALL DO_MATH(10, 20)
+2400 REM Test 16: User Functions and Scoping
+2410 LET X = 100
+2420 LET Y = 500
+2430 LET FUNC_RES = CALL DO_MATH(10, 20)
 IF FUNC_RES <> 30 THEN ERRORS = ERRORS + 1 : PRINT "Error: CALL DO_MATH(10, 20) returned "; FUNC_RES; " instead of 30"
 IF X <> 100 THEN ERRORS = ERRORS + 1 : PRINT "Error: Outer X was mutated! Got "; X
 IF Y <> 500 THEN ERRORS = ERRORS + 1 : PRINT "Error: Outer Y was mutated! Got "; Y
@@ -550,9 +549,13 @@ IF Z <> 999 THEN ERRORS = ERRORS + 1 : PRINT "Error: Function failed to mutate t
 2490 ! MUTATE_SHORTHAND()
 2495 IF SHTH_TEST <> 777 THEN ERRORS = ERRORS + 1 : ? "Error: ! shorthand failed to CALL MUTATE_SHORTHAND"
 
-2510 REM Skip to final summary section
-2520 GOTO 3000
-
+2510 REM Test 18: Editor Line Sorting
+2515 LET SORT_TEST = 0
+2540 IF SORT_TEST <> 1 THEN ERRORS = ERRORS + 1 : ? "Error: Line numbers executed out of order!"
+2520 GOTO 2550
+2530 LET SORT_TEST = 1
+2550 REM Skip to final summary section
+2560 GOTO 3000
 FUN DO_MATH(X, Y)
   LET TOTAL = X + Y
 RETURN TOTAL
@@ -565,7 +568,6 @@ FUN MUTATE_SHORTHAND()
   LET SHTH_TEST = 777
 RETURN
 
-1999 GOTO -1 : REM This line should never be executed
 
 3000 REM Final summary
 3010 PRINT

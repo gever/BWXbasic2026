@@ -97,8 +97,8 @@ const loadTestFile = (filepath) => {
 
     const text = fs.readFileSync(absPath, 'utf8');
     const lines = text.split(/\r\n|\n|\r/);
-    const prog = [];
-    let currentNum = 10;
+    const numberedLines = [];
+    const unnumberedLines = [];
 
     for (let line of lines) {
         line = line.trim();
@@ -106,16 +106,16 @@ const loadTestFile = (filepath) => {
         const m = line.match(/^(\d+)\s+(.*)/);
         if (m) {
             const ln = parseInt(m[1]);
-            prog.push({ line: ln, src: m[2] });
+            numberedLines.push({ line: ln, src: m[2] });
         } else {
-            prog.push({ line: null, src: line });
+            unnumberedLines.push({ line: null, src: line });
         }
     }
+    
+    numberedLines.sort((a,b) => a.line - b.line);
+    const prog = numberedLines.concat(unnumberedLines);
 
-    // Remove the 1999 GOTO -1 trap line, since our engine correctly executes sequentially.
-    const cleanProg = prog.filter(x => x.line !== 1999);
-
-    SYS.program = cleanProg;
+    SYS.program = prog;
     SYS.vars = {};
     SYS.arrays = {};
 };

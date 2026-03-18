@@ -105,17 +105,24 @@ export const EDITOR = {
         SYS.labels = {};
 
         // 2. Re-parse code identically to FS.load() behavior
+        const numberedLines = [];
+        const unnumberedLines = [];
+
         for (let line of lines) {
             line = line.trimRight();
 
             // Match optional line numbers explicitly
             const m = line.match(/^\s*(\d+)\s+(.*)/);
             if (m) {
-                SYS.program.push({ line: parseInt(m[1]), src: m[2] });
+                numberedLines.push({ line: parseInt(m[1]), src: m[2] });
             } else {
-                SYS.program.push({ line: null, src: line });
+                unnumberedLines.push({ line: null, src: line });
             }
         }
+
+        // 3. Sort lines with numbers mathematically, then append un-numbered lines
+        numberedLines.sort((a, b) => a.line - b.line);
+        SYS.program = numberedLines.concat(unnumberedLines);
 
         IO.print("\nREADY.");
         IO.prompt();
