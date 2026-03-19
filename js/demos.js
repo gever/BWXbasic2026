@@ -8,5 +8,7 @@ export const DEMOS = {
     "REGRESSION.BAS": "demo/regression.bas",
     "DICT.BAS": "demo/dict.bas",
     "ARROW.BAS": "demo/arrow.bas",
-    "ARROW_N.BAS": "demo/arrow_n.bas"
+    "ARROW_N.BAS": "demo/arrow_n.bas",
+    "TURTLE.BAS": "demo/turtle.bas",
+    "TURTLE_STACK.BAS": "demo/turtle_stack.bas"
 };
