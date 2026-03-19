@@ -132,7 +132,12 @@ export const KEYWORDS = [
     { name: "VAL", type: "FUNCTION", category: "STRING FUNCTIONS", desc: "Convert string to number.", example: "N = VAL(\"12.5\")", helpSyntax: "VAL(S$)" },
     { name: "ASC", type: "FUNCTION", category: "STRING FUNCTIONS", desc: "ASCII code of first character.", example: "C = ASC(\"A\")", helpSyntax: "ASC(S$)" },
     { name: "CHR$", type: "FUNCTION", category: "STRING FUNCTIONS", desc: "Single-char string from ASCII code.", example: "A$ = CHR$(65)", helpSyntax: "CHR$(N)" },
-    { name: "INSTR", type: "FUNCTION", category: "STRING FUNCTIONS", desc: "Search for string.", example: "P = INSTR(\"ABC\",\"B\")", helpSyntax: "INSTR(N,S$,Sub$)" }
+    { name: "INSTR", type: "FUNCTION", category: "STRING FUNCTIONS", desc: "Search for string.", example: "P = INSTR(\"ABC\",\"B\")", helpSyntax: "INSTR(N,S$,Sub$)" },
+
+    // SOUND EFFECTS
+    { name: "SFX_LOAD", type: "FUNCTION", category: "SOUND EFFECTS", desc: "Loads a sound effect and returns its ID.", example: "S = SFX_LOAD(\"laser.mp3\")", helpSyntax: "SFX_LOAD(URL$)" },
+    { name: "SFX_PLAY", type: "COMMAND", category: "SOUND EFFECTS", desc: "Plays a sound effect asynchronously.", example: "SFX_PLAY(S)" },
+    { name: "SFX_PLAY_WAIT", type: "COMMAND", category: "SOUND EFFECTS", desc: "Plays a sound effect synchronously.", example: "SFX_PLAY_WAIT(S)" }
 ];
 
 export const SYNTAX_COMMANDS = KEYWORDS.filter(k => k.type === "COMMAND").map(k => k.name);

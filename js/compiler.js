@@ -2,6 +2,7 @@ import { LIB } from './library.js';
 import { Tokenizer } from './parser.js';
 import { SYS } from './system.js';
 import { SYNTAX_COMMANDS, SYNTAX_KEYWORDS } from './keywords.js';
+import { SOUND } from './sound.js';
 
 const AsyncFunction = Object.getPrototypeOf(async function () { }).constructor;
 
@@ -72,6 +73,14 @@ export const Compiler = {
 
                 if (tu === 'TIME') {
                     return "performance.now()";
+                }
+
+                if (tu === 'SFX_LOAD') {
+                    ctx.setAsync();
+                    next(); // consume '('
+                    const url = parseLogicalOR();
+                    next(); // consume ')'
+                    return `(await SOUND.load(${url}))`;
                 }
 
                 // Handle Math Functions (SIN, LEN, etc)
@@ -469,7 +478,7 @@ export const Compiler = {
                     // We can use a recursive helper or just call Compiler.compile again with a fake object.
                     const sid = "SUB_" + Math.random().toString(36).substr(2, 9);
                     SYS[sid] = Compiler.compile({ line: lineObj.line, src: src });
-                    return `return SYS['${sid}'](SYS,IO,GRAPHICS,FS,ENGINE);`;
+                    return `return SYS['${sid}'](SYS,IO,GRAPHICS,FS,ENGINE,SOUND);`;
                 };
 
                 const tb = compileBranch(matchThen);
@@ -785,6 +794,20 @@ export const Compiler = {
                 chunk = `GRAPHICS.popState();`;
             }
 
+            else if (cmd === 'SFX_PLAY') {
+                if (peek() === '(') next();
+                const id = Compiler.genExpression(tokens, ctx);
+                if (peek() === ')') next();
+                chunk = `SOUND.play(${id});`;
+            }
+            else if (cmd === 'SFX_PLAY_WAIT') {
+                async = true;
+                if (peek() === '(') next();
+                const id = Compiler.genExpression(tokens, ctx);
+                if (peek() === ')') next();
+                chunk = `await SOUND.playWait(${id});`;
+            }
+
             else if (cmd === 'SEED') {
                 if (peek() === '(') {
                     next();
@@ -836,7 +859,7 @@ export const Compiler = {
         }
 
         try {
-            const f = new (async ? AsyncFunction : Function)("SYS", "IO", "GRAPHICS", "FS", "ENGINE", body);
+            const f = new (async ? AsyncFunction : Function)("SYS", "IO", "GRAPHICS", "FS", "ENGINE", "SOUND", body);
             // NEW: Attach the generated text to the function so JSPEEK can read it
             f.generatedBody = body;
             return f;

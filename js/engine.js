@@ -5,6 +5,7 @@ import { FS } from './fs.js';
 import { Compiler } from './compiler.js';
 import { SCREEN } from './screen.js';
 import { Tokenizer } from './parser.js';
+import { SOUND } from './sound.js';
 
 export const ENGINE = {
     // NEW: Helper to generate source for JSPEEK without running
@@ -200,7 +201,7 @@ export const ENGINE = {
                 // NEW: Track the line about to be executed
                 if (SYS.program[SYS.pc]) SYS.lastExecLine = SYS.program[SYS.pc].line;
 
-                const res = SYS.compiled[SYS.pc](SYS, IO, GRAPHICS, FS, ENGINE);
+                const res = SYS.compiled[SYS.pc](SYS, IO, GRAPHICS, FS, ENGINE, SOUND);
                 if (res && res.then) {
                     await res;
                     ly = performance.now();
@@ -260,7 +261,7 @@ export const ENGINE = {
 
                 if (SYS.program[SYS.pc]) SYS.lastExecLine = SYS.program[SYS.pc].line;
 
-                const res = SYS.compiled[SYS.pc](SYS, IO, GRAPHICS, FS, ENGINE);
+                const res = SYS.compiled[SYS.pc](SYS, IO, GRAPHICS, FS, ENGINE, SOUND);
                 if (res && res.then) {
                     await res;
                     ly = performance.now();

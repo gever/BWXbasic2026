@@ -7,6 +7,7 @@ import { ENGINE } from './engine.js';
 import { FS } from './fs.js';
 import { GRAPHICS } from './graphics.js';
 import { HELP_DATA } from './help.js';
+import { SOUND } from './sound.js';
 
 let inputTrap = null; // will be passed from main
 
@@ -475,7 +476,7 @@ export const IO = {
                 try {
                     const func = Compiler.compile({ line: 0, src: cRaw });
                     SYS.running = true;
-                    const res = func(SYS, IO, GRAPHICS, FS, ENGINE);
+                    const res = func(SYS, IO, GRAPHICS, FS, ENGINE, SOUND);
                     if (res && res.then) {
                         res.then(() => {
                             SYS.running = false;
