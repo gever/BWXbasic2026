@@ -38,7 +38,7 @@ export const FS = {
 
         if (path) {
             try {
-                const response = await fetch(path);
+                const response = await fetch(`${path}?t=${Date.now()}`);
                 if (!response.ok) throw new Error("404");
                 const text = await response.text();
 
