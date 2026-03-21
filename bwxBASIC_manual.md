@@ -172,7 +172,7 @@ When a program is loaded or edited, the engine logically separates the script in
 
 Because of this automatic separation, placing un-numbered commands dynamically between numbered lines will cause them to be skipped and relocated to the end of the script! Therefore, numbered code should be utilized as the main sequential flow of the program, while un-numbered freestyle blocks should be reserved for trailing definitions, structured data, or isolated modular subroutines (like `FUN` blocks) built exclusively at the bottom of your file. 
 
-To help make this structural transition clear, if the engine detects a mixture of both styles, it will seamlessly inject a visual `REM freestyle boundary ================` marker between the two sections!
+To help make this structural transition clear, if the engine detects a mixture of both styles, it will seamlessly inject a visual ```REM freestyle boundary ================``` marker between the two sections!
 
 ## 4. Functions
 
