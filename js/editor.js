@@ -120,9 +120,8 @@ export const EDITOR = {
             }
         }
 
-        // 3. Sort lines with numbers mathematically, then append un-numbered lines
-        numberedLines.sort((a, b) => a.line - b.line);
-        SYS.program = numberedLines.concat(unnumberedLines);
+        // 3. Sort and normalize the program layout
+        SYS.normalizeProgram(numberedLines, unnumberedLines);
 
         IO.print("\nREADY.");
         IO.prompt();

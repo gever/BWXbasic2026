@@ -58,8 +58,7 @@ export const FS = {
                     }
                 }
 
-                numberedLines.sort((a,b) => a.line - b.line);
-                SYS.program = numberedLines.concat(unnumberedLines);
+                SYS.normalizeProgram(numberedLines, unnumberedLines);
                 
                 SYS.vars = {}; SYS.arrays = {};
                 FS.currentFilename = fn;
@@ -137,8 +136,7 @@ export const FS = {
                         }
                     });
                     
-                    numberedLines.sort((a,b) => a.line - b.line);
-                    SYS.program = numberedLines.concat(unnumberedLines);
+                    SYS.normalizeProgram(numberedLines, unnumberedLines);
                     
                     IO.print(`Uploaded ${file.name}`);
                     import('./engine.js').then(({ ENGINE }) => {

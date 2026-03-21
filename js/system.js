@@ -3,6 +3,20 @@ import { CONFIG } from './config.js';
 export const SYS = {
     vars: {}, arrays: {}, program: [], compiled: [], defFn: {},
     transpiledSource: "", // NEW: Storage for JSPEEK
+    normalizeProgram: (numberedLines, unnumberedLines) => {
+        const marker = "REM freestyle boundary ================";
+        if (numberedLines.length > 0 && unnumberedLines.length > 0) {
+            const hasRealUnnumbered = unnumberedLines.some(l => l.src.trim() !== "" && l.src.trim() !== marker);
+            if (hasRealUnnumbered) {
+                const hasMarker = unnumberedLines.some(l => l.src.trim() === marker);
+                if (!hasMarker) {
+                    unnumberedLines.unshift({ line: null, src: marker });
+                }
+            }
+        }
+        numberedLines.sort((a, b) => a.line - b.line);
+        SYS.program = numberedLines.concat(unnumberedLines);
+    },
     NIL: { _isNil: true, toString: () => "NIL" }, // NEW: Hash Table missing item constant
     pc: 0, labels: {}, stack: [], forStack: {},
     lastExecLine: 0, // NEW: Track last executed line for WHERE

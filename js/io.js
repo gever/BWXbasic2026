@@ -484,11 +484,8 @@ export const IO = {
                             }
                         }
 
-                        // 3. Re-sort numbered lines mathematically to maintain structural integrity
-                        numberedLines.sort((a,b) => a.line - b.line);
-                        
-                        // 4. Update memory bank
-                        SYS.program = numberedLines.concat(unnumberedLines);
+                        // 3. Update memory bank and normalize
+                        SYS.normalizeProgram(numberedLines, unnumberedLines);
                         
                         IO.print(`${addedCount} LINES PASTED`);
                         IO.prompt();

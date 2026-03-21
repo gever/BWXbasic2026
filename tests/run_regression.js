@@ -112,10 +112,7 @@ const loadTestFile = (filepath) => {
         }
     }
     
-    numberedLines.sort((a,b) => a.line - b.line);
-    const prog = numberedLines.concat(unnumberedLines);
-
-    SYS.program = prog;
+    SYS.normalizeProgram(numberedLines, unnumberedLines);
     SYS.vars = {};
     SYS.arrays = {};
 };
