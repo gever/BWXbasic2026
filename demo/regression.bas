@@ -168,7 +168,11 @@
 950 LET SUB = D2("nested")
 951 IF SUB("foo") <> 1 THEN ERRORS = ERRORS + 1 : PRINT "Error: DICT nested extraction failed"
 952 LET FMT$ = STR$(D1)
-953 IF FMT$ <> "{" + CHR$(34) + "foo" + CHR$(34) + " = 1, " + CHR$(34) + "bar" + CHR$(34) + " = 2}" THEN ERRORS = ERRORS + 1 : PRINT "Error: DICT to string formatting failed"
+953 IF FMT$ <> "DICT(" + CHR$(34) + "foo" + CHR$(34) + ", 1, " + CHR$(34) + "bar" + CHR$(34) + ", 2)" THEN ERRORS = ERRORS + 1 : PRINT "Error: DICT to string formatting failed, got "; FMT$
+954 DIM ARR_FMT(2) : LET ARR_FMT(0) = 4 : LET ARR_FMT(1) = 5 : LET ARR_FMT(2) = 6
+955 IF STR$(ARR_FMT) <> "ARRAY(4, 5, 6)" THEN ERRORS = ERRORS + 1 : PRINT "Error: 1D DIM format failed, got "; STR$(ARR_FMT)
+956 ARRAY INLINE(9, 8, 7)
+957 IF STR$(INLINE) <> "ARRAY(9, 8, 7)" THEN ERRORS = ERRORS + 1 : PRINT "Error: ARRAY inline format failed, got "; STR$(INLINE)
 
 950 REM Test 3: False condition with mixed statement types
 955 LET COMPOUND7 = 0 : LET COMPOUND8$ = "unchanged"
@@ -548,6 +552,11 @@ IF Z <> 999 THEN ERRORS = ERRORS + 1 : PRINT "Error: Function failed to mutate t
 2485 LET SHTH_TEST = 0
 2490 ! MUTATE_SHORTHAND()
 2495 IF SHTH_TEST <> 777 THEN ERRORS = ERRORS + 1 : ? "Error: ! shorthand failed to CALL MUTATE_SHORTHAND"
+
+2500 REM Test 18.5: String Escapes
+2502 LET ESC_TEST$ = "A\"B\n"
+2504 IF LEN(ESC_TEST$) <> 4 THEN ERRORS = ERRORS + 1 : ? "Error: Escape length failed!"
+2506 IF MID$(ESC_TEST$, 2, 1) <> CHR$(34) THEN ERRORS = ERRORS + 1 : ? "Error: Escape quote failed!"
 
 2510 REM Test 18: Editor Line Sorting
 2515 LET SORT_TEST = 0

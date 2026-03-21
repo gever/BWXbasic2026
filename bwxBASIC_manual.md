@@ -7,8 +7,8 @@ bwxBASIC is a modern web-based implementation of BASIC, inspired by Applesoft BA
 *   **Real Numbers**: All numbers are floating point.
     *   `A = 3.14`
     *   `C = -50`
-*   **Strings**: Text enclosed in double quotes. Variable names must end with `$`.
-    *   `N$ = "bwxBASIC"`
+*   **Strings**: Text enclosed in double quotes. Variable names must end with `$`. Supports standard C-style escape sequences like `\n` and `\"`.
+    *   `N$ = "bwxBASIC\n"`
 *   **Arrays**: Defined with `DIM` for allocation or `ARRAY` for initialization. Zero-indexed.
     *   **Allocation**: `DIM A(10)` (Creates array with 11 array slots, 0-10). Multi-dimensional supported: `DIM MAT(5, 5)`.
         *   Can also be used as a function: `LET A = DIM(10)`

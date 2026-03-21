@@ -36,7 +36,8 @@
 - [ ] FEAT: allow SQR and SQRT
 - [X] FEAT: add turtle drawing commands (e.g. GR_FWD N, GR_RT N, etc)
 - [X] BUG: REM at the end of line without a leading colon throws exception
-- [ ] BUG: PRINT isn't printing contents of multi-dimensional arrays
+- [x] BUG: PRINT isn't printing contents of multi-dimensional arrays, or dicts, or arrays correctly. String representations should be consistent between PRINT and STR(...), and be past-able as bwxBASIC syntax.
+- [x] FEAT: STR(...) on an ARRAY, or DICT should return a string representation of the array/dict that matches what PRINT would produce.
 - [ ] BUG: a linenumber followed immediately by ' is a compiler exception
 - [X] BUG: IF ... THEN ... ELSE END is a compiler exception
 - [X] BUG: changing a line number in the editor doesn't cause the lines to resort on next edit or LIST

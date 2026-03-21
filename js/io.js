@@ -48,26 +48,27 @@ export const IO = {
         return new Promise(r => IO.waiter = r);
     },
 
-    format: (val) => {
+    format: (val, nested = false) => {
         if (typeof val === 'number') {
             // Round to 3 decimals, strip trailing zeros
             return parseFloat(val.toFixed(3));
         }
+        if (typeof val === 'string' && nested) {
+            return `"${val}"`;
+        }
         if (typeof val === 'object' && val !== null) {
             if (val._isNil) return "NIL";
             if (Array.isArray(val)) {
-                return "[" + val.map(v => IO.format(v)).join(", ") + "]";
+                return "ARRAY(" + val.map(v => IO.format(v, true)).join(", ") + ")";
             }
             if (val._isHash) {
                 const parts = [];
                 for (const k in val) {
                     if (k !== '_isHash') {
-                        let fv = IO.format(val[k]);
-                        if (typeof val[k] === 'string') fv = `"${fv}"`;
-                        parts.push(`"${k}" = ${fv}`);
+                        parts.push(`"${k}", ${IO.format(val[k], true)}`);
                     }
                 }
-                return "{" + parts.join(", ") + "}";
+                return "DICT(" + parts.join(", ") + ")";
             }
         }
         return val;
