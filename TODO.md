@@ -46,7 +46,7 @@
 - [X] BUG: user cannot hit <enter> at the end of an indented line in the editor.
 - [X] BUG: cursor jumps up to previous line when you hit <enter> at then end of a line (thanks John!)
 - [ ] FEAT: editor should remember last cursor location when we re-invoke EDIT
-- [ ] BUG: ```PRINT A; : PRINT " is the same hand"``` produces unexpected output. If A was 27, it would print "270 is the same hand" 
+- [X] BUG: ```PRINT A; : PRINT " is the same hand"``` produces unexpected output. If A was 27, it would print "270 is the same hand" 
 - [X] BUG: ```IF ... THEN RETURN``` is a syntax error
 - [X] FEAT: add PASTE command to allow safer pasting of code into the REPL. It should sort/merge numbered lines in the current code, and append un-numbered lines to the end of the current program. It should not execute the code, but rather add it to the current program. If a numbered-line conflicts with an existing numbered-line, it should replace the existing line. It should not modify the current filename.
 - [X] Question: what causes blank lines to appear before the un-numbered line in demo/regression.bas when it gets loaded into the editor? How should we define the layout of a mixture of numbered and un-numbered lines in bwxBASIC? Can they be freely mixed?
