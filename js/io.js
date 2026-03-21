@@ -74,7 +74,39 @@ export const IO = {
     },
 
     // --- Helper Functions ---
-    help: () => {
+    help: (topic = "") => {
+        if (topic) {
+            topic = topic.toUpperCase();
+            let results = [];
+            let matchedCat = Object.keys(HELP_DATA).find(c => c.toUpperCase() === topic || c.toUpperCase().includes(topic));
+            
+            if (matchedCat) {
+                HELP_DATA[matchedCat].forEach(item => results.push(item));
+                IO.print(`${matchedCat}:`);
+                let namesFull = results.map(r => r.c.split(' ')[0]);
+                IO.print(namesFull.join(', '));
+            } else {
+                Object.keys(HELP_DATA).forEach(cat => {
+                    HELP_DATA[cat].forEach(item => {
+                        let cmdName = item.c.split(' ')[0].split('(')[0].toUpperCase();
+                        if (cmdName === topic || item.c.toUpperCase().includes(topic)) {
+                            results.push(item);
+                        }
+                    });
+                });
+                if (results.length === 0) {
+                    IO.print(`?NO HELP FOUND FOR '${topic}'`);
+                } else {
+                    results.forEach(item => {
+                        IO.print(`${item.c}`);
+                        IO.print(`  ${item.d}`);
+                        IO.print(`  Ex: ${item.e}`);
+                    });
+                }
+            }
+            return;
+        }
+
         const ov = document.getElementById('help-overlay'), ct = document.getElementById('help-content'), search = document.getElementById('help-search');
         ov.style.display = 'flex'; search.focus();
 

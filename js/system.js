@@ -73,6 +73,13 @@ export const SYS = {
         SYS.vars = {};
         SYS.arrays = {};
         // Natively expose system config tracking
-        SYS.arrays['SYS'] = { _isHash: true, "VERSION": CONFIG.version };
+        SYS.arrays['SYS'] = { 
+            _isHash: true, 
+            "VERSION": CONFIG.version,
+            "COLS": CONFIG.cols,
+            "ROWS": CONFIG.rows,
+            "MAX_X": CONFIG.cols,
+            "MAX_Y": CONFIG.rows
+        };
     }
 };

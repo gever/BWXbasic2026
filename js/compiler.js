@@ -838,7 +838,7 @@ export const Compiler = {
 
             else if (cmd === 'HTAB') chunk = `IO.htab(${Compiler.genExpression(tokens, ctx)});`;
             else if (cmd === 'VTAB') chunk = `IO.vtab(${Compiler.genExpression(tokens, ctx)});`;
-            else if (cmd === 'SETPOS') { const x = Compiler.genExpression(tokens, ctx); next(); const y = Compiler.genExpression(tokens, ctx); chunk = `IO.setPos(${x},${y});`; }
+            else if (cmd === 'SETPOS' || cmd === 'LOCATE') { const x = Compiler.genExpression(tokens, ctx); next(); const y = Compiler.genExpression(tokens, ctx); chunk = `IO.setPos(${x},${y});`; }
             else if (cmd === 'HOME' || cmd === 'CLS') chunk = "IO.home();";
 
             else if (cmd === 'END') { async = true; chunk = "await new Promise(r => setTimeout(r, 10)); SYS.running=false;"; }
@@ -849,7 +849,13 @@ export const Compiler = {
             else if (cmd === 'DOWNLOAD') chunk = `FS.download(${Compiler.genExpression(tokens, ctx)});`;
             else if (cmd === 'UPLOAD') { async = true; chunk = `await FS.upload();`; }
             else if (cmd === 'JSECHO') chunk = `IO.jsEcho = !IO.jsEcho; IO.print("JSECHO " + (IO.jsEcho ? "ON" : "OFF"));`;
-            else if (cmd === 'HELP') chunk = `IO.help();`;
+            else if (cmd === 'HELP') {
+                let topic = "";
+                if (ctx.idx < tokens.length && ![':', "'", 'THEN', 'ELSE'].includes(peekUpper())) {
+                    topic = next().replace(/"/g, "").toUpperCase();
+                }
+                chunk = `IO.help("${topic}");`;
+            }
             else if (['LIST', 'RUN', 'EDIT', 'NEW', 'COPY', 'VARS', 'WHERE', 'JSPEEK'].includes(cmd)) {
                 chunk = `throw "ILLEGAL COMMAND";`;
             }

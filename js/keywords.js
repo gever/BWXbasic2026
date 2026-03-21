@@ -43,7 +43,8 @@ export const KEYWORDS = [
     { name: "HPLOT", type: "COMMAND", category: "SCREEN & GRAPHICS", desc: "Legacy: Plots a point or draws lines.", example: "30 HPLOT 0,0 TO 100,100" },
     { name: "HTAB", type: "COMMAND", category: "SCREEN & GRAPHICS", desc: "Moves cursor to horizontal column X (1-40).", example: "10 HTAB 20" },
     { name: "VTAB", type: "COMMAND", category: "SCREEN & GRAPHICS", desc: "Moves cursor to vertical row Y (1-24).", example: "20 VTAB 12" },
-    { name: "SETPOS", type: "COMMAND", category: "SCREEN & GRAPHICS", desc: "Moves cursor to X, Y coordinates (Custom).", example: "30 SETPOS 15, 10" },
+    { name: "SETPOS", type: "COMMAND", category: "SCREEN & GRAPHICS", desc: "Moves cursor to X, Y coordinates. Synonym for LOCATE.", example: "30 SETPOS 15, 10" },
+    { name: "LOCATE", type: "COMMAND", category: "SCREEN & GRAPHICS", desc: "Moves cursor to X, Y coordinates. Synonym for SETPOS.", example: "30 LOCATE 15, 10", helpSyntax: "LOCATE X, Y" },
 
     // TURTLE GRAPHICS
     { name: "GR_FWD", type: "COMMAND", category: "TURTLE GRAPHICS", desc: "Alias GR_FD. Moves turtle forward by distance.", example: "10 GR_FWD 50" },

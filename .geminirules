@@ -1,1 +1,3 @@
 Never try to run tests in the browser. That behavior is not allowed on this project.
+Always check to see if the HELP text and bwxBASIC_manual.md are up to date whenever functionality is modified or added.
+

@@ -26,6 +26,11 @@ bwxBASIC is a modern web-based implementation of BASIC, inspired by Applesoft BA
     *   **Deletion & Missing Keys**: Missing keys resolve to the constant `NIL`. Assigning `NIL` (e.g. `TBL("foo") = NIL`) removes the key.
     *   **Iteration**: Loop through keys using `FORKEYS K, TBL ... NEXT K`.
 
+*   **System Variables (`SYS`)**: A built-in restricted dictionary providing environment values.
+    *   `SYS("VERSION")`: The bwxBASIC version string.
+    *   `SYS("COLS")` or `SYS("MAX_X")`: Text screen width in characters.
+    *   `SYS("ROWS")` or `SYS("MAX_Y")`: Text screen height in characters.
+
 ## 1.5. DATA, READ, and RESTORE
 
 For bulk data loading into Arrays or Dicts, you can embed `DATA` variables in your programs.
@@ -85,6 +90,13 @@ Pauses execution.
 20 DELAY 1000
 30 PRINT "DONE!"
 ```
+
+### Text Cursor & Formatting
+
+*   **HOME** or **CLS**: Clears the text screen and moves the cursor to the top-left.
+*   **HTAB X**: Moves the text cursor horizontally to column X.
+*   **VTAB Y**: Moves the text cursor vertically to row Y.
+*   **LOCATE X, Y** (or **SETPOS X, Y**): Moves the text cursor to specific X, Y coordinates.
 
 ## 3. Control Flow
 
