@@ -136,13 +136,13 @@ DrawScene:
   GR_COLOR = 255 : GR_CLEAR
 
   REM Draw Active Balloons 
-  FOR i = 0 TO num_balloons - 1
-    DICT b = balloons(i)
-    IF b("active") = 0 THEN GOTO SkipDrawBalloon
+  FOR di = 0 TO num_balloons - 1
+    DICT db = balloons(di)
+    IF db("active") = 0 THEN GOTO SkipDrawBalloon
 
-    bx = b("x") : by = b("y") : dia = b("dia")
+    bx = db("x") : by = db("y") : dia = db("dia")
     ' balloon
-    GR_COLOR = b("col")
+    GR_COLOR = db("col")
     GR_MOVETO bx, by
     GR_FELLIPSE dia, dia
 
@@ -156,7 +156,7 @@ DrawScene:
     GR_LINETO bx + (dia/2), by + dia + 10
 
     SkipDrawBalloon:
-  NEXT i
+  NEXT di
 
   REM Draw Turret Base
   GR_COLOR = 44 : REM Orange
