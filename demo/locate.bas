@@ -1,0 +1,16 @@
+'DOC: USE OF LOCATE COMMAND
+'DOC: USE OF SYS FUNCTION
+
+CLS
+LET prompt = "<hit any key>"
+LOCATE 0,0 : PRINT "A";
+LOCATE SYS("COLS")-1,0 : PRINT "B";
+LOCATE 0, SYS("ROWS")-1 : PRINT "C";
+LOCATE SYS("COLS")-1, SYS("ROWS")-1 : PRINT "D";
+CALL CENTER_PRINT("<hit any key>", SYS("ROWS")/2)
+LET A$ = INKEY$(1)
+
+FUN CENTER_PRINT(label, row)
+  LOCATE SYS("COLS")/2 - LEN(label)/2, row
+  PRINT label;
+  RETURN 0
