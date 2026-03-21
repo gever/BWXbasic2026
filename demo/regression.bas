@@ -565,6 +565,8 @@ IF Z <> 999 THEN ERRORS = ERRORS + 1 : PRINT "Error: Function failed to mutate t
 2530 LET SORT_TEST = 1
 2550 REM Skip to final summary section
 2560 GOTO 3000
+
+REM Test definition of user functions
 FUN DO_MATH(X, Y)
   LET TOTAL = X + Y
 RETURN TOTAL
@@ -577,7 +579,6 @@ FUN MUTATE_SHORTHAND()
   LET SHTH_TEST = 777
 RETURN
 
-
 3000 REM Final summary
 3010 PRINT
 3020 IF ERRORS = 0 THEN PRINT "SUCCESS: All tests passed!"
@@ -585,3 +586,5 @@ RETURN
 3040 PRINT
 
 3100 END
+
+REM End-of-file
