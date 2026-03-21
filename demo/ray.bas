@@ -48,7 +48,7 @@
 370 OX = 0.0 : OY = 0.0 : OZ = 0.0
 380 DX = (X / W) * 2.0 - 1.0
 390 DY = ((H - 1 - Y) / H) * 2.0 - 1.0
-400 DZ = 1.0
+400 DZ = 1.6 : REM "focal length" approximately
 410 DL = SQR(DX*DX + DY*DY + DZ*DZ)
 420 DX = DX / DL : DY = DY / DL : DZ = DZ / DL
 430 CLR = CALL TRACE(OX, OY, OZ, DX, DY, DZ, X, Y)
