@@ -76,6 +76,7 @@ export const ENGINE = {
                     errStr = `?${e} IN ${lineObj.line !== null ? lineObj.line : ""}`;
                 }
                 IO.print(errStr);
+                console.error(errStr, e);
                 SYS.running = false;
                 IO.prompt();
                 return;
@@ -161,6 +162,7 @@ export const ENGINE = {
                     errStr = `?${e} IN ${compileChunk.line !== null ? compileChunk.line : ""}`;
                 }
                 IO.print(errStr);
+                console.error(errStr, e);
                 SYS.running = false;
                 IO.prompt();
                 return;
@@ -219,7 +221,9 @@ export const ENGINE = {
                 srcLine = SYS.program[SYS.pc].line !== null ? ` IN ${SYS.program[SYS.pc].line}` : "";
                 srcCode = `\n  ${SYS.program[SYS.pc].src}`;
             }
-            IO.print(`\n?${e}${srcLine}${srcCode}`);
+            const errStr = `\n?${e}${srcLine}${srcCode}`;
+            IO.print(errStr);
+            console.error(errStr, e);
             SYS.running = false;
             IO.prompt();
             return;
@@ -284,7 +288,9 @@ export const ENGINE = {
                 srcLine = SYS.program[SYS.pc].line !== null ? ` IN ${SYS.program[SYS.pc].line}` : "";
                 srcCode = `\n  ${SYS.program[SYS.pc].src}`;
             }
-            IO.print(`\n?${e}${srcLine}${srcCode}`);
+            const errStr = `\n?${e}${srcLine}${srcCode}`;
+            IO.print(errStr);
+            console.error(errStr, e);
             SYS.running = false;
         }
 
