@@ -189,9 +189,9 @@ DrawQuiver:
 
     IF qi > quiver THEN GOTO SkipQuiverFill
 
-    LET qc = 210
-    IF qi <= 10 THEN qc = 216
-    IF qi <= 5 THEN qc = 221
+    LET qc = 216
+    ' IF qi <= 10 THEN qc = 216
+    ' IF qi <= 5 THEN qc = 221
 
     GR_COLOR = qc
     GR_MOVETO qx, qy
