@@ -11,19 +11,21 @@ LET h = GR_CANVAS_HEIGHT
 LET TEXT_YELLOW = 152 : LET ARROW_COLOR = 156 : LET STRING_COLOR = 63
 LET gravity = 0.5
 LET arrow_len = 8
+LET round = 0
+
+GameStart:
 LET score = 0
+LET quiver = 5
 
 RoundStart:
-REM Initialize Turret & Arrow
+round = round + 1
+REM turret x, y
 LET tx = 50 + RND(w - 100)
 LET ty = h - 10
-LET score = 0
-
-RoundStart: REM Initialize Turret & Arrows
 DICT arrow("x", tx, "y", ty, "dx", 0, "dy", 1)
 
-REM Generate Balloons (1 to 3)
-LET num_balloons = 3 : ' INT(1 + RAND(3))
+REM Generate Balloons (based on round)
+LET num_balloons = round + 1
 ARRAY balloons(num_balloons - 1)
 FOR i = 0 TO num_balloons - 1
   LET bx = 20 + RND(w - 40)
@@ -36,13 +38,18 @@ NEXT i
 
 REM --- Main Input Phase ---
 InputPhase:
+  IF quiver <= 0 THEN GOTO GameOver
   GOSUB DrawScene
 
   GR_FONT 16 : GR_COLOR = TEXT_YELLOW
-  GR_MOVETO 10, 12 : GR_PRINT "balloons: "; num_balloons
-  GR_MOVETO 10, 20 : GR_PRINT "SCORE: " ; score
-  GR_MOVETO 10, 28 : GR_PRINT "ENTER ANGLE (0-180):"
-  SETPOS 15, 3 : INPUT a
+  GR_MOVETO 10, h-40 : GR_PRINT "BALLOONS: "; num_balloons
+  GR_MOVETO 10, h-30 : GR_PRINT "SCORE: " ; score
+  GR_MOVETO 10, h-55 : GR_PRINT "ENTER ANGLE (0-180):"
+  SETPOS 15, SYS("ROWS") - 3 : INPUT a
+  if a < 0 OR a > 180 THEN GOTO InputPhase
+
+  LET quiver = quiver - 1
+  LET popped_this_shot = 0
 
   IF a < 0 THEN a = 0
   IF a > 180 THEN a = 180
@@ -103,7 +110,10 @@ InputPhase:
       b("active") = 0
       LET popped_this_frame = 1
       LET score = score + 10
+      LET popped_this_shot = popped_this_shot + 1
       GOSUB PopAnimation
+      GOSUB AddArrowToQuiver
+      IF popped_this_shot = 2 THEN GOSUB AddArrowToQuiver
       GOTO SkipBalloon
 
       MissedBalloon: LET active_count = active_count + 1
@@ -124,8 +134,11 @@ GOTO AnimateLoop
 CheckWin:
   IF active_count > 0 THEN GOTO AnimateLoop
 
+  GOSUB AddArrowToQuiver
+  GOSUB AddArrowToQuiver
+
 GR_MOVETO w/2 - 100, h/2
-GR_COLOR = 36 : REM Green
+GR_COLOR = 115 : REM Green
 GR_PRINT "ROUND CLEARED!"
 DELAY 2000
 GOTO RoundStart
@@ -134,8 +147,9 @@ GOTO RoundStart
 REM --- Subroutines ---
 DrawScene:
   GR_COLOR = 255 : GR_CLEAR
+  GOSUB DrawQuiver
 
-  REM Draw Active Balloons 
+  REM Draw Active Balloons
   FOR di = 0 TO num_balloons - 1
     DICT db = balloons(di)
     IF db("active") = 0 THEN GOTO SkipDrawBalloon
@@ -164,6 +178,61 @@ DrawScene:
   GR_FRECT 30, 20
 RETURN
 
+DrawQuiver:
+  LET q_start_x = w - (20 * 14) - 20
+  FOR qi = 1 TO 20
+    LET qx = q_start_x + (qi * 14)
+    LET qy = 12
+    GR_COLOR = 127
+    GR_MOVETO qx, qy
+    GR_ELLIPSE 10, 10
+
+    IF qi > quiver THEN GOTO SkipQuiverFill
+
+    LET qc = 210
+    IF qi <= 10 THEN qc = 216
+    IF qi <= 5 THEN qc = 221
+
+    GR_COLOR = qc
+    GR_MOVETO qx, qy
+    GR_FELLIPSE 10, 10
+
+    SkipQuiverFill:
+  NEXT qi
+RETURN
+
+AddArrowToQuiver:
+  IF quiver >= 20 THEN RETURN
+  LET quiver = quiver + 1
+
+  REM Spark highlight
+  LET q_start_x = w - (20 * 14) - 20
+  LET qx = q_start_x + (quiver * 14)
+  LET qy = 12
+
+  FOR sf = 1 TO 3
+    GR_COLOR = 64 : REM lavender sparks
+    FOR sp = 0 TO 7
+      LET spr = CALL radians(sp * 45)
+      LET spdx = COS(spr) * (sf * 4) + 5
+      LET spdy = SIN(spr) * (sf * 4) + 5
+      GR_MOVETO qx + spdx, qy + spdy
+      GR_FELLIPSE 2, 2
+    NEXT sp
+    DELAY 20
+    GOSUB DrawScene
+  NEXT sf
+RETURN
+
+GameOver:
+  GR_FONT 40
+  GR_MOVETO w/2 - 80, h/2
+  GR_COLOR = 158 : REM Red
+  GR_PRINT "OUT OF ARROWS!"
+  GR_FONT 26
+  DELAY 3000
+  GOTO GameStart
+
 PopAnimation:
   REM b is already the active balloon dict
   LET px = b("x") + (b("dia") / 2)
@@ -172,7 +241,7 @@ PopAnimation:
 
   FOR f = 1 TO 5
     GOSUB DrawScene
-    
+
     GR_COLOR = pc
     FOR p = 0 TO 7
       LET pr = CALL radians(p * 45)
@@ -181,7 +250,7 @@ PopAnimation:
       GR_MOVETO px + pdx, py + pdy
       GR_FELLIPSE 3, 3
     NEXT p
-    
+
     DELAY 30
   NEXT f
 RETURN
