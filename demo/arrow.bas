@@ -58,13 +58,12 @@ InputPhase:
   GR_MOVETO 10, h-30 : GR_PRINT "SCORE: " ; score
   GR_MOVETO 10, h-55 : GR_PRINT "ENTER ANGLE (0-180):"
   SETPOS 15, SYS("ROWS") - 3 : INPUT a
+  print a
+  IF a <> a THEN LET a = 0
   if a < 0 OR a > 180 THEN GOTO InputPhase
 
-  LET quiver = quiver - 1
-  LET popped_this_shot = 0
-
-  IF a < 0 THEN a = 0
-  IF a > 180 THEN a = 180
+  LET quiver = quiver - 1 : REM spend an arrow
+  LET popped_this_shot = 0 : REM track balloons popped this shot
 
   REM Compute initial velocity based on input angle
   REM Angle 90 is straight up, 0 is right, 180 is left. We map standard geometry.
@@ -249,19 +248,21 @@ DrawScene:
   GR_COLOR = 44 : REM Orange
   GR_MOVETO tx - 15, ty
   GR_FRECT 30, 20
+  GR_MOVETO tx-1, ty
+  GR_FRECT 2, 2
 RETURN
 
 DrawQuiver:
-  LET q_start_x = w - (20 * 10) - 20
+  LET q_start_x = 40
 
   GR_COLOR = TEXT_YELLOW
   GR_FONT 16
-  GR_MOVETO q_start_x - 80, 25
+  GR_MOVETO q_start_x - 20, 15
   GR_PRINT "Arrows:"
 
   FOR qi = 1 TO quiver
     LET qx = q_start_x + (qi * 10)
-    LET qy = 30
+    LET qy = 25
     CALL draw_quiver_arrow(qx, qy)
   NEXT qi
 RETURN
