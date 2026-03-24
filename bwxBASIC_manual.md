@@ -1,6 +1,15 @@
 # bwxBASIC Reference Manual
 
-bwxBASIC is a modern web-based implementation of BASIC, inspired by Applesoft BASIC but enhanced with structured graphics commands, modern editing features, and a 256-color palette.
+bwxBASIC is a modern web-based implementation of BASIC, inspired by Applesoft BASIC, fairly compatible with GWBASIC, but enhanced with structured graphics commands, modern editing features, and a 256-color palette.
+
+Note that bwxBASIC is case-insensitive for keywords and variable names. However, it is case-sensitive for string literals. For example:
+```basic
+10 LET A = 10
+20 let a = 20
+30 PRINT A, a
+```
+Will print "10 20" to the console. For nostalgic reasons, the console enforces uppercase for everything except string literals, use the EDIT (without a linenumber) to use mixed case. The editor is also the only place you can write bwxBASIC without line numbers.
+
 
 ## 1. Variables & Data Types
 
