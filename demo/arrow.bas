@@ -93,7 +93,7 @@ InputPhase:
         DICT b = balloons(i)
         IF b("active") = 0 THEN GOTO SkipGravity
         IF b("type") = 0 THEN GOTO SkipGravity
-        
+
         LET cx = b("x") + (b("dia") / 2)
         LET cy = b("y") + (b("dia") / 2)
         LET dist = CALL distance(gx, gy, cx, cy)
@@ -104,7 +104,7 @@ InputPhase:
         LET pull_dy = ((cy - gy) / dist) * force_mag * dt
         arrow("dx") = arrow("dx") + pull_dx
         arrow("dy") = arrow("dy") + pull_dy
-        
+
         SkipGravity:
       NEXT i
 
@@ -252,25 +252,17 @@ DrawScene:
 RETURN
 
 DrawQuiver:
-  LET q_start_x = w - (20 * 14) - 20
-  FOR qi = 1 TO 20
-    LET qx = q_start_x + (qi * 14)
-    LET qy = 12
-    GR_COLOR = 127
-    GR_MOVETO qx, qy
-    GR_ELLIPSE 10, 10
+  LET q_start_x = w - (20 * 10) - 20
 
-    IF qi > quiver THEN GOTO SkipQuiverFill
+  GR_COLOR = TEXT_YELLOW
+  GR_FONT 16
+  GR_MOVETO q_start_x - 80, 25
+  GR_PRINT "Arrows:"
 
-    LET qc = 216
-    ' IF qi <= 10 THEN qc = 216
-    ' IF qi <= 5 THEN qc = 221
-
-    GR_COLOR = qc
-    GR_MOVETO qx, qy
-    GR_FELLIPSE 10, 10
-
-    SkipQuiverFill:
+  FOR qi = 1 TO quiver
+    LET qx = q_start_x + (qi * 10)
+    LET qy = 30
+    CALL draw_quiver_arrow(qx, qy)
   NEXT qi
 RETURN
 
@@ -279,9 +271,9 @@ AddArrowToQuiver:
   LET quiver = quiver + 1
 
   REM Spark highlight
-  LET aq_start_x = w - (20 * 14) - 20
-  LET aqx = aq_start_x + (quiver * 14)
-  LET aqy = 12
+  LET aq_start_x = w - (20 * 10) - 20
+  LET aqx = aq_start_x + (quiver * 10)
+  LET aqy = 20
 
   FOR sf = 1 TO 3
     GR_COLOR = 64 : REM lavender sparks
@@ -339,3 +331,30 @@ FUN distance(x1, y1, x2, y2)
   LET dy = y2 - y1
   LET d = SQR((dx * dx) + (dy * dy))
 RETURN d
+
+FUN draw_quiver_arrow(x, y)
+  REM Shaft
+  GR_COLOR = 251
+  GR_MOVETO x, y
+  GR_LINETO x, y - 20
+
+  REM Feathers
+  GR_COLOR = 156
+  GR_MOVETO x - 3, y
+  gosub draw_feather
+  GR_MOVETO x - 3, y - 2
+  gosub draw_feather
+  GR_MOVETO x - 3, y - 4
+  gosub draw_feather
+
+  REM Arrowhead
+  GR_COLOR = 43
+  GR_MOVETO x, y - 20
+  GR_FTRI x - 3, y - 15, x + 3, y - 15
+RETURN 0
+
+draw_feather:
+  GR_PUSH
+  GR_RT 45 : GR_FWD 5 : GR_RT 90 : GR_FWD 5
+  GR_POP
+return

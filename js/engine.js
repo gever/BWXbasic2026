@@ -6,6 +6,7 @@ import { Compiler } from './compiler.js';
 import { SCREEN } from './screen.js';
 import { Tokenizer } from './parser.js';
 import { SOUND } from './sound.js';
+import { SYNTAX_COMMANDS, SYNTAX_KEYWORDS, SYNTAX_FUNCTIONS } from './keywords.js';
 
 export const ENGINE = {
     // NEW: Helper to generate source for JSPEEK without running
@@ -41,7 +42,10 @@ export const ENGINE = {
                 const x = { line: lineObj.line, src: lineObj.src };
                 const labelMatch = x.src.match(/^\s*([A-Za-z_][A-Za-z0-9_]*)\s*:(.*)$/);
                 if (labelMatch) {
-                    x.src = labelMatch[2].trim() || "REM";
+                    const lName = labelMatch[1].toUpperCase();
+                    if (!SYNTAX_COMMANDS.includes(lName) && !SYNTAX_KEYWORDS.includes(lName) && !SYNTAX_FUNCTIONS.includes(lName)) {
+                        x.src = labelMatch[2].trim() || "REM";
+                    }
                 }
 
                 if (typeof x.src === 'string' && x.src.toUpperCase().trim().startsWith('DATA')) {
@@ -121,8 +125,11 @@ export const ENGINE = {
                 // Catch optional alphanumeric labels (e.g., LoopStart: LET X = 1)
                 const labelMatch = compileChunk.src.match(/^\s*([A-Za-z_][A-Za-z0-9_]*)\s*:(.*)$/);
                 if (labelMatch) {
-                    SYS.labels[labelMatch[1].toUpperCase()] = i;
-                    compileChunk.src = labelMatch[2].trim() || "REM";
+                    const lName = labelMatch[1].toUpperCase();
+                    if (!SYNTAX_COMMANDS.includes(lName) && !SYNTAX_KEYWORDS.includes(lName) && !SYNTAX_FUNCTIONS.includes(lName)) {
+                        SYS.labels[lName] = i;
+                        compileChunk.src = labelMatch[2].trim() || "REM";
+                    }
                 }
 
                 // Catch FUN definitions for forward jumping (e.g., FUN MYMATH(X,Y))
