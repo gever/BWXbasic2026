@@ -58,9 +58,8 @@ InputPhase:
   GR_MOVETO 10, h-30 : GR_PRINT "SCORE: " ; score
   GR_MOVETO 10, h-55 : GR_PRINT "ENTER ANGLE (0-180):"
   SETPOS 15, SYS("ROWS") - 3 : INPUT a
-  print a
-  IF a <> a THEN LET a = 0
-  if a < 0 OR a > 180 THEN GOTO InputPhase
+  IF a <> a THEN GOTO InputPhase : REM NaN-check
+  if a < 0 OR a > 180 THEN GOTO InputPhase : REM range-check
 
   LET quiver = quiver - 1 : REM spend an arrow
   LET popped_this_shot = 0 : REM track balloons popped this shot
@@ -259,6 +258,8 @@ DrawQuiver:
   GR_FONT 16
   GR_MOVETO q_start_x - 20, 15
   GR_PRINT "Arrows:"
+
+  IF quiver < 1 THEN RETURN
 
   FOR qi = 1 TO quiver
     LET qx = q_start_x + (qi * 10)
