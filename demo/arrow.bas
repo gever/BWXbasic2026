@@ -11,6 +11,7 @@ LET h = GR_CANVAS_HEIGHT
 LET TEXT_YELLOW = 152 : LET ARROW_COLOR = 156 : LET STRING_COLOR = 63
 LET gravity = 0.5
 LET arrow_len = 8
+LET draw_angle = 1 : REM print the angle of the current shot
 
 LET trail_canvas = GR_CANVAS(w, h)
 GR_SET_CANVAS trail_canvas
@@ -27,6 +28,7 @@ round = round + 1
 GR_SET_CANVAS trail_canvas
 GR_COLOR = 230 : GR_CLEAR
 GR_SET_CANVAS 0
+LET a = 0 : REM angle of current shot
 
 REM turret x, y
 LET tx = 50 + RND(w - 100)
@@ -246,9 +248,11 @@ DrawScene:
   REM Draw Turret Base
   GR_COLOR = 44 : REM Orange
   GR_MOVETO tx - 15, ty
-  GR_FRECT 30, 20
-  GR_MOVETO tx-1, ty
-  GR_FRECT 2, 2
+  GR_FRECT 30, 20 : REM base
+  GR_COLOR 140
+  GR_MOVETO tx-1, ty - 2 : REM indicator
+  GR_FRECT 2, 6
+  IF draw_angle THEN GR_COLOR = 236 : GR_MOVETO tx+2, ty+2 : GR_PRINT a
 RETURN
 
 DrawQuiver:
