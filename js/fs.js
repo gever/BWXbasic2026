@@ -26,6 +26,56 @@ export const FS = {
         } catch (e) { if (!quiet) IO.print("?ERROR SAVING"); }
     },
 
+    loadJSON: async (fn) => {
+        if (!fn) return { _isHash: true };
+        const f = fn.toUpperCase();
+        let path = DEMOS[f];
+
+        if (!path && (f.startsWith("/") || f.includes("/") || f.endsWith(".JSON"))) {
+            path = fn;
+        }
+
+        let jsonData = null;
+        if (path) {
+            try {
+                const response = await fetch(`${path}?t=${Date.now()}`);
+                if (response.ok) {
+                    jsonData = await response.json();
+                }
+            } catch (e) {
+                // Ignore network error and falback to localstorage
+            }
+        }
+
+        if (!jsonData) {
+            const d = localStorage.getItem(FS.PREFIX + f);
+            if (d) {
+                try {
+                    jsonData = JSON.parse(d);
+                } catch(e) { }
+            }
+        }
+
+        const makeData = (obj) => {
+            if (Array.isArray(obj)) {
+                return obj.map(item => (typeof item === 'object' && item !== null) ? makeData(item) : item);
+            } else if (typeof obj === 'object' && obj !== null) {
+                const dict = { _isHash: true };
+                for (let k in obj) {
+                    dict[k] = makeData(obj[k]);
+                }
+                return dict;
+            }
+            return obj;
+        };
+
+        if (jsonData) {
+            return makeData(jsonData);
+        } else {
+            return { _isHash: true };
+        }
+    },
+
     load: async (fn) => {
         if (!fn || fn === 0 || fn === "0") fn = FS.currentFilename;
         if (!fn) { IO.print("?MISSING FILE NAME"); return; }

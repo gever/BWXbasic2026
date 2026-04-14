@@ -8,6 +8,7 @@ export const KEYWORDS = [
     { name: "SAVE", type: "COMMAND", category: "SYSTEM & FILES", desc: "Saves current program to browser local storage.", example: "SAVE \"MYGAME\"" },
     { name: "LOAD", type: "COMMAND", category: "SYSTEM & FILES", desc: "Loads a program from local storage or demo library.", example: "LOAD \"DEMO/GRAPHICS.BAS\"" },
     { name: "DIR", type: "COMMAND", category: "SYSTEM & FILES", desc: "Lists all saved files and available demos.", example: "DIR" },
+    { name: "LOAD_JSON", type: "FUNCTION", category: "SYSTEM & FILES", desc: "Loads a JSON file from local storage or URL and returns a DICT.", example: "D = LOAD_JSON(\"/data/shapes.json\")", helpSyntax: "LOAD_JSON(PATH$)" },
     { name: "CATALOG", type: "COMMAND", category: null, desc: "Alias for DIR", example: "CATALOG" }, // Alias
     { name: "DOWNLOAD", type: "COMMAND", category: "SYSTEM & FILES", desc: "Downloads the program as a .BAS text file to your computer.", example: "DOWNLOAD \"GAME\"" },
     { name: "UPLOAD", type: "COMMAND", category: "SYSTEM & FILES", desc: "Uploads a .BAS text file from your computer into memory.", example: "UPLOAD" },

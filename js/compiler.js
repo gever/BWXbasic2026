@@ -83,6 +83,14 @@ export const Compiler = {
                     return `(await SOUND.load(${url}))`;
                 }
 
+                if (tu === 'LOAD_JSON') {
+                    ctx.setAsync();
+                    next(); // consume '('
+                    const url = parseLogicalOR();
+                    next(); // consume ')'
+                    return `(await FS.loadJSON(${url}))`;
+                }
+
                 // Handle Math Functions (SIN, LEN, etc)
                 if (LIB[tu]) {
                     const a = [];

@@ -1,3 +1,1 @@
 Never try to run tests in the browser. Always request browser tests from the user.
-Always check to see if the HELP text and bwxBASIC_manual.md are up to date whenever functionality is modified or added.
-Always run the full regression test after making changes to any javascript file.

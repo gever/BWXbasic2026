@@ -7,7 +7,7 @@
 - [X] FEAT: add support for off-screen buffers (GR_CANVAS(W, H) returns a buffer ID, GR_COPY(BUFFER_ID, X, Y, W, H) copies the buffer to the screen, GR_FREE(BUFFER_ID) releases the buffer, GR_SET_CANVAS(BUFFER_ID) sets the buffer as the current canvas, GR_GET_CANVAS() returns the current canvas ID, GR_CANVAS_WIDTH, GR_CANVAS_HEIGHT, GR_SET_CANVAS(0) sets the screen as the current canvas)
 - [X] BUG: ```10 DIM G(8,8),C(9,2),K(3,3),N(3),Z(8,8),D(8)``` - doesn't parse correctly
 - [X] BUG: COPY command (copies current program to the clipboard) is not documented
-- [ ] BUG: pasting code in from Linux does something weird at end of line
+- [X] BUG: pasting code in from Linux does something weird at end of line
 - [X] BUG: REPL scrolling is inconsistent
 - [ ] FEAT: Uppercase all input (except quoted strings), keep canonical BASIC formatting internally, show user canonical even if the paste or edit in lowercase
 - [X] BUG: ```10 A$ = INKEY$(1)``` is generating an error at runtime
@@ -19,7 +19,7 @@
 - [X] BUG: GR_CANVAS_WIDTH and GR_CANVAS_HEIGHT (and other parameterless functions) are not working in math expressions.
 - [X] BUG: REPL doesn't keep track of the current filename (LOAD/SAVE/NEW not setting/using FS.currentFilename appropriately)
 - [X] BUG: https://bwxbasic.org/BWXbasic_manual.html is not working to see the (github rendered version) of the markdown manual.
-- [ ] FEAT: restructure HELP screen to be iframe that loads the markdown manual (https://bwxbasic.org/BWXbasic_manual.html) and add a link to the repo (https://github.com/gever/BWXbasic2026)
+- [X] FEAT: restructure HELP screen to be iframe that loads the markdown manual (https://bwxbasic.org/BWXbasic_manual.html) and add a link to the repo (https://github.com/gever/BWXbasic2026)
 - [ ] FEAT: Add GR_HIDE_STOP and GR_SHOW_STOP (default to GR_SHOW_STOP) to allow programs to hide the stop button during execution.
 - [ ] FEAT: format FUN definitions with indentation (and maybe a different background color?) in the editor and listing.
 - [X] FEAT: add '!' as shorthand for CALL
@@ -53,3 +53,4 @@
   - **Answer**: The blank lines appear because the parser in `FS.load()` and `EDITOR.close()` considers any line without a leading number to be "un-numbered" (including empty lines). All blank lines throughout the file are ripped out from between numbered lines and indiscriminately appended to the bottom of the script string along with your `FUN` blocks.
   - **Layout Definition & Mixing**: Currently, they **cannot** be safely freely mixed if execution order matters. Because the loader sorts all numbered lines globally and forcefully pushes all un-numbered lines to the very end of the memory bank, any un-numbered statement (like an inline command or label) placed between numbered lines will be ripped out and relocated to the end of the program instead.
   - **Proposed Path Forward**: bwxBASIC should likely dictate that numbered code must strictly precede un-numbered structured blocks (which is how `FUN`s currently survive). Alternatively, if you want them freely mixed, the engine/parser must be redesigned to store lines exactly as sequentially typed without performing a global multi-step separation.
+- [ ] FEAT: load JSON into DICTs

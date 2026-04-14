@@ -34,6 +34,11 @@ Will print "10 20" to the console. For nostalgic reasons, the console enforces u
         *   Can also be used as a function: `LET TBL = DICT("foo", 10)`
     *   **Deletion & Missing Keys**: Missing keys resolve to the constant `NIL`. Assigning `NIL` (e.g. `TBL("foo") = NIL`) removes the key.
     *   **Iteration**: Loop through keys using `FORKEYS K, TBL ... NEXT K`.
+    *   You can load complex data into an associative array using the LOAD_JSON command:
+        ```basic
+        10 LET D = LOAD_JSON("PATH") : REM Load a JSON file from a URL or local path into a Dictionary.
+    ```
+        ```
 
 *   **System Variables (`SYS`)**: A built-in restricted dictionary providing environment values.
     *   `SYS("VERSION")`: The bwxBASIC version string.

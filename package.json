@@ -1,6 +1,6 @@
 {
   "name": "bwxbasic",
-  "version": "0.88.0",
+  "version": "0.89.0",
   "description": "bwxBASIC is a pure Javascript implementation of BASIC running in a retro-inspired REPL environment.",
   "main": "index.js",
   "type": "module",
